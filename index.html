@@ -9,7 +9,7 @@
     <style>
         :root { --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* THEMES - Updated Cyan for better visibility */
+        /* THEMES - Deep Midnight Cyan */
         body.mode-kid { 
             background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%); 
             color: #f0f9ff; 
@@ -23,39 +23,55 @@
 
         body { transition: background var(--transition); height: 100vh; overflow: hidden; display: flex; }
 
-        /* SIDEBAR */
+        /* SIDEBAR - Increased contrast for Roy */
         .sidebar { 
-            background: rgba(0, 0, 0, 0.4); 
-            backdrop-filter: blur(25px); 
-            border-right: 1px solid rgba(255,255,255,0.1); 
+            background: rgba(0, 0, 0, 0.6); /* Darker for better button visibility */
+            backdrop-filter: blur(30px); 
+            border-right: 1px solid rgba(255,255,255,0.2); 
             width: 280px;
         }
 
         .nav-item {
             display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px; border-radius: 12px;
-            font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em;
-            transition: 0.2s; color: rgba(255,255,255,0.5);
-            text-transform: uppercase; margin-bottom: 4px;
+            padding: 14px 18px; border-radius: 12px;
+            font-size: 0.85rem; font-weight: 800; letter-spacing: 0.05em;
+            transition: 0.2s; color: rgba(255,255,255,0.8); /* Much brighter */
+            text-transform: uppercase; margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .nav-item:hover, .nav-item.active { 
-            background: rgba(255,255,255,0.1); color: #7dd3fc; 
+            background: rgba(56, 189, 248, 0.2); 
+            color: #7dd3fc; 
+            border-color: #38bdf8;
         }
 
-        /* INPUT BAR - High Contrast for visibility */
+        /* NEW THREAD BUTTON */
+        .btn-new-chat {
+            background: #38bdf8;
+            color: #000;
+            font-weight: 900;
+            padding: 12px;
+            border-radius: 12px;
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+
+        /* CHAT BUBBLES */
         .glass-panel {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
 
         .chat-bubble { padding: 20px; border-radius: 16px; max-width: 85%; }
         .mobby-msg { background: rgba(255,255,255,0.07); border-left: 4px solid #38bdf8; }
-        .user-msg { background: rgba(0,0,0,0.4); border-right: 4px solid #94a3b8; text-align: right; margin-left: auto; }
+        .user-msg { background: rgba(0,0,0,0.5); border-right: 4px solid #94a3b8; text-align: right; margin-left: auto; }
         
-        /* Smooth fade for settings */
-        .settings-overlay { background: rgba(3, 7, 18, 0.95); backdrop-blur: 20px; }
+        .settings-overlay { background: rgba(3, 7, 18, 0.98); backdrop-filter: blur(40px); }
     </style>
 </head>
 <body id="mainBody" class="mode-kid">
@@ -66,43 +82,47 @@
             <p id="statusTag" class="text-[9px] font-bold text-sky-400 tracking-widest mt-1 uppercase">Clearance: Instructional</p>
         </div>
 
+        <button onclick="createNewChat()" class="btn-new-chat hover:brightness-110 transition">
+            + NEW THREAD
+        </button>
+
         <nav class="flex-grow">
-            <button onclick="createNewChat()" class="nav-item active w-full">
+            <button onclick="location.reload()" class="nav-item w-full">
                 <span>🏠</span> DASHBOARD
             </button>
-            <button onclick="toggleSettings()" class="nav-item w-full">
+            <button onclick="toggleSettings()" class="nav-item w-full" id="settingsBtn">
                 <span>⚙️</span> SYSTEM SETTINGS
             </button>
             
-            <div class="mt-8 mb-2 px-4 text-[10px] font-black text-white/20 tracking-widest uppercase">Memory Threads</div>
-            <div id="threadList" class="space-y-1 overflow-y-auto max-h-[40vh] pr-2"></div>
+            <div class="mt-8 mb-4 px-4 text-[10px] font-black text-white/40 tracking-widest uppercase">Saved Threads</div>
+            <div id="threadList" class="space-y-2 overflow-y-auto max-h-[40vh] pr-2"></div>
         </nav>
 
-        <div class="mt-auto pt-6 border-t border-white/5 px-2">
-            <p class="text-[9px] text-white/30 font-bold uppercase mb-4">Owner: Roy | SIC Corp</p>
-            <button onclick="location.reload()" class="text-[10px] font-bold text-red-400/50 hover:text-red-400 uppercase tracking-widest transition">Terminate Session</button>
+        <div class="mt-auto pt-6 border-t border-white/10 px-2">
+            <p class="text-[9px] text-white/40 font-bold uppercase mb-4">Owner: Roy | SIC Corp</p>
+            <button onclick="location.reload()" class="text-[10px] font-bold text-red-400 hover:text-red-300 uppercase tracking-widest transition">Terminate Session</button>
         </div>
     </aside>
 
     <main class="flex-grow flex flex-col p-6 relative">
         
         <div id="settingsTab" class="fixed inset-0 z-[100] settings-overlay hidden flex flex-col items-center justify-center p-6">
-            <div class="w-full max-w-md p-10 glass-panel border-white/10 bg-black/40">
-                <h2 class="text-xl font-black mb-8 tracking-tighter">CORE CONFIGURATION</h2>
+            <div class="w-full max-w-md p-10 glass-panel border-white/20 bg-black/60">
+                <h2 class="text-xl font-black mb-8 tracking-tighter text-white">CORE CONFIGURATION</h2>
                 <div class="space-y-6">
                     <div>
-                        <label class="text-[10px] font-bold opacity-40 block mb-2 uppercase">Interface Personality</label>
-                        <select id="modeSelect" onchange="applyMode()" class="w-full bg-black/60 border border-white/10 p-4 rounded-xl text-sm text-white outline-none">
+                        <label class="text-[10px] font-bold text-white/50 block mb-2 uppercase">Interface Personality</label>
+                        <select id="modeSelect" onchange="applyMode()" class="w-full bg-black/80 border border-white/20 p-4 rounded-xl text-sm text-white outline-none">
                             <option value="kid">Instructional (Cyan-Blue)</option>
                             <option value="adult">SIC Admin (Slate-Gray)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold opacity-40 block mb-2 uppercase">Neural Key (Groq)</label>
-                        <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-black/60 border border-white/10 p-4 rounded-xl text-sm text-white outline-none">
+                        <label class="text-[10px] font-bold text-white/50 block mb-2 uppercase">Neural Key (Groq)</label>
+                        <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-black/80 border border-white/20 p-4 rounded-xl text-sm text-white outline-none">
                     </div>
                     <button onclick="saveAndClose()" class="w-full bg-sky-500 text-black px-8 py-4 rounded-xl font-black text-xs uppercase hover:bg-sky-400 transition">Save & Initialize</button>
-                    <button onclick="toggleSettings()" class="w-full text-white/30 text-[9px] font-bold uppercase tracking-widest mt-2">Close Settings</button>
+                    <button onclick="toggleSettings()" class="w-full text-white/40 text-[9px] font-bold uppercase tracking-widest mt-4">Close Settings</button>
                 </div>
             </div>
         </div>
@@ -111,10 +131,10 @@
             </div>
 
         <footer class="max-w-4xl mx-auto w-full">
-            <div class="glass-panel p-2 flex items-center gap-4 px-6 border-white/20 bg-black/20">
-                <span class="text-[10px] font-black opacity-30">CMD</span>
-                <input type="text" id="userInput" placeholder="Enter command for MobbyOS..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white placeholder:text-white/20">
-                <button id="sendBtn" class="bg-sky-500 hover:bg-sky-400 text-black p-3 rounded-xl transition shadow-lg shadow-sky-500/20">
+            <div class="glass-panel p-2 flex items-center gap-4 px-6 border-white/30 bg-black/40 shadow-2xl">
+                <span class="text-[10px] font-black text-sky-400">CMD</span>
+                <input type="text" id="userInput" placeholder="Enter command for MobbyOS..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white placeholder:text-white/30">
+                <button id="sendBtn" class="bg-sky-500 hover:bg-sky-400 text-black p-3 rounded-xl transition shadow-lg shadow-sky-500/40">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
                 </button>
             </div>
@@ -135,7 +155,10 @@
         let chats = {};
         let currentMode = 'kid';
 
-        window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
+        window.toggleSettings = () => {
+            const el = document.getElementById('settingsTab');
+            el.classList.toggle('hidden');
+        };
 
         window.applyMode = () => {
             currentMode = document.getElementById('modeSelect').value;
@@ -145,11 +168,11 @@
             if(currentMode === 'adult') {
                 body.className = 'mode-adult';
                 status.innerText = 'Clearance: SIC Admin';
-                status.className = 'text-[9px] font-bold text-red-500 tracking-widest mt-1 uppercase';
+                status.style.color = '#ef4444';
             } else {
                 body.className = 'mode-kid';
                 status.innerText = 'Clearance: Instructional';
-                status.className = 'text-[9px] font-bold text-sky-400 tracking-widest mt-1 uppercase';
+                status.style.color = '#38bdf8';
             }
         };
 
@@ -214,8 +237,8 @@
             if(!text) return;
 
             const sys = currentMode === 'adult' 
-                ? "You are MobbyOS Admin. Professional, cynical, and use complex technical language. Loyal to Roy/SIC Corp." 
-                : "You are MobbyOS Kid. Friendly, helpful teacher. Explain coding concepts simply to Roy.";
+                ? "You are MobbyOS Admin. Professional, cynical. Loyal to Roy/SIC Corp." 
+                : "You are MobbyOS Kid. Friendly, helpful teacher for Roy.";
 
             if (chats[currentChatId].length === 0) chats[currentChatId].push({ role: "system", content: sys });
             chats[currentChatId].push({ role: "user", content: text });
@@ -248,7 +271,7 @@
                 box.innerHTML += `
                     <div class="${isUser ? 'text-right' : 'text-left'} mb-6">
                         <div class="chat-bubble inline-block ${isUser ? 'user-msg' : 'mobby-msg'} shadow-xl">
-                            <p class="text-[7px] font-black opacity-20 mb-2 uppercase tracking-widest">${isUser ? 'ADMIN_ROY' : 'MOBBY_CORE'}</p>
+                            <p class="text-[7px] font-black opacity-40 mb-2 uppercase tracking-widest text-sky-400">${isUser ? 'ADMIN_ROY' : 'MOBBY_CORE'}</p>
                             <div class="text-sm leading-relaxed">${msg.content}</div>
                         </div>
                     </div>`;
