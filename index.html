@@ -7,9 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        /* THEMES */
+        :root { --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         body.mode-kid { background: #0c4a6e; color: #f0f9ff; }
         body.mode-adult { background: #1e293b; color: #e2e8f0; }
         body.mode-admin { background: #020617; color: #f8fafc; font-family: 'JetBrains Mono', monospace; }
@@ -17,125 +15,121 @@
         body { transition: background var(--transition); height: 100vh; overflow: hidden; display: flex; }
         .hidden { display: none !important; }
 
-        /* MAGICAL LOGIN */
-        #loginOverlay { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); z-index: 9999; }
-        .magic-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); animation: float 6s infinite ease-in-out; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-        
+        /* OVERLAYS */
+        .overlay-glass { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); z-index: 9999; }
+        .magic-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .input-magical { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 12px; width: 100%; outline: none; font-size: 0.8rem; }
 
-        /* SIDEBAR & NAV */
+        /* SIDEBAR */
         .sidebar { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.05); width: 280px; }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; display: inline-block; box-shadow: 0 0 8px #22c55e; }
+        .nav-btn { width: 100%; text-align: left; padding: 12px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); transition: 0.3s; }
+        .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.05); color: white; }
+
+        /* PFP */
+        .pfp-circle { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; background: #000; }
+        .pfp-small { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); object-fit: cover; }
         
-        /* DASHBOARD GLASS */
-        .dashboard-panel { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; }
-        
-        .star { position: absolute; background: white; border-radius: 50%; opacity: 0.3; animation: twinkle var(--duration) infinite; }
-        @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.8; } }
+        .thread-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-radius: 8px; transition: 0.2s; cursor: pointer; }
+        .thread-item:hover { background: rgba(255,255,255,0.05); }
+        .del-btn { opacity: 0; color: #ef4444; font-size: 8px; padding: 4px; }
+        .thread-item:hover .del-btn { opacity: 0.6; }
+        .del-btn:hover { opacity: 1 !important; }
     </style>
 </head>
 <body id="mainBody" class="mode-kid">
 
-    <div id="loginOverlay" class="fixed inset-0 flex items-center justify-center">
-        <div id="starField" class="absolute inset-0 pointer-events-none"></div>
-        <div class="magic-card p-10 rounded-[2.5rem] w-full max-w-sm relative z-10 mx-4">
-            <h1 class="text-3xl font-black text-white tracking-tighter text-center mb-2">MOBBY<span class="text-sky-400">OS</span></h1>
-            <p class="text-[9px] text-white/30 uppercase tracking-[0.3em] text-center mb-8">System Authentication</p>
-            
-            <div class="space-y-4">
-                <input type="email" id="loginEmail" placeholder="Email Address" class="input-magical">
-                <input type="password" id="loginPass" placeholder="Access Password" class="input-magical">
-                <button id="authBtn" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-sky-400 transition-all shadow-xl">Initialize Session</button>
+    <div id="loginOverlay" class="fixed inset-0 overlay-glass flex items-center justify-center">
+        <div class="magic-card p-10 rounded-[2.5rem] w-full max-w-sm text-center">
+            <h1 class="text-3xl font-black text-white tracking-tighter mb-8">MOBBY<span class="text-sky-400">OS</span></h1>
+            <div class="space-y-3">
+                <input type="email" id="loginEmail" placeholder="Email" class="input-magical">
+                <input type="password" id="loginPass" placeholder="Password" class="input-magical">
+                <button id="emailAuthBtn" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-sky-400">Initialize</button>
+                <div class="flex items-center my-4 opacity-20"><hr class="flex-grow border-white/20"><span class="px-3 text-[10px] text-white">OR</span><hr class="flex-grow border-white/20"></div>
+                <button id="googleAuthBtn" class="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4"> Continue with Google
+                </button>
             </div>
-            
-            <button onclick="toggleAuthMode()" id="switchAuth" class="w-full mt-6 text-[9px] text-white/40 font-bold uppercase hover:text-white transition">Need an account? Register</button>
+            <button onclick="toggleAuthMode()" id="switchAuth" class="mt-6 text-[9px] text-white/40 font-bold uppercase hover:text-white">Need account? Register</button>
+        </div>
+    </div>
+
+    <div id="setupOverlay" class="fixed inset-0 overlay-glass flex items-center justify-center hidden">
+        <div class="magic-card p-10 rounded-[2.5rem] w-full max-w-md text-center">
+            <h2 class="text-2xl font-black text-white mb-2 uppercase italic">Neural Sync</h2>
+            <p class="text-white/40 text-[10px] uppercase tracking-widest mb-8">Configure your identity at SIC Corp</p>
+            <div class="space-y-4">
+                <div class="flex justify-center mb-4"><img id="setupPFPPreview" src="https://i.imgur.com/r6oJp4O.png" class="pfp-circle"></div>
+                <input type="text" id="setupName" placeholder="Display Name" class="input-magical">
+                <input type="text" id="setupPFP" placeholder="Custom PFP URL (Optional)" class="input-magical">
+                <button onclick="completeSetup()" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">Activate Account</button>
+            </div>
         </div>
     </div>
 
     <aside class="sidebar flex flex-col p-6">
-        <div class="mb-8 px-2">
-            <h1 class="text-xl font-black tracking-tighter text-white">MOBBYOS</h1>
-            <div id="clearanceDisplay" class="mt-2 text-[10px] font-bold text-sky-400 uppercase">Clearance: Guest</div>
+        <div class="mb-10 flex items-center gap-3">
+            <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="pfp-small">
+            <div>
+                <h1 class="text-sm font-black text-white tracking-tighter">MOBBYOS</h1>
+                <div id="clearanceDisplay" class="text-[8px] font-bold text-sky-400 uppercase">Guest</div>
+            </div>
         </div>
 
-        <nav class="space-y-1 flex-grow">
-            <button onclick="showView('dashboard')" class="w-full text-left p-3 rounded-xl text-[10px] font-black text-white/40 hover:bg-white/5 hover:text-white transition uppercase tracking-widest">01. Dashboard</button>
-            <button onclick="showView('terminal')" class="w-full text-left p-3 rounded-xl text-[10px] font-black text-white/40 hover:bg-white/5 hover:text-white transition uppercase tracking-widest">02. Terminal</button>
-            <button onclick="toggleSettings()" class="w-full text-left p-3 rounded-xl text-[10px] font-black text-white/40 hover:bg-white/5 hover:text-white transition uppercase tracking-widest">03. Settings</button>
+        <nav class="space-y-1">
+            <button onclick="showView('dashboard')" class="nav-btn active" id="btn-dashboard">Dashboard</button>
+            <button onclick="showView('terminal')" class="nav-btn" id="btn-terminal">Terminal</button>
+            <button onclick="toggleSettings()" class="nav-btn">Settings</button>
         </nav>
 
-        <div class="mt-auto pt-6 border-t border-white/5">
-            <div class="flex items-center gap-3 px-2 mb-4">
-                <span class="status-dot"></span>
-                <span class="text-[9px] font-bold text-white/40 uppercase tracking-widest">System Online</span>
-            </div>
-            <p class="text-[8px] font-bold text-white/10 uppercase tracking-[0.2em] text-center">SIC CORP &copy; 2026</p>
-        </div>
+        <div class="mt-10 mb-4 px-2 text-[9px] font-black text-white/10 uppercase tracking-widest">Neural Threads</div>
+        <div id="threadList" class="flex-grow overflow-y-auto space-y-1 text-white/40 text-[9px]"></div>
+        
+        <div class="mt-auto text-[8px] font-bold text-center opacity-20 uppercase tracking-widest">SIC CORP | NEXAFLOW</div>
     </aside>
 
-    <main class="flex-grow flex flex-col p-8 relative overflow-hidden">
-        
-        <div id="view-dashboard" class="h-full flex flex-col space-y-8 animate-in fade-in duration-500">
-            <header>
-                <h2 class="text-4xl font-black tracking-tighter text-white">Welcome back, <span id="userNameDisplay" class="text-sky-400">Explorer</span></h2>
-                <p class="text-white/30 text-xs mt-2 uppercase tracking-widest">Mobby Neural Link: Active</p>
-            </header>
-
-            <div class="grid grid-cols-2 gap-6 flex-grow">
-                <div class="dashboard-panel p-8 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-4">Credentials</h3>
-                        <div class="space-y-2">
-                            <p class="text-xs font-bold text-white/60 uppercase">ID: <span id="dashUID" class="text-white">---</span></p>
-                            <p class="text-xs font-bold text-white/60 uppercase">Mail: <span id="dashEmail" class="text-white">---</span></p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="dashboard-panel p-8">
-                    <h3 class="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-4">About Mobby</h3>
-                    <p class="text-sm leading-relaxed text-white/60">
-                        Mobby is a multi-layered artificial intelligence developed by <strong>Roy</strong> at <strong>SIC Corp</strong>. 
-                        Designed for coding, general interest, and elite optimization.
-                    </p>
+    <main class="flex-grow flex flex-col p-8 relative">
+        <div id="view-dashboard" class="h-full flex flex-col space-y-8">
+            <div class="flex items-center gap-6">
+                <img id="dashPFP" src="https://i.imgur.com/r6oJp4O.png" class="pfp-circle">
+                <div>
+                    <h2 class="text-4xl font-black text-white tracking-tighter">Welcome, <span id="userNameDisplay">User</span></h2>
+                    <p class="text-white/30 text-[10px] uppercase tracking-[0.3em]">ID: <span id="dashUID">---</span></p>
                 </div>
             </div>
-
-            <div class="h-16 border-t border-white/5 flex items-center justify-between px-2">
-                <div class="flex gap-8">
-                    <div class="text-[9px] font-black text-white/20 uppercase tracking-widest">Uptime: <span class="text-white/40">99.9%</span></div>
-                    <div class="text-[9px] font-black text-white/20 uppercase tracking-widest">Core: <span class="text-white/40">v3.3-VERSATILE</span></div>
+            <div class="grid grid-cols-2 gap-6 flex-grow">
+                <div class="bg-white/5 border border-white/5 p-8 rounded-[2rem]">
+                    <h3 class="text-[10px] font-black text-sky-400 uppercase mb-4">Core Intel</h3>
+                    <p class="text-sm text-white/60 leading-relaxed">Mobby is aCapably built by <strong>Roy</strong> (SIC Corp). This terminal is your gateway to NexaFlow's neural networks.</p>
                 </div>
-                <div class="text-[9px] font-black text-white/20 uppercase tracking-widest">Location: <span class="text-white/40">Global Terminal</span></div>
+                <div class="bg-white/5 border border-white/5 p-8 rounded-[2rem]">
+                    <h3 class="text-[10px] font-black text-sky-400 uppercase mb-4">Identity Update</h3>
+                    <input type="text" id="pfpInput" placeholder="New PFP URL..." class="input-magical mb-2">
+                    <button onclick="updatePFP()" class="text-[10px] font-bold text-white/40 hover:text-white uppercase">Sync Visuals</button>
+                </div>
+            </div>
+            <div class="h-12 border-t border-white/5 flex items-center justify-between opacity-30 px-2">
+                <div class="text-[8px] font-black uppercase tracking-[0.2em]">Status: Nominal</div>
+                <div class="text-[8px] font-black uppercase tracking-[0.2em]">SIC_CORP_AUTHENTICATED</div>
             </div>
         </div>
 
         <div id="view-terminal" class="h-full flex flex-col hidden">
-            <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 px-4 mb-6"></div>
-            <footer class="max-w-4xl mx-auto w-full">
-                <div class="p-2 flex items-center gap-4 px-6 border border-white/10 rounded-2xl bg-black/40 backdrop-blur-md">
-                    <input type="text" id="userInput" placeholder="Type Command..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white placeholder:text-white/20">
-                    <button id="sendBtn" class="bg-white/10 text-white p-3 rounded-xl">SEND</button>
-                </div>
-            </footer>
+            <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 mb-6"></div>
+            <div class="max-w-4xl mx-auto w-full p-2 flex gap-4 px-6 border border-white/10 rounded-2xl bg-black/40">
+                <input type="text" id="userInput" placeholder="Neural Input..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white">
+                <button id="sendBtn" class="text-sky-400 font-black text-xs uppercase">Run</button>
+            </div>
         </div>
 
         <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-6 hidden">
-            <div class="w-full max-w-md p-10 bg-slate-900 border border-white/10 rounded-[2rem]">
-                <h2 class="text-lg font-black mb-8 text-white tracking-widest uppercase">Kernel Config</h2>
-                <div class="space-y-6">
-                    <select id="modeSelect" onchange="applyMode()" class="w-full bg-black border border-white/10 p-4 rounded-xl text-white text-xs">
-                        <option value="kid">Public (Kid)</option>
-                        <option value="adult">Standard (Adult)</option>
-                        <option value="admin" id="adminOption" style="display:none;">Executive (Admin)</option>
-                    </select>
+            <div class="w-full max-w-md p-10 bg-slate-900 border border-white/10 rounded-[2.5rem]">
+                <h2 class="text-lg font-black text-white mb-6 uppercase">System Config</h2>
+                <div class="space-y-4">
+                    <select id="modeSelect" onchange="applyMode()" class="input-magical"><option value="kid">Kid</option><option value="adult">Adult</option><option value="admin" id="adminOption" style="display:none;">Admin</option></select>
                     <input type="password" id="groqInput" placeholder="Groq API Key" class="input-magical">
-                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px]">Save & Sync</button>
-                    
-                    <div class="pt-6 border-t border-white/5">
-                        <button onclick="confirmSignOut()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-black uppercase text-[10px] hover:bg-red-500 hover:text-white transition">Sign Out of MobbyOS</button>
-                    </div>
+                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px]">Save & Exit</button>
+                    <button onclick="confirmSignOut()" class="w-full text-red-500 py-4 font-black uppercase text-[10px] hover:bg-red-500/10 rounded-xl transition">Logoff</button>
                 </div>
             </div>
         </div>
@@ -143,71 +137,109 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, deleteDoc, collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
         const auth = getAuth(app);
-        
-        let isLoginMode = true;
-        const SIC_ADMINS = ["SICMailCenter1@gmail.com", "Roystonslijkerman@gmail.com"];
+        const provider = new GoogleAuthProvider();
 
-        // UI NAVIGATION
-        window.showView = (viewName) => {
+        let currentChatId = null;
+        let isLoginMode = true;
+
+        // UI HELPERS
+        window.showView = (name) => {
             document.getElementById('view-dashboard').classList.add('hidden');
             document.getElementById('view-terminal').classList.add('hidden');
-            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            document.getElementById('btn-dashboard').classList.remove('active');
+            document.getElementById('btn-terminal').classList.remove('active');
+            document.getElementById(`view-${name}`).classList.remove('hidden');
+            document.getElementById(`btn-${name}`).classList.add('active');
         };
 
         window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
 
-        // AUTH LOGIC
-        window.toggleAuthMode = () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('authBtn').innerText = isLoginMode ? 'Initialize Session' : 'Create Account';
-            document.getElementById('switchAuth').innerText = isLoginMode ? 'Need an account? Register' : 'Have an account? Login';
+        // SETUP LOGIC
+        window.completeSetup = async () => {
+            const user = auth.currentUser;
+            const name = document.getElementById('setupName').value || user.email.split('@')[0];
+            const pfp = document.getElementById('setupPFP').value || "https://i.imgur.com/r6oJp4O.png";
+            
+            await setDoc(doc(db, "users", user.uid), { setupComplete: true, displayName: name, pfp: pfp }, { merge: true });
+            localStorage.setItem('mobby_setup_done', 'true');
+            localStorage.setItem('mobby_pfp', pfp);
+            location.reload();
         };
 
-        document.getElementById('authBtn').onclick = async () => {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPass').value;
-            try {
-                if(isLoginMode) await signInWithEmailAndPassword(auth, email, pass);
-                else await createUserWithEmailAndPassword(auth, email, pass);
-            } catch (e) { alert(e.message); }
-        };
-
-        window.confirmSignOut = () => {
-            if(confirm("Are you sure you want to terminate this neural session?")) {
-                signOut(auth).then(() => location.reload());
-            }
-        };
-
-        onAuthStateChanged(auth, (user) => {
+        // AUTH & BOOT
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('loginOverlay').classList.add('hidden');
-                document.getElementById('dashEmail').innerText = user.email;
-                document.getElementById('dashUID').innerText = user.uid.substring(0,8);
-                document.getElementById('userNameDisplay').innerText = user.email.split('@')[0].toUpperCase();
+                const setupDone = localStorage.getItem('mobby_setup_done');
                 
-                const isAdmin = SIC_ADMINS.includes(user.email);
-                if(isAdmin) document.getElementById('adminOption').style.display = 'block';
-                showView('dashboard');
+                if (!setupDone) {
+                    document.getElementById('setupOverlay').classList.remove('hidden');
+                } else {
+                    document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
+                    document.getElementById('dashUID').innerText = user.uid.substring(0,8);
+                    const pfp = localStorage.getItem('mobby_pfp') || "https://i.imgur.com/r6oJp4O.png";
+                    document.getElementById('sidePFP').src = pfp;
+                    document.getElementById('dashPFP').src = pfp;
+                    loadUserChats(user.uid);
+                }
             } else {
                 document.getElementById('loginOverlay').classList.remove('hidden');
             }
         });
 
-        // Twinkle Effect
-        const field = document.getElementById('starField');
-        for(let i=0; i<60; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = Math.random()*100+'%'; star.style.top = Math.random()*100+'%';
-            star.style.width = Math.random()*3+'px'; star.style.height = star.style.width;
-            star.style.setProperty('--duration', (Math.random()*3+2)+'s');
-            field.appendChild(star);
+        // THREAD MANAGEMENT
+        async function loadUserChats(uid) {
+            const q = query(collection(db, "users", uid, "threads"), orderBy("timestamp", "desc"));
+            const snap = await getDocs(q);
+            const list = document.getElementById('threadList');
+            list.innerHTML = '';
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                const container = document.createElement('div');
+                container.className = "thread-item";
+                container.innerHTML = `
+                    <span class="truncate flex-grow" onclick="selectThread('${docSnap.id}')">${data.title || 'Untitled'}</span>
+                    <button class="del-btn" onclick="deleteThread(event, '${docSnap.id}')">DEL</button>
+                `;
+                list.appendChild(container);
+            });
         }
+
+        window.deleteThread = async (e, id) => {
+            e.stopPropagation();
+            if(confirm("Erase thread from memory?")) {
+                await deleteDoc(doc(db, "users", auth.currentUser.uid, "threads", id));
+                loadUserChats(auth.currentUser.uid);
+            }
+        };
+
+        window.selectThread = (id) => {
+            currentChatId = id;
+            showView('terminal');
+            // renderMessages logic...
+        };
+
+        // AUTH ACTIONS
+        document.getElementById('emailAuthBtn').onclick = () => {
+            const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPass').value;
+            isLoginMode ? signInWithEmailAndPassword(auth, e, p) : createUserWithEmailAndPassword(auth, e, p);
+        };
+        document.getElementById('googleAuthBtn').onclick = () => signInWithPopup(auth, provider);
+        window.toggleAuthMode = () => {
+            isLoginMode = !isLoginMode;
+            document.getElementById('emailAuthBtn').innerText = isLoginMode ? 'Initialize' : 'Register';
+        };
+        window.confirmSignOut = () => confirm("Terminate session?") && signOut(auth).then(() => {
+            localStorage.clear();
+            location.reload();
+        });
     </script>
 </body>
 </html>
