@@ -25,44 +25,45 @@
         .nav-btn { width: 100%; text-align: left; padding: 12px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); transition: 0.3s; }
         .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.05); color: white; }
 
-        /* PFP */
-        .pfp-circle { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; background: #000; }
+        /* PFP & THREADS */
+        .pfp-circle { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; background: #000; transition: 0.3s; }
         .pfp-small { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); object-fit: cover; }
-        
-        .thread-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-radius: 8px; transition: 0.2s; cursor: pointer; }
-        .thread-item:hover { background: rgba(255,255,255,0.05); }
-        .del-btn { opacity: 0; color: #ef4444; font-size: 8px; padding: 4px; }
+        .thread-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-radius: 8px; transition: 0.2s; cursor: pointer; border-left: 0px solid #38bdf8; }
+        .thread-item:hover { background: rgba(255,255,255,0.05); border-left-width: 3px; color: white; }
+        .del-btn { opacity: 0; color: #ef4444; font-size: 8px; font-weight: 900; padding: 4px 8px; transition: 0.2s; }
         .thread-item:hover .del-btn { opacity: 0.6; }
-        .del-btn:hover { opacity: 1 !important; }
+        .del-btn:hover { opacity: 1 !important; transform: scale(1.1); }
     </style>
 </head>
 <body id="mainBody" class="mode-kid">
 
     <div id="loginOverlay" class="fixed inset-0 overlay-glass flex items-center justify-center">
         <div class="magic-card p-10 rounded-[2.5rem] w-full max-w-sm text-center">
-            <h1 class="text-3xl font-black text-white tracking-tighter mb-8">MOBBY<span class="text-sky-400">OS</span></h1>
+            <h1 class="text-3xl font-black text-white tracking-tighter mb-8 italic">MOBBY<span class="text-sky-400">OS</span></h1>
             <div class="space-y-3">
                 <input type="email" id="loginEmail" placeholder="Email" class="input-magical">
                 <input type="password" id="loginPass" placeholder="Password" class="input-magical">
                 <button id="emailAuthBtn" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-sky-400">Initialize</button>
                 <div class="flex items-center my-4 opacity-20"><hr class="flex-grow border-white/20"><span class="px-3 text-[10px] text-white">OR</span><hr class="flex-grow border-white/20"></div>
-                <button id="googleAuthBtn" class="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2">
+                <button id="googleAuthBtn" class="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:bg-white/10">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4"> Continue with Google
                 </button>
             </div>
-            <button onclick="toggleAuthMode()" id="switchAuth" class="mt-6 text-[9px] text-white/40 font-bold uppercase hover:text-white">Need account? Register</button>
+            <button id="switchAuthBtn" class="mt-6 text-[9px] text-white/40 font-bold uppercase hover:text-white">Need account? Register</button>
         </div>
     </div>
 
     <div id="setupOverlay" class="fixed inset-0 overlay-glass flex items-center justify-center hidden">
         <div class="magic-card p-10 rounded-[2.5rem] w-full max-w-md text-center">
             <h2 class="text-2xl font-black text-white mb-2 uppercase italic">Neural Sync</h2>
-            <p class="text-white/40 text-[10px] uppercase tracking-widest mb-8">Configure your identity at SIC Corp</p>
-            <div class="space-y-4">
+            <p class="text-white/40 text-[10px] uppercase tracking-widest mb-8">Establish Identity at SIC Corp</p>
+            <div class="space-y-4 text-left">
                 <div class="flex justify-center mb-4"><img id="setupPFPPreview" src="https://i.imgur.com/r6oJp4O.png" class="pfp-circle"></div>
-                <input type="text" id="setupName" placeholder="Display Name" class="input-magical">
-                <input type="text" id="setupPFP" placeholder="Custom PFP URL (Optional)" class="input-magical">
-                <button onclick="completeSetup()" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">Activate Account</button>
+                <label class="text-[8px] font-black text-sky-400 uppercase ml-2">Codename</label>
+                <input type="text" id="setupName" placeholder="Enter name..." class="input-magical">
+                <label class="text-[8px] font-black text-sky-400 uppercase ml-2">Visual ID (URL)</label>
+                <input type="text" id="setupPFP" placeholder="Paste image link..." class="input-magical" oninput="document.getElementById('setupPFPPreview').src = this.value || 'https://i.imgur.com/r6oJp4O.png'">
+                <button id="activateBtn" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest mt-4">Activate Identity</button>
             </div>
         </div>
     </div>
@@ -72,20 +73,16 @@
             <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="pfp-small">
             <div>
                 <h1 class="text-sm font-black text-white tracking-tighter">MOBBYOS</h1>
-                <div id="clearanceDisplay" class="text-[8px] font-bold text-sky-400 uppercase">Guest</div>
+                <div id="clearanceDisplay" class="text-[8px] font-bold text-sky-400 uppercase tracking-widest">Active</div>
             </div>
         </div>
-
         <nav class="space-y-1">
             <button onclick="showView('dashboard')" class="nav-btn active" id="btn-dashboard">Dashboard</button>
             <button onclick="showView('terminal')" class="nav-btn" id="btn-terminal">Terminal</button>
             <button onclick="toggleSettings()" class="nav-btn">Settings</button>
         </nav>
-
-        <div class="mt-10 mb-4 px-2 text-[9px] font-black text-white/10 uppercase tracking-widest">Neural Threads</div>
+        <div class="mt-10 mb-4 px-2 text-[9px] font-black text-white/10 uppercase tracking-widest">Memory Threads</div>
         <div id="threadList" class="flex-grow overflow-y-auto space-y-1 text-white/40 text-[9px]"></div>
-        
-        <div class="mt-auto text-[8px] font-bold text-center opacity-20 uppercase tracking-widest">SIC CORP | NEXAFLOW</div>
     </aside>
 
     <main class="flex-grow flex flex-col p-8 relative">
@@ -99,37 +96,32 @@
             </div>
             <div class="grid grid-cols-2 gap-6 flex-grow">
                 <div class="bg-white/5 border border-white/5 p-8 rounded-[2rem]">
-                    <h3 class="text-[10px] font-black text-sky-400 uppercase mb-4">Core Intel</h3>
-                    <p class="text-sm text-white/60 leading-relaxed">Mobby is aCapably built by <strong>Roy</strong> (SIC Corp). This terminal is your gateway to NexaFlow's neural networks.</p>
+                    <h3 class="text-[10px] font-black text-sky-400 uppercase mb-4">Core System</h3>
+                    <p class="text-sm text-white/60 leading-relaxed">MobbyOS is a proprietary interface built by <strong>Roy</strong>. SIC Corp owns the website and underlying code.</p>
                 </div>
                 <div class="bg-white/5 border border-white/5 p-8 rounded-[2rem]">
-                    <h3 class="text-[10px] font-black text-sky-400 uppercase mb-4">Identity Update</h3>
-                    <input type="text" id="pfpInput" placeholder="New PFP URL..." class="input-magical mb-2">
-                    <button onclick="updatePFP()" class="text-[10px] font-bold text-white/40 hover:text-white uppercase">Sync Visuals</button>
+                    <h3 class="text-[10px] font-black text-sky-400 uppercase mb-4">Sync Visuals</h3>
+                    <input type="text" id="pfpInput" placeholder="New Image URL..." class="input-magical mb-2">
+                    <button id="updatePfpBtn" class="text-[10px] font-bold text-white/40 hover:text-white uppercase">Apply Sync</button>
                 </div>
-            </div>
-            <div class="h-12 border-t border-white/5 flex items-center justify-between opacity-30 px-2">
-                <div class="text-[8px] font-black uppercase tracking-[0.2em]">Status: Nominal</div>
-                <div class="text-[8px] font-black uppercase tracking-[0.2em]">SIC_CORP_AUTHENTICATED</div>
             </div>
         </div>
 
         <div id="view-terminal" class="h-full flex flex-col hidden">
             <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 mb-6"></div>
             <div class="max-w-4xl mx-auto w-full p-2 flex gap-4 px-6 border border-white/10 rounded-2xl bg-black/40">
-                <input type="text" id="userInput" placeholder="Neural Input..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white">
-                <button id="sendBtn" class="text-sky-400 font-black text-xs uppercase">Run</button>
+                <input type="text" id="userInput" placeholder="Neural Command..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white">
+                <button id="sendBtn" class="text-sky-400 font-black text-xs uppercase">Execute</button>
             </div>
         </div>
 
         <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-6 hidden">
             <div class="w-full max-w-md p-10 bg-slate-900 border border-white/10 rounded-[2.5rem]">
-                <h2 class="text-lg font-black text-white mb-6 uppercase">System Config</h2>
+                <h2 class="text-lg font-black text-white mb-6 uppercase">Config</h2>
                 <div class="space-y-4">
-                    <select id="modeSelect" onchange="applyMode()" class="input-magical"><option value="kid">Kid</option><option value="adult">Adult</option><option value="admin" id="adminOption" style="display:none;">Admin</option></select>
-                    <input type="password" id="groqInput" placeholder="Groq API Key" class="input-magical">
-                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px]">Save & Exit</button>
-                    <button onclick="confirmSignOut()" class="w-full text-red-500 py-4 font-black uppercase text-[10px] hover:bg-red-500/10 rounded-xl transition">Logoff</button>
+                    <select id="modeSelect" class="input-magical"><option value="kid">Kid</option><option value="adult">Adult</option><option value="admin" id="adminOption" style="display:none;">Admin</option></select>
+                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px]">Commit Changes</button>
+                    <button id="logoutBtn" class="w-full text-red-500 py-4 font-black uppercase text-[10px] hover:bg-red-500/10 rounded-xl">Terminate Session</button>
                 </div>
             </div>
         </div>
@@ -137,8 +129,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, updateDoc, deleteDoc, collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
@@ -146,45 +138,58 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        let currentChatId = null;
         let isLoginMode = true;
+
+        // AUTH HANDLERS
+        document.getElementById('emailAuthBtn').onclick = () => {
+            const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPass').value;
+            isLoginMode ? signInWithEmailAndPassword(auth, e, p) : createUserWithEmailAndPassword(auth, e, p);
+        };
+        document.getElementById('googleAuthBtn').onclick = () => signInWithPopup(auth, provider);
+        document.getElementById('switchAuthBtn').onclick = () => {
+            isLoginMode = !isLoginMode;
+            document.getElementById('emailAuthBtn').innerText = isLoginMode ? 'Initialize' : 'Register';
+            document.getElementById('switchAuthBtn').innerText = isLoginMode ? 'Need account? Register' : 'Have account? Login';
+        };
+        document.getElementById('logoutBtn').onclick = () => confirm("Confirm Logout?") && signOut(auth).then(() => { localStorage.clear(); location.reload(); });
+
+        // SETUP HANDLER (FIXED)
+        document.getElementById('activateBtn').onclick = async () => {
+            const user = auth.currentUser;
+            const name = document.getElementById('setupName').value || "MobbyUser";
+            const pfp = document.getElementById('setupPFP').value || "https://i.imgur.com/r6oJp4O.png";
+            
+            try {
+                await updateProfile(user, { displayName: name, photoURL: pfp });
+                await setDoc(doc(db, "users", user.uid), { setupComplete: true, displayName: name, pfp: pfp }, { merge: true });
+                localStorage.setItem('mobby_setup_done', 'true');
+                localStorage.setItem('mobby_pfp', pfp);
+                location.reload();
+            } catch (err) { alert("Setup Error: " + err.message); }
+        };
 
         // UI HELPERS
         window.showView = (name) => {
-            document.getElementById('view-dashboard').classList.add('hidden');
-            document.getElementById('view-terminal').classList.add('hidden');
-            document.getElementById('btn-dashboard').classList.remove('active');
-            document.getElementById('btn-terminal').classList.remove('active');
+            ['dashboard', 'terminal'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+            ['dashboard', 'terminal'].forEach(b => document.getElementById(`btn-${b}`).classList.remove('active'));
             document.getElementById(`view-${name}`).classList.remove('hidden');
             document.getElementById(`btn-${name}`).classList.add('active');
         };
-
         window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
 
-        // SETUP LOGIC
-        window.completeSetup = async () => {
-            const user = auth.currentUser;
-            const name = document.getElementById('setupName').value || user.email.split('@')[0];
-            const pfp = document.getElementById('setupPFP').value || "https://i.imgur.com/r6oJp4O.png";
-            
-            await setDoc(doc(db, "users", user.uid), { setupComplete: true, displayName: name, pfp: pfp }, { merge: true });
-            localStorage.setItem('mobby_setup_done', 'true');
-            localStorage.setItem('mobby_pfp', pfp);
-            location.reload();
-        };
-
-        // AUTH & BOOT
+        // APP LOGIC
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('loginOverlay').classList.add('hidden');
-                const setupDone = localStorage.getItem('mobby_setup_done');
+                const userDoc = await getDoc(doc(db, "users", user.uid));
                 
-                if (!setupDone) {
+                if (!userDoc.exists() || !userDoc.data().setupComplete) {
                     document.getElementById('setupOverlay').classList.remove('hidden');
                 } else {
-                    document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
+                    document.getElementById('setupOverlay').classList.add('hidden');
+                    document.getElementById('userNameDisplay').innerText = userDoc.data().displayName;
                     document.getElementById('dashUID').innerText = user.uid.substring(0,8);
-                    const pfp = localStorage.getItem('mobby_pfp') || "https://i.imgur.com/r6oJp4O.png";
+                    const pfp = userDoc.data().pfp || "https://i.imgur.com/r6oJp4O.png";
                     document.getElementById('sidePFP').src = pfp;
                     document.getElementById('dashPFP').src = pfp;
                     loadUserChats(user.uid);
@@ -194,52 +199,34 @@
             }
         });
 
-        // THREAD MANAGEMENT
         async function loadUserChats(uid) {
             const q = query(collection(db, "users", uid, "threads"), orderBy("timestamp", "desc"));
             const snap = await getDocs(q);
             const list = document.getElementById('threadList');
             list.innerHTML = '';
             snap.forEach(docSnap => {
-                const data = docSnap.data();
-                const container = document.createElement('div');
-                container.className = "thread-item";
-                container.innerHTML = `
-                    <span class="truncate flex-grow" onclick="selectThread('${docSnap.id}')">${data.title || 'Untitled'}</span>
-                    <button class="del-btn" onclick="deleteThread(event, '${docSnap.id}')">DEL</button>
-                `;
-                list.appendChild(container);
+                const item = document.createElement('div');
+                item.className = "thread-item";
+                item.innerHTML = `<span class="truncate" onclick="window.selectThread('${docSnap.id}')">${docSnap.data().title || 'Log Session'}</span><button class="del-btn" onclick="window.deleteThread(event, '${docSnap.id}')">ERASE</button>`;
+                list.appendChild(item);
             });
         }
 
         window.deleteThread = async (e, id) => {
             e.stopPropagation();
-            if(confirm("Erase thread from memory?")) {
+            if(confirm("Erase from SIC Cloud?")) {
                 await deleteDoc(doc(db, "users", auth.currentUser.uid, "threads", id));
                 loadUserChats(auth.currentUser.uid);
             }
         };
 
-        window.selectThread = (id) => {
-            currentChatId = id;
-            showView('terminal');
-            // renderMessages logic...
+        document.getElementById('updatePfpBtn').onclick = async () => {
+            const url = document.getElementById('pfpInput').value;
+            if(url) {
+                await setDoc(doc(db, "users", auth.currentUser.uid), { pfp: url }, { merge: true });
+                location.reload();
+            }
         };
-
-        // AUTH ACTIONS
-        document.getElementById('emailAuthBtn').onclick = () => {
-            const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPass').value;
-            isLoginMode ? signInWithEmailAndPassword(auth, e, p) : createUserWithEmailAndPassword(auth, e, p);
-        };
-        document.getElementById('googleAuthBtn').onclick = () => signInWithPopup(auth, provider);
-        window.toggleAuthMode = () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('emailAuthBtn').innerText = isLoginMode ? 'Initialize' : 'Register';
-        };
-        window.confirmSignOut = () => confirm("Terminate session?") && signOut(auth).then(() => {
-            localStorage.clear();
-            location.reload();
-        });
     </script>
 </body>
 </html>
