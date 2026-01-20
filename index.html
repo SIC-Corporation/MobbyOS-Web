@@ -67,12 +67,16 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_ID",
-            appId: "YOUR_APP_ID"
+// YOUR REAL FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8",
+            authDomain: "mobbyoswebapp.firebaseapp.com",
+            projectId: "mobbyoswebapp",
+            storageBucket: "mobbyoswebapp.firebasestorage.app",
+            messagingSenderId: "6814948758",
+            appId: "1:6814948758:web:a87a03eff182e0029091b7",
+            measurementId: "G-BQJE3R5K2B"
+        };
         };
 
         const app = initializeApp(firebaseConfig);
