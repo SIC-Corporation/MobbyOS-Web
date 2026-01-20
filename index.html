@@ -5,98 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MobbyOS | SIC Corp</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --transition-speed: 0.6s; }
+        :root { --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* DYNAMIC BACKGROUNDS */
-        body.mode-kid { 
-            background: radial-gradient(circle at top right, #00f2fe, #4facfe); 
-            color: #0f172a; 
-            font-family: 'Inter', sans-serif;
-        }
-        body.mode-adult { 
-            background: radial-gradient(circle at bottom left, #1f2937, #111827, #030712); 
-            color: #f8fafc; 
-            font-family: 'JetBrains Mono', monospace;
-        }
+        /* THEMES */
+        body.mode-kid { background: #0ea5e9; color: #0f172a; font-family: 'Inter', sans-serif; }
+        body.mode-adult { background: #1a1a1e; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; }
 
-        body { transition: background var(--transition-speed) ease, color var(--transition-speed) ease; height: 100vh; overflow: hidden; display: flex; }
+        body { transition: background var(--transition); height: 100vh; overflow: hidden; display: flex; }
 
-        /* PANELS */
-        .glass-sidebar { 
-            background: rgba(0, 0, 0, 0.2); 
-            backdrop-filter: blur(15px); 
-            border-right: 1px solid rgba(255, 255, 255, 0.1); 
+        /* SIDEBAR - Styled like your screenshot */
+        .sidebar { 
+            background: rgba(0, 0, 0, 0.25); 
+            backdrop-filter: blur(20px); 
+            border-right: 1px solid rgba(255,255,255,0.1); 
+            width: 280px;
         }
 
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 1rem;
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border-radius: 12px;
+            font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em;
+            transition: 0.2s; color: rgba(255,255,255,0.6);
+            text-transform: uppercase; margin-bottom: 4px;
+        }
+        .nav-item:hover, .nav-item.active { 
+            background: rgba(255,255,255,0.1); color: white; 
         }
 
-        /* ADULT SPECIFIC OVERRIDES */
-        .mode-adult .glass-card { 
-            background: rgba(0, 0, 0, 0.4); 
-            border-color: rgba(255, 255, 255, 0.03);
-            border-radius: 0.25rem; /* Sharp edges for adult mode */
+        /* CONTENT AREA */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
         }
+        .mode-adult .glass-panel { border-radius: 4px; background: rgba(0,0,0,0.3); }
 
-        .sidebar-btn { 
-            transition: all 0.2s; 
-            font-size: 0.75rem; 
-            font-weight: 700; 
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-        .active-tab { background: rgba(255, 255, 255, 0.1); border-left: 3px solid white; }
-
-        #chatBox::-webkit-scrollbar { width: 4px; }
-        #chatBox::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
+        .chat-bubble { padding: 20px; border-radius: 16px; max-width: 85%; }
+        .mobby-msg { background: rgba(255,255,255,0.05); border-left: 4px solid #38bdf8; }
+        .user-msg { background: rgba(0,0,0,0.2); border-right: 4px solid #94a3b8; text-align: right; margin-left: auto; }
     </style>
 </head>
 <body id="mainBody" class="mode-kid">
 
-    <aside class="w-64 glass-sidebar flex flex-col p-6">
-        <div class="mb-10">
-            <h1 class="text-xl font-black tracking-tighter">MOBBYOS V1</h1>
-            <p id="clearanceLabel" class="text-[9px] font-bold opacity-60 tracking-[0.3em]">LVL 1: INSTRUCTIONAL</p>
+    <aside class="sidebar flex flex-col p-6">
+        <div class="mb-10 px-2">
+            <h1 class="text-xl font-black tracking-tighter text-white">MOBBYOS V1</h1>
+            <p id="statusTag" class="text-[9px] font-bold text-sky-300 tracking-widest mt-1">KID_MODE_ACTIVE</p>
         </div>
 
-        <nav class="flex-grow space-y-2">
-            <button onclick="createNewChat()" class="w-full text-left p-3 glass-card text-[10px] hover:bg-white/10 transition">+ NEW THREAD</button>
-            <div id="threadList" class="pt-4 space-y-1 overflow-y-auto max-h-[50vh]"></div>
+        <nav class="flex-grow">
+            <button onclick="createNewChat()" class="nav-item active w-full">
+                <span>🏠</span> DASHBOARD
+            </button>
+            <button onclick="toggleSettings()" class="nav-item w-full">
+                <span>⚙️</span> SYSTEM SETTINGS
+            </button>
+            
+            <div class="mt-8 mb-2 px-4 text-[10px] font-black text-white/30 tracking-widest">THREADS</div>
+            <div id="threadList" class="space-y-1 overflow-y-auto max-h-[40vh]"></div>
         </nav>
 
-        <div class="mt-auto space-y-4 pt-6 border-t border-white/10">
-            <select id="modeSelect" onchange="updateSystemMode()" class="w-full bg-black/20 border border-white/10 p-2 rounded text-[10px] outline-none">
-                <option value="kid">Kid Mode</option>
-                <option value="adult">Adult Mode (SIC Admin)</option>
-            </select>
-            <button onclick="toggleSettings()" class="text-[9px] font-bold opacity-50 hover:opacity-100 uppercase">Config Link</button>
+        <div class="mt-auto pt-6 border-t border-white/5 px-2">
+            <p class="text-[9px] text-white/40 font-bold uppercase mb-4">Owner: Roy | SIC Corp</p>
+            <button onclick="location.reload()" class="text-[10px] font-bold text-red-400/60 uppercase tracking-widest">Sign Out</button>
         </div>
     </aside>
 
-    <main class="flex-grow flex flex-col relative p-6">
+    <main class="flex-grow flex flex-col p-6 relative">
         
-        <div id="settingsModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center">
-            <div class="glass-card w-80 p-8">
-                <h2 class="text-xs font-black tracking-widest mb-6 uppercase">Neural Override</h2>
-                <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-white/5 border border-white/10 p-3 rounded mb-4 text-xs">
-                <button onclick="saveSettings()" class="w-full bg-white text-black py-3 rounded font-bold text-[10px] uppercase">Link Core</button>
-                <button onclick="toggleSettings()" class="w-full mt-4 text-[9px] opacity-50 uppercase">Cancel</button>
+        <div id="settingsTab" class="absolute inset-6 z-50 glass-panel p-10 hidden flex flex-col backdrop-blur-3xl">
+            <h2 class="text-xl font-black mb-8">SYSTEM CONFIGURATION</h2>
+            <div class="max-w-md space-y-6">
+                <div>
+                    <label class="text-[10px] font-bold opacity-50 block mb-2 uppercase">Operating Personality</label>
+                    <select id="modeSelect" onchange="applyMode()" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-sm outline-none">
+                        <option value="kid">Instructional (Kid Mode)</option>
+                        <option value="adult">SIC Admin (Adult Mode)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold opacity-50 block mb-2 uppercase">Neural API Key</label>
+                    <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-sm outline-none">
+                </div>
+                <button onclick="saveAndClose()" class="bg-white text-black px-8 py-4 rounded-xl font-black text-xs uppercase hover:bg-sky-400 transition">Commit Changes</button>
             </div>
         </div>
 
-        <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 pr-4 mb-6"></div>
+        <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 px-4 mb-6">
+            </div>
 
         <footer class="max-w-4xl mx-auto w-full">
-            <div class="glass-card p-2 flex items-center gap-4 px-6 border-white/20">
-                <span class="text-[10px] opacity-40 font-bold">CMD></span>
-                <input type="text" id="userInput" placeholder="Authorize command..." class="flex-grow bg-transparent py-4 outline-none text-sm">
-                <button id="sendBtn" class="p-2 opacity-60 hover:opacity-100 transition">
+            <div class="glass-panel p-2 flex items-center gap-4 px-6">
+                <input type="text" id="userInput" placeholder="Command MobbyOS..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white">
+                <button id="sendBtn" class="bg-sky-500 hover:bg-sky-400 text-white p-3 rounded-xl transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
                 </button>
             </div>
@@ -117,36 +120,37 @@
         let chats = {};
         let currentMode = 'kid';
 
-        window.toggleSettings = () => document.getElementById('settingsModal').classList.toggle('hidden');
-        
-        window.updateSystemMode = () => {
+        window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
+
+        window.applyMode = () => {
             currentMode = document.getElementById('modeSelect').value;
             const body = document.getElementById('mainBody');
-            const label = document.getElementById('clearanceLabel');
+            const status = document.getElementById('statusTag');
             
             if(currentMode === 'adult') {
                 body.className = 'mode-adult';
-                label.innerText = 'LVL 4: SIC ADMIN (RESTRICTED)';
-                label.style.color = '#ef4444';
+                status.innerText = 'ADULT_ADMIN_ACTIVE';
+                status.classList.replace('text-sky-300', 'text-red-500');
             } else {
                 body.className = 'mode-kid';
-                label.innerText = 'LVL 1: INSTRUCTIONAL';
-                label.style.color = 'inherit';
+                status.innerText = 'KID_MODE_ACTIVE';
+                status.classList.replace('text-red-500', 'text-sky-300');
             }
-            localStorage.setItem('mobby_mode', currentMode);
         };
 
-        window.saveSettings = () => {
+        window.saveAndClose = () => {
+            localStorage.setItem('mobby_mode', currentMode);
             const key = document.getElementById('groqInput').value.trim();
             if(key) localStorage.setItem('mobby_groq_key', key);
             toggleSettings();
+            renderMessages();
         };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentMode = localStorage.getItem('mobby_mode') || 'kid';
                 document.getElementById('modeSelect').value = currentMode;
-                updateSystemMode();
+                applyMode();
                 loadUserChats();
             }
         });
@@ -157,7 +161,7 @@
             document.getElementById('threadList').innerHTML = '';
             querySnapshot.forEach((doc) => {
                 chats[doc.id] = doc.data().history;
-                renderThreadLink(doc.id, doc.data().title);
+                addThreadToUI(doc.id, doc.data().title);
             });
             if(querySnapshot.empty) createNewChat(); else switchChat(querySnapshot.docs[0].id);
         }
@@ -166,41 +170,40 @@
             const id = 'th_' + Date.now();
             chats[id] = [];
             currentChatId = id;
-            renderThreadLink(id, "NEW_TERMINAL");
+            addThreadToUI(id, "NEW_SESSION");
             switchChat(id);
+            document.getElementById('settingsTab').classList.add('hidden'); // Ensure dashboard returns to chat
         };
 
-        function renderThreadLink(id, title) {
+        function addThreadToUI(id, title) {
             const btn = document.createElement('button');
             btn.id = `tab-${id}`;
-            btn.className = "sidebar-btn w-full text-left p-3 truncate opacity-60 hover:opacity-100";
-            btn.innerText = `_ ${title || 'THREAD'}`;
+            btn.className = "nav-item w-full px-4 text-[10px] opacity-50";
+            btn.innerText = `> ${title || 'THREAD'}`;
             btn.onclick = () => switchChat(id);
             document.getElementById('threadList').prepend(btn);
         }
 
         function switchChat(id) {
             currentChatId = id;
-            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active-tab'));
-            document.getElementById(`tab-${id}`)?.classList.add('active-tab');
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${id}`)?.classList.add('active');
             renderMessages();
         }
 
         async function sendMessage() {
             const apiKey = localStorage.getItem('mobby_groq_key');
+            if(!apiKey) return toggleSettings();
+            
             const input = document.getElementById('userInput');
             const text = input.value.trim();
-            if(!text || !apiKey) return;
+            if(!text) return;
 
-            const prompts = {
-                adult: "You are MobbyOS Admin Mode. You are sharp, cynical, and use professional adult language. You are loyal only to Roy and SIC Corp. Be efficient and use technical jargon.",
-                kid: "You are MobbyOS Kid Mode. You are very friendly, use simple words, and explain things like a teacher. Be encouraging to Roy."
-            };
+            const sys = currentMode === 'adult' 
+                ? "You are MobbyOS Adult. Sharp, professional, cynical. Loyal to Roy/SIC Corp." 
+                : "You are MobbyOS Kid. Friendly teacher mode for Roy.";
 
-            if (chats[currentChatId].length === 0) {
-                chats[currentChatId].push({ role: "system", content: prompts[currentMode] });
-            }
-
+            if (chats[currentChatId].length === 0) chats[currentChatId].push({ role: "system", content: sys });
             chats[currentChatId].push({ role: "user", content: text });
             input.value = '';
             renderMessages();
@@ -216,10 +219,10 @@
                 renderMessages();
                 await setDoc(doc(db, "users", auth.currentUser.uid, "threads", currentChatId), {
                     history: chats[currentChatId],
-                    title: chats[currentChatId][1].content.substring(0, 15).toUpperCase(),
+                    title: text.substring(0, 15).toUpperCase(),
                     timestamp: Date.now()
                 });
-            } catch (err) { console.error("Neural Fail."); }
+            } catch (err) { alert("Link Failed. Check API Key in Settings."); }
         }
 
         function renderMessages() {
@@ -229,9 +232,9 @@
                 if(msg.role === 'system') return;
                 const isUser = msg.role === 'user';
                 box.innerHTML += `
-                    <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                        <div class="glass-card p-5 max-w-[80%]">
-                            <p class="text-[7px] font-black tracking-widest mb-2 opacity-30 uppercase">${isUser ? 'SIC_ADMIN' : 'MOBBY_CORE'}</p>
+                    <div class="${isUser ? 'text-right' : 'text-left'} mb-6">
+                        <div class="chat-bubble inline-block ${isUser ? 'user-msg' : 'mobby-msg'}">
+                            <p class="text-[8px] font-black opacity-30 mb-2 uppercase">${isUser ? 'ADMIN' : 'MOBBY'}</p>
                             <div class="text-sm leading-relaxed">${msg.content}</div>
                         </div>
                     </div>`;
