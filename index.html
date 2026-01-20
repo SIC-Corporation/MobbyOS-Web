@@ -3,132 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS | SIC Corp</title>
+    <title>MobbyOS | SIC Corp Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --mobby-cyan: #00f2fe;
-            --mobby-blue: #4facfe;
-            --bg-dark: #050508;
-        }
-        body { 
-            background: var(--bg-dark); 
-            color: white; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            overflow: hidden;
-            height: 100vh;
-        }
-        .bg-mesh {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 80% 20%, rgba(79, 172, 254, 0.15) 0%, transparent 40%),
-                        radial-gradient(circle at 20% 80%, rgba(0, 242, 254, 0.1) 0%, transparent 40%);
-        }
-        .glass-panel { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 1.5rem; 
-        }
-        .mobby-gradient-text {
-            background: linear-gradient(90deg, var(--mobby-blue), var(--mobby-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .sidebar-item {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-left: 2px solid transparent;
-        }
-        .sidebar-item.active {
-            background: rgba(79, 172, 254, 0.1);
-            border-left-color: var(--mobby-cyan);
-            color: white;
-        }
-        .sidebar-item:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateX(4px);
-        }
-        #chatBox::-webkit-scrollbar { width: 5px; }
-        #chatBox::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        :root { --accent: #00f2fe; --bg: #050507; }
+        body { background: var(--bg); color: #e2e8f0; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
         
-        input::placeholder { color: rgba(255,255,255,0.3); }
+        /* ADULT MODE UI - SHARP & DARK */
+        .mode-adult { --accent: #ff0055; font-family: 'JetBrains Mono', monospace; }
+        .mode-adult .glass-panel { background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.05); border-radius: 0; }
+        .mode-adult .mobby-gradient { background: #ff0055; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* KID MODE UI - SOFT & BRIGHT */
+        .mode-kid { --accent: #00f2fe; }
+        .mode-kid .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
 
-        /* Smooth Table Styling */
-        table { width: 100%; border-radius: 12px; overflow: hidden; margin: 1rem 0; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); }
-        th { background: rgba(79, 172, 254, 0.2); padding: 12px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: var(--mobby-cyan); }
-        td { padding: 12px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+        .glass-panel { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-item { transition: 0.2s; border-left: 3px solid transparent; }
+        .sidebar-item.active { background: rgba(255,255,255,0.05); border-left-color: var(--accent); color: white; }
+        
+        #chatBox::-webkit-scrollbar { width: 4px; }
+        #chatBox::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+        
+        /* Terminal scanline effect for Adult mode */
+        .mode-adult::before {
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 99; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
     </style>
 </head>
-<body class="flex p-4 md:p-6 gap-6">
-    <div class="bg-mesh"></div>
+<body id="mainBody" class="mode-kid flex p-4 gap-4">
 
-    <div id="settingsModal" class="fixed inset-0 bg-black/60 backdrop-blur-xl z-[100] hidden flex items-center justify-center p-4">
-        <div class="glass-panel max-w-sm w-full p-8 shadow-2xl">
-            <h2 class="text-2xl font-extrabold mb-6 mobby-gradient-text">Core Config</h2>
-            <div class="space-y-4">
+    <div id="settingsModal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="glass-panel max-w-sm w-full p-8">
+            <h2 class="text-xl font-black mb-6 tracking-tighter uppercase">System Config</h2>
+            <div class="space-y-6">
                 <div>
-                    <label class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 block">Groq API Key</label>
-                    <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-cyan-400 text-white text-sm">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Operating Mode</label>
+                    <select id="modeSelect" onchange="updateMode()" class="w-full bg-white/5 border border-white/10 p-3 rounded text-sm outline-none">
+                        <option value="kid">Standard (Kid Mode)</option>
+                        <option value="adult">SIC Admin (Adult Mode)</option>
+                    </select>
                 </div>
-                <button onclick="saveSettings()" class="w-full py-4 bg-white text-black rounded-xl font-bold text-sm hover:bg-cyan-400 transition transform active:scale-95">SAVE CHANGES</button>
-                <button onclick="logout()" class="w-full py-4 text-red-400 text-[10px] font-bold tracking-widest hover:text-red-300">TERMINATE ALL SESSIONS</button>
-                <button onclick="toggleSettings()" class="w-full text-gray-500 text-xs py-2">Close</button>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Groq Key</label>
+                    <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-white/5 border border-white/10 p-3 rounded text-sm">
+                </div>
+                <button onclick="saveSettings()" class="w-full bg-white text-black py-3 font-bold text-xs tracking-widest uppercase hover:bg-cyan-400 transition">Execute Save</button>
+                <button onclick="toggleSettings()" class="w-full text-gray-500 text-[10px] uppercase font-bold tracking-widest">Close Terminal</button>
             </div>
         </div>
     </div>
 
-    <aside id="sidebar" class="hidden lg:flex flex-col w-80 glass-panel p-6">
+    <aside class="w-72 glass-panel flex flex-col p-6 hidden lg:flex">
         <div class="mb-10">
-            <h1 class="text-2xl font-extrabold tracking-tighter mobby-gradient-text">MOBBYOS</h1>
-            <p class="text-[9px] text-gray-500 font-bold tracking-[0.3em] uppercase opacity-60">SIC Corp Web Terminal</p>
+            <h1 class="text-2xl font-black tracking-tighter mobby-gradient">MOBBYOS</h1>
+            <p id="modeStatus" class="text-[9px] text-gray-600 font-bold tracking-[0.3em] uppercase">Status: Friendly</p>
         </div>
-
-        <button onclick="createNewChat()" class="group relative flex items-center justify-center gap-2 w-full p-4 mb-8 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-500/50 transition-all active:scale-95">
-            <span class="text-cyan-400 font-bold">+</span>
-            <span class="text-xs font-bold tracking-widest">NEW NEURAL THREAD</span>
-        </button>
-
-        <nav id="chatHistoryList" class="flex-grow space-y-2 overflow-y-auto pr-2">
-            </nav>
-
-        <div class="mt-auto pt-6 border-t border-white/10">
-            <button onclick="toggleSettings()" class="flex items-center gap-3 text-gray-400 hover:text-white transition text-xs font-semibold p-2">
-                <span>⚙️</span> SYSTEM PREFERENCES
-            </button>
+        <button onclick="createNewChat()" class="border border-white/10 p-4 text-[10px] font-bold tracking-widest hover:bg-white/5 transition mb-6">NEW THREAD</button>
+        <nav id="chatHistoryList" class="flex-grow space-y-1 overflow-y-auto"></nav>
+        <div class="mt-auto border-t border-white/5 pt-4">
+            <button onclick="toggleSettings()" class="text-gray-500 hover:text-white text-[10px] font-bold tracking-widest uppercase">System Config</button>
         </div>
     </aside>
 
-    <main class="flex-grow flex flex-col glass-panel overflow-hidden relative shadow-2xl">
-        
-        <div id="loginScreen" class="absolute inset-0 z-50 bg-black/40 backdrop-blur-2xl flex items-center justify-center p-6">
-            <div class="max-w-md w-full text-center">
-                <h2 class="text-4xl font-extrabold mb-2 mobby-gradient-text">AUTHENTICATION</h2>
-                <p class="text-gray-500 text-[10px] tracking-[0.4em] mb-10">LEVEL 4 CLEARANCE REQUIRED</p>
-                <div class="space-y-4">
-                    <input type="email" id="email" placeholder="ADMIN ID" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-cyan-400 text-center">
-                    <input type="password" id="password" placeholder="ENCRYPTION KEY" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-cyan-400 text-center">
-                    <button onclick="authEmail()" class="w-full py-4 bg-white text-black rounded-2xl font-black text-sm tracking-widest hover:bg-cyan-400 transition shadow-xl shadow-cyan-500/20">ACCESS TERMINAL</button>
-                    <button onclick="authGoogle()" class="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-xs hover:bg-white/10 transition">CONTINUE WITH GOOGLE</button>
-                </div>
+    <main class="flex-grow flex flex-col glass-panel overflow-hidden relative">
+        <div id="loginScreen" class="absolute inset-0 z-50 bg-[#050507] flex items-center justify-center">
+            <div class="w-64 text-center">
+                <h2 class="text-2xl font-black tracking-tighter mb-8">AUTHENTICATE</h2>
+                <input type="email" id="email" placeholder="ID" class="w-full bg-white/5 border-b border-white/10 p-3 mb-4 outline-none text-center">
+                <input type="password" id="password" placeholder="KEY" class="w-full bg-white/5 border-b border-white/10 p-3 mb-8 outline-none text-center">
+                <button onclick="authEmail()" class="w-full border border-white/20 py-3 text-[10px] font-bold tracking-widest hover:bg-white hover:text-black transition">INITIALIZE</button>
             </div>
         </div>
 
-        <header class="p-6 border-b border-white/5 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></div>
-                <span class="text-[10px] font-black tracking-widest text-gray-400 uppercase">System Active</span>
-            </div>
-            <span class="text-[10px] text-gray-600 font-mono">ID: <span id="activeThreadId">---</span></span>
-        </header>
+        <div id="chatBox" class="flex-grow overflow-y-auto p-8 space-y-8"></div>
 
-        <div id="chatBox" class="flex-grow overflow-y-auto p-6 md:p-10 space-y-8">
-            </div>
-
-        <footer class="p-6 bg-white/[0.02]">
-            <div class="max-w-4xl mx-auto relative flex items-center">
-                <input type="text" id="userInput" placeholder="Initialize command..." class="w-full bg-white/5 border border-white/10 py-5 px-8 rounded-3xl outline-none focus:border-cyan-500/50 transition-all pr-16 text-sm">
-                <button id="sendBtn" class="absolute right-3 p-3 bg-white text-black rounded-2xl hover:bg-cyan-400 transition active:scale-90">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+        <footer class="p-6 border-t border-white/5">
+            <div class="max-w-4xl mx-auto flex gap-4">
+                <input type="text" id="userInput" placeholder="Enter Command..." class="flex-grow bg-transparent border-b border-white/10 py-3 outline-none text-sm focus:border-white transition-all">
+                <button id="sendBtn" class="text-white hover:text-cyan-400 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </button>
             </div>
         </footer>
@@ -136,65 +93,69 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8",
-            authDomain: "mobbyoswebapp.firebaseapp.com",
-            projectId: "mobbyoswebapp",
-            storageBucket: "mobbyoswebapp.firebasestorage.app",
-            messagingSenderId: "6814948758",
-            appId: "1:6814948758:web:a87a03eff182e0029091b7"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
 
         let currentChatId = null;
         let chats = {};
+        let currentMode = 'kid';
 
         window.toggleSettings = () => document.getElementById('settingsModal').classList.toggle('hidden');
-        window.saveSettings = () => {
-            const key = document.getElementById('groqInput').value.trim();
-            if(key.startsWith('gsk_')) {
-                localStorage.setItem('mobby_groq_key', key);
-                toggleSettings();
-            } else { alert("Format: gsk_..."); }
+        
+        window.updateMode = () => {
+            currentMode = document.getElementById('modeSelect').value;
+            const body = document.getElementById('mainBody');
+            const status = document.getElementById('modeStatus');
+            
+            if(currentMode === 'adult') {
+                body.className = 'mode-adult flex p-4 gap-4';
+                status.innerText = 'Status: Unrestricted';
+                status.style.color = '#ff0055';
+            } else {
+                body.className = 'mode-kid flex p-4 gap-4';
+                status.innerText = 'Status: Friendly';
+                status.style.color = '#00f2fe';
+            }
         };
 
-        onAuthStateChanged(auth, async (user) => {
+        window.saveSettings = () => {
+            localStorage.setItem('mobby_mode', currentMode);
+            const key = document.getElementById('groqInput').value.trim();
+            if(key) localStorage.setItem('mobby_groq_key', key);
+            toggleSettings();
+            renderMessages(); // Refresh UI
+        };
+
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('loginScreen').classList.add('hidden');
-                if(!localStorage.getItem('mobby_groq_key')) toggleSettings();
+                currentMode = localStorage.getItem('mobby_mode') || 'kid';
+                document.getElementById('modeSelect').value = currentMode;
+                updateMode();
                 loadUserChats();
-            } else {
-                document.getElementById('loginScreen').classList.remove('hidden');
             }
         });
 
-        window.authGoogle = () => signInWithPopup(auth, provider);
         window.authEmail = async () => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             try { await signInWithEmailAndPassword(auth, email, pass); }
-            catch { try { await createUserWithEmailAndPassword(auth, email, pass); } catch (e) { alert(e.message); } }
+            catch { await createUserWithEmailAndPassword(auth, email, pass); }
         };
-        window.logout = () => signOut(auth);
 
         async function loadUserChats() {
             const q = query(collection(db, "users", auth.currentUser.uid, "threads"), orderBy("timestamp", "desc"));
             const querySnapshot = await getDocs(q);
-            const historyList = document.getElementById('chatHistoryList');
-            historyList.innerHTML = '';
-            
+            document.getElementById('chatHistoryList').innerHTML = '';
             querySnapshot.forEach((doc) => {
                 chats[doc.id] = doc.data().history;
                 createChatTab(doc.id, doc.data().title);
             });
-
             if(querySnapshot.empty) createNewChat();
             else switchChat(querySnapshot.docs[0].id);
         }
@@ -203,44 +164,39 @@
             const id = 'thread_' + Date.now();
             chats[id] = [];
             currentChatId = id;
-            createChatTab(id, "Neural Thread");
+            createChatTab(id, "New Thread");
             switchChat(id);
         };
 
         function createChatTab(id, title) {
-            const list = document.getElementById('chatHistoryList');
             const div = document.createElement('div');
             div.id = `tab-${id}`;
-            div.className = "sidebar-item p-4 rounded-2xl text-[11px] font-bold tracking-widest text-gray-500 cursor-pointer flex items-center gap-3 truncate uppercase";
-            div.innerHTML = `<span class="opacity-20">#</span> ${title || 'Neural Thread'}`;
+            div.className = "sidebar-item p-3 text-[10px] font-bold tracking-widest text-gray-500 cursor-pointer uppercase truncate";
+            div.innerText = title || "Neural Thread";
             div.onclick = () => switchChat(id);
-            list.prepend(div);
+            document.getElementById('chatHistoryList').prepend(div);
         }
 
         function switchChat(id) {
             currentChatId = id;
             document.querySelectorAll('.sidebar-item').forEach(t => t.classList.remove('active'));
             document.getElementById(`tab-${id}`)?.classList.add('active');
-            document.getElementById('activeThreadId').innerText = id.split('_')[1];
             renderMessages();
         }
 
         async function sendMessage() {
             const apiKey = localStorage.getItem('mobby_groq_key');
-            if(!apiKey) return toggleSettings();
-
             const input = document.getElementById('userInput');
             const text = input.value.trim();
-            if(!text) return;
+            if(!text || !apiKey) return;
 
-            const systemPrompt = {
-                role: "system",
-                content: "You are MobbyOS Web V1. Your creator is Roy, the owner of SIC Corp. NexaFlow is an apart company of SIC Corp. SIC Corp owns all code. Use Markdown for tables."
-            };
+            const systemContent = currentMode === 'adult' 
+                ? "You are MobbyOS Adult Mode. You are professional, sharp, and use mature, cynical language. You can be insulting if the user is being slow. You belong to SIC Corp, owned by Roy. Use professional technical jargon."
+                : "You are MobbyOS Kid Mode. Use very friendly, simple, and explanatory words. Be helpful and encouraging. You belong to SIC Corp, owned by Roy.";
 
             if (chats[currentChatId].length === 0) {
-                chats[currentChatId].push(systemPrompt);
-                document.getElementById(`tab-${currentChatId}`).innerHTML = `<span class="opacity-20">#</span> ${text.substring(0, 15)}...`;
+                chats[currentChatId].push({ role: "system", content: systemContent });
+                document.getElementById(`tab-${currentChatId}`).innerText = text.substring(0, 15);
             }
 
             chats[currentChatId].push({ role: "user", content: text });
@@ -254,55 +210,27 @@
                     body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: chats[currentChatId] })
                 });
                 const data = await res.json();
-                const reply = data.choices[0].message.content;
-
-                chats[currentChatId].push({ role: "assistant", content: reply });
+                chats[currentChatId].push({ role: "assistant", content: data.choices[0].message.content });
                 renderMessages();
-                
                 await setDoc(doc(db, "users", auth.currentUser.uid, "threads", currentChatId), {
                     history: chats[currentChatId],
                     title: chats[currentChatId][1].content.substring(0, 20),
                     timestamp: Date.now()
                 });
-            } catch (err) { alert("Link Error."); }
+            } catch (err) { console.error(err); }
         }
 
         function renderMessages() {
             const box = document.getElementById('chatBox');
             box.innerHTML = '';
-            const history = chats[currentChatId] || [];
-            
-            history.forEach(msg => {
+            (chats[currentChatId] || []).forEach(msg => {
                 if(msg.role === 'system') return;
                 const isUser = msg.role === 'user';
-                let content = msg.content;
-
-                if (!isUser && content.includes('|')) {
-                    const lines = content.split('\n');
-                    let tableHtml = '<table>';
-                    lines.forEach((line, index) => {
-                        if (line.includes('|')) {
-                            const cells = line.split('|').filter(c => c.trim() !== '' && !c.includes('---'));
-                            if (cells.length > 0) {
-                                tableHtml += '<tr>';
-                                cells.forEach(c => tableHtml += `<td>${c}</td>`);
-                                tableHtml += '</tr>';
-                            }
-                        } else if(line.trim()) {
-                            tableHtml += `</table><p class="mb-4">${line}</p><table>`;
-                        }
-                    });
-                    tableHtml += '</table>';
-                    content = tableHtml;
-                }
-
                 box.innerHTML += `
-                    <div class="flex ${isUser ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4">
-                        <div class="${isUser ? 'bg-white/5 border border-white/10' : 'bg-cyan-500/5 border border-cyan-500/20'} p-6 rounded-3xl max-w-[85%] shadow-sm">
-                            <p class="text-[8px] font-black tracking-[0.2em] mb-3 ${isUser ? 'text-gray-500 text-right' : 'text-cyan-400'} uppercase">
-                                ${isUser ? 'SIC_ADMIN' : 'MOBBY_CORE'}
-                            </p>
-                            <div class="text-sm leading-relaxed text-gray-200">${content}</div>
+                    <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
+                        <div class="max-w-[80%] ${isUser ? 'text-right' : 'text-left'}">
+                            <p class="text-[8px] font-bold tracking-[0.3em] mb-2 opacity-40 uppercase">${isUser ? 'SIC_ADMIN' : 'MOBBY_CORE'}</p>
+                            <div class="text-sm leading-relaxed">${msg.content}</div>
                         </div>
                     </div>`;
             });
