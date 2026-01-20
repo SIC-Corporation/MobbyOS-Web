@@ -3,106 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS | SIC Corp Executive</title>
+    <title>MobbyOS | SIC Corp</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #4facfe; --bg: #0f172a; }
-        body { background: #0a0a0f; color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
+        :root { --transition-speed: 0.6s; }
         
-        /* ADULT UI: CLEAN & LETHAL */
-        .sidebar { background: #13131a; border-right: 1px solid rgba(255,255,255,0.05); }
-        .main-stage { background: radial-gradient(circle at center, #111118 0%, #0a0a0f 100%); }
-        
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.02); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            border-radius: 1.25rem;
-            transition: all 0.3s ease;
+        /* DYNAMIC BACKGROUNDS */
+        body.mode-kid { 
+            background: radial-gradient(circle at top right, #00f2fe, #4facfe); 
+            color: #0f172a; 
+            font-family: 'Inter', sans-serif;
+        }
+        body.mode-adult { 
+            background: radial-gradient(circle at bottom left, #1f2937, #111827, #030712); 
+            color: #f8fafc; 
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Message Bubbles - Inspired by your screenshot but cleaner */
-        .msg-mobby { background: rgba(79, 172, 254, 0.05); border-left: 3px solid var(--accent); }
-        .msg-admin { background: rgba(255, 255, 255, 0.03); border-right: 3px solid #64748b; }
+        body { transition: background var(--transition-speed) ease, color var(--transition-speed) ease; height: 100vh; overflow: hidden; display: flex; }
+
+        /* PANELS */
+        .glass-sidebar { 
+            background: rgba(0, 0, 0, 0.2); 
+            backdrop-filter: blur(15px); 
+            border-right: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 1rem;
+        }
+
+        /* ADULT SPECIFIC OVERRIDES */
+        .mode-adult .glass-card { 
+            background: rgba(0, 0, 0, 0.4); 
+            border-color: rgba(255, 255, 255, 0.03);
+            border-radius: 0.25rem; /* Sharp edges for adult mode */
+        }
 
         .sidebar-btn { 
-            border-radius: 0.75rem; 
             transition: all 0.2s; 
-            color: #94a3b8;
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
-        .sidebar-btn:hover, .sidebar-btn.active { 
-            background: rgba(79, 172, 254, 0.1); 
-            color: #4facfe; 
-        }
+        .active-tab { background: rgba(255, 255, 255, 0.1); border-left: 3px solid white; }
 
-        .input-area { background: #13131a; border-top: 1px solid rgba(255,255,255,0.05); }
-        
-        /* Table Styling for Adult Mode Structure */
-        table { width: 100%; margin-top: 1rem; border-collapse: collapse; }
-        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; color: #cbd5e1; }
-        tr:last-child td { border: none; }
+        #chatBox::-webkit-scrollbar { width: 4px; }
+        #chatBox::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
     </style>
 </head>
-<body class="flex">
+<body id="mainBody" class="mode-kid">
 
-    <aside class="w-72 sidebar flex flex-col p-6 h-full">
-        <div class="mb-10 px-2">
-            <h1 class="text-xl font-extrabold tracking-tight text-white">MOBBYOS V1</h1>
-            <p class="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-1">Adult Clearance</p>
+    <aside class="w-64 glass-sidebar flex flex-col p-6">
+        <div class="mb-10">
+            <h1 class="text-xl font-black tracking-tighter">MOBBYOS V1</h1>
+            <p id="clearanceLabel" class="text-[9px] font-bold opacity-60 tracking-[0.3em]">LVL 1: INSTRUCTIONAL</p>
         </div>
 
         <nav class="flex-grow space-y-2">
-            <button onclick="switchTab('dashboard')" class="sidebar-btn active w-full flex items-center gap-3 p-3">
-                <span>🏠</span> DASHBOARD
-            </button>
-            <button onclick="toggleSettings()" class="sidebar-btn w-full flex items-center gap-3 p-3">
-                <span>🔑</span> CHANGE API KEY
-            </button>
-            
-            <div class="pt-8 pb-2 px-2 text-[10px] font-black text-slate-600 tracking-widest uppercase">Threads</div>
-            <div id="threadList" class="space-y-1 max-h-[40vh] overflow-y-auto pr-2">
-                </div>
+            <button onclick="createNewChat()" class="w-full text-left p-3 glass-card text-[10px] hover:bg-white/10 transition">+ NEW THREAD</button>
+            <div id="threadList" class="pt-4 space-y-1 overflow-y-auto max-h-[50vh]"></div>
         </nav>
 
-        <div class="mt-auto pt-6 border-t border-white/5">
-            <div class="px-2 mb-4">
-                <p class="text-[9px] text-slate-600 font-bold uppercase">Owner: Roy | SIC Corp</p>
-            </div>
-            <button onclick="logout()" class="text-[10px] font-bold text-red-400/60 hover:text-red-400 uppercase tracking-widest px-2">Sign Out</button>
+        <div class="mt-auto space-y-4 pt-6 border-t border-white/10">
+            <select id="modeSelect" onchange="updateSystemMode()" class="w-full bg-black/20 border border-white/10 p-2 rounded text-[10px] outline-none">
+                <option value="kid">Kid Mode</option>
+                <option value="adult">Adult Mode (SIC Admin)</option>
+            </select>
+            <button onclick="toggleSettings()" class="text-[9px] font-bold opacity-50 hover:opacity-100 uppercase">Config Link</button>
         </div>
     </aside>
 
-    <main class="flex-grow flex flex-col main-stage relative">
+    <main class="flex-grow flex flex-col relative p-6">
         
-        <div id="chatBox" class="flex-grow overflow-y-auto p-12 space-y-8">
+        <div id="settingsModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center">
+            <div class="glass-card w-80 p-8">
+                <h2 class="text-xs font-black tracking-widest mb-6 uppercase">Neural Override</h2>
+                <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-white/5 border border-white/10 p-3 rounded mb-4 text-xs">
+                <button onclick="saveSettings()" class="w-full bg-white text-black py-3 rounded font-bold text-[10px] uppercase">Link Core</button>
+                <button onclick="toggleSettings()" class="w-full mt-4 text-[9px] opacity-50 uppercase">Cancel</button>
             </div>
+        </div>
 
-        <footer class="input-area p-8">
-            <div class="max-w-4xl mx-auto flex items-center gap-4 glass-card p-2 px-6 border-white/10">
-                <input type="text" id="userInput" placeholder="Command MobbyOS..." class="flex-grow bg-transparent py-3 outline-none text-sm text-slate-200">
-                <button id="sendBtn" class="bg-cyan-500 hover:bg-cyan-400 text-black p-2 rounded-lg transition transform active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 pr-4 mb-6"></div>
+
+        <footer class="max-w-4xl mx-auto w-full">
+            <div class="glass-card p-2 flex items-center gap-4 px-6 border-white/20">
+                <span class="text-[10px] opacity-40 font-bold">CMD></span>
+                <input type="text" id="userInput" placeholder="Authorize command..." class="flex-grow bg-transparent py-4 outline-none text-sm">
+                <button id="sendBtn" class="p-2 opacity-60 hover:opacity-100 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
                 </button>
             </div>
         </footer>
-
-        <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-            <div class="glass-card w-96 p-8 bg-[#13131a] shadow-2xl">
-                <h2 class="text-sm font-bold tracking-widest mb-6">CORE OVERRIDE</h2>
-                <input type="password" id="groqInput" placeholder="Enter Groq Key..." class="w-full bg-black/40 border border-white/10 p-3 rounded-xl mb-4 text-sm">
-                <button onclick="saveSettings()" class="w-full bg-cyan-500 text-black py-3 rounded-xl font-bold text-xs tracking-widest uppercase">Update System</button>
-                <button onclick="toggleSettings()" class="w-full text-slate-500 text-[10px] mt-4 uppercase font-bold">Cancel</button>
-            </div>
-        </div>
     </main>
 
     <script type="module">
-        // Firebase setup (keeping your working config)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, setDoc, collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
@@ -111,14 +115,41 @@
 
         let currentChatId = null;
         let chats = {};
+        let currentMode = 'kid';
 
         window.toggleSettings = () => document.getElementById('settingsModal').classList.toggle('hidden');
-        window.saveSettings = () => {
-            const key = document.getElementById('groqInput').value.trim();
-            if(key) { localStorage.setItem('mobby_groq_key', key); toggleSettings(); }
+        
+        window.updateSystemMode = () => {
+            currentMode = document.getElementById('modeSelect').value;
+            const body = document.getElementById('mainBody');
+            const label = document.getElementById('clearanceLabel');
+            
+            if(currentMode === 'adult') {
+                body.className = 'mode-adult';
+                label.innerText = 'LVL 4: SIC ADMIN (RESTRICTED)';
+                label.style.color = '#ef4444';
+            } else {
+                body.className = 'mode-kid';
+                label.innerText = 'LVL 1: INSTRUCTIONAL';
+                label.style.color = 'inherit';
+            }
+            localStorage.setItem('mobby_mode', currentMode);
         };
 
-        onAuthStateChanged(auth, (user) => { if (user) loadUserChats(); else window.location.href = '#'; });
+        window.saveSettings = () => {
+            const key = document.getElementById('groqInput').value.trim();
+            if(key) localStorage.setItem('mobby_groq_key', key);
+            toggleSettings();
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentMode = localStorage.getItem('mobby_mode') || 'kid';
+                document.getElementById('modeSelect').value = currentMode;
+                updateSystemMode();
+                loadUserChats();
+            }
+        });
 
         async function loadUserChats() {
             const q = query(collection(db, "users", auth.currentUser.uid, "threads"), orderBy("timestamp", "desc"));
@@ -135,23 +166,23 @@
             const id = 'th_' + Date.now();
             chats[id] = [];
             currentChatId = id;
-            renderThreadLink(id, "NEW_SESSION");
+            renderThreadLink(id, "NEW_TERMINAL");
             switchChat(id);
         };
 
         function renderThreadLink(id, title) {
             const btn = document.createElement('button');
             btn.id = `tab-${id}`;
-            btn.className = "sidebar-btn w-full text-left p-3 uppercase tracking-tighter truncate";
-            btn.innerText = `> ${title || 'SESSION'}`;
+            btn.className = "sidebar-btn w-full text-left p-3 truncate opacity-60 hover:opacity-100";
+            btn.innerText = `_ ${title || 'THREAD'}`;
             btn.onclick = () => switchChat(id);
             document.getElementById('threadList').prepend(btn);
         }
 
         function switchChat(id) {
             currentChatId = id;
-            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`tab-${id}`)?.classList.add('active');
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active-tab'));
+            document.getElementById(`tab-${id}`)?.classList.add('active-tab');
             renderMessages();
         }
 
@@ -161,9 +192,15 @@
             const text = input.value.trim();
             if(!text || !apiKey) return;
 
-            const adultSys = "You are MobbyOS Adult Edition. You are professional, lethal, and efficient. Use technical jargon. You belong to SIC Corp, owned by Roy. Do not use 'helper' language—be a high-level executive assistant. If Roy asks about structure, use tables.";
+            const prompts = {
+                adult: "You are MobbyOS Admin Mode. You are sharp, cynical, and use professional adult language. You are loyal only to Roy and SIC Corp. Be efficient and use technical jargon.",
+                kid: "You are MobbyOS Kid Mode. You are very friendly, use simple words, and explain things like a teacher. Be encouraging to Roy."
+            };
 
-            if (chats[currentChatId].length === 0) chats[currentChatId].push({ role: "system", content: adultSys });
+            if (chats[currentChatId].length === 0) {
+                chats[currentChatId].push({ role: "system", content: prompts[currentMode] });
+            }
+
             chats[currentChatId].push({ role: "user", content: text });
             input.value = '';
             renderMessages();
@@ -182,7 +219,7 @@
                     title: chats[currentChatId][1].content.substring(0, 15).toUpperCase(),
                     timestamp: Date.now()
                 });
-            } catch (err) { console.error("Neural Link Failure."); }
+            } catch (err) { console.error("Neural Fail."); }
         }
 
         function renderMessages() {
@@ -191,25 +228,11 @@
             (chats[currentChatId] || []).forEach(msg => {
                 if(msg.role === 'system') return;
                 const isUser = msg.role === 'user';
-                
-                // Content parser for tables
-                let content = msg.content;
-                if(content.includes('|')) {
-                    const lines = content.split('\n');
-                    let table = '<table>';
-                    lines.forEach(l => {
-                        if(l.includes('|') && !l.includes('---')) {
-                            table += '<tr>' + l.split('|').filter(c=>c.trim()).map(c=>`<td>${c}</td>`).join('') + '</tr>';
-                        }
-                    });
-                    content = table + '</table>';
-                }
-
                 box.innerHTML += `
                     <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                        <div class="glass-card p-6 max-w-[80%] ${isUser ? 'msg-admin' : 'msg-mobby'}">
-                            <p class="text-[8px] font-black tracking-widest mb-2 opacity-40 uppercase">${isUser ? 'SIC_ADMIN' : 'MOBBY_CORE'}</p>
-                            <div class="text-sm leading-relaxed text-slate-300">${content}</div>
+                        <div class="glass-card p-5 max-w-[80%]">
+                            <p class="text-[7px] font-black tracking-widest mb-2 opacity-30 uppercase">${isUser ? 'SIC_ADMIN' : 'MOBBY_CORE'}</p>
+                            <div class="text-sm leading-relaxed">${msg.content}</div>
                         </div>
                     </div>`;
             });
