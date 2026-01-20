@@ -9,16 +9,24 @@
     <style>
         :root { --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* THEMES */
-        body.mode-kid { background: #0ea5e9; color: #0f172a; font-family: 'Inter', sans-serif; }
-        body.mode-adult { background: #1a1a1e; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; }
+        /* THEMES - Updated Cyan for better visibility */
+        body.mode-kid { 
+            background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%); 
+            color: #f0f9ff; 
+            font-family: 'Inter', sans-serif; 
+        }
+        body.mode-adult { 
+            background: radial-gradient(circle at center, #1f2937 0%, #030712 100%); 
+            color: #e2e8f0; 
+            font-family: 'JetBrains Mono', monospace; 
+        }
 
         body { transition: background var(--transition); height: 100vh; overflow: hidden; display: flex; }
 
-        /* SIDEBAR - Styled like your screenshot */
+        /* SIDEBAR */
         .sidebar { 
-            background: rgba(0, 0, 0, 0.25); 
-            backdrop-filter: blur(20px); 
+            background: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(25px); 
             border-right: 1px solid rgba(255,255,255,0.1); 
             width: 280px;
         }
@@ -27,24 +35,27 @@
             display: flex; align-items: center; gap: 12px;
             padding: 12px 16px; border-radius: 12px;
             font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em;
-            transition: 0.2s; color: rgba(255,255,255,0.6);
+            transition: 0.2s; color: rgba(255,255,255,0.5);
             text-transform: uppercase; margin-bottom: 4px;
         }
         .nav-item:hover, .nav-item.active { 
-            background: rgba(255,255,255,0.1); color: white; 
+            background: rgba(255,255,255,0.1); color: #7dd3fc; 
         }
 
-        /* CONTENT AREA */
+        /* INPUT BAR - High Contrast for visibility */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
-        .mode-adult .glass-panel { border-radius: 4px; background: rgba(0,0,0,0.3); }
 
         .chat-bubble { padding: 20px; border-radius: 16px; max-width: 85%; }
-        .mobby-msg { background: rgba(255,255,255,0.05); border-left: 4px solid #38bdf8; }
-        .user-msg { background: rgba(0,0,0,0.2); border-right: 4px solid #94a3b8; text-align: right; margin-left: auto; }
+        .mobby-msg { background: rgba(255,255,255,0.07); border-left: 4px solid #38bdf8; }
+        .user-msg { background: rgba(0,0,0,0.4); border-right: 4px solid #94a3b8; text-align: right; margin-left: auto; }
+        
+        /* Smooth fade for settings */
+        .settings-overlay { background: rgba(3, 7, 18, 0.95); backdrop-blur: 20px; }
     </style>
 </head>
 <body id="mainBody" class="mode-kid">
@@ -52,7 +63,7 @@
     <aside class="sidebar flex flex-col p-6">
         <div class="mb-10 px-2">
             <h1 class="text-xl font-black tracking-tighter text-white">MOBBYOS V1</h1>
-            <p id="statusTag" class="text-[9px] font-bold text-sky-300 tracking-widest mt-1">KID_MODE_ACTIVE</p>
+            <p id="statusTag" class="text-[9px] font-bold text-sky-400 tracking-widest mt-1 uppercase">Clearance: Instructional</p>
         </div>
 
         <nav class="flex-grow">
@@ -63,43 +74,47 @@
                 <span>⚙️</span> SYSTEM SETTINGS
             </button>
             
-            <div class="mt-8 mb-2 px-4 text-[10px] font-black text-white/30 tracking-widest">THREADS</div>
-            <div id="threadList" class="space-y-1 overflow-y-auto max-h-[40vh]"></div>
+            <div class="mt-8 mb-2 px-4 text-[10px] font-black text-white/20 tracking-widest uppercase">Memory Threads</div>
+            <div id="threadList" class="space-y-1 overflow-y-auto max-h-[40vh] pr-2"></div>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-white/5 px-2">
-            <p class="text-[9px] text-white/40 font-bold uppercase mb-4">Owner: Roy | SIC Corp</p>
-            <button onclick="location.reload()" class="text-[10px] font-bold text-red-400/60 uppercase tracking-widest">Sign Out</button>
+            <p class="text-[9px] text-white/30 font-bold uppercase mb-4">Owner: Roy | SIC Corp</p>
+            <button onclick="location.reload()" class="text-[10px] font-bold text-red-400/50 hover:text-red-400 uppercase tracking-widest transition">Terminate Session</button>
         </div>
     </aside>
 
     <main class="flex-grow flex flex-col p-6 relative">
         
-        <div id="settingsTab" class="absolute inset-6 z-50 glass-panel p-10 hidden flex flex-col backdrop-blur-3xl">
-            <h2 class="text-xl font-black mb-8">SYSTEM CONFIGURATION</h2>
-            <div class="max-w-md space-y-6">
-                <div>
-                    <label class="text-[10px] font-bold opacity-50 block mb-2 uppercase">Operating Personality</label>
-                    <select id="modeSelect" onchange="applyMode()" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-sm outline-none">
-                        <option value="kid">Instructional (Kid Mode)</option>
-                        <option value="adult">SIC Admin (Adult Mode)</option>
-                    </select>
+        <div id="settingsTab" class="fixed inset-0 z-[100] settings-overlay hidden flex flex-col items-center justify-center p-6">
+            <div class="w-full max-w-md p-10 glass-panel border-white/10 bg-black/40">
+                <h2 class="text-xl font-black mb-8 tracking-tighter">CORE CONFIGURATION</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-[10px] font-bold opacity-40 block mb-2 uppercase">Interface Personality</label>
+                        <select id="modeSelect" onchange="applyMode()" class="w-full bg-black/60 border border-white/10 p-4 rounded-xl text-sm text-white outline-none">
+                            <option value="kid">Instructional (Cyan-Blue)</option>
+                            <option value="adult">SIC Admin (Slate-Gray)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold opacity-40 block mb-2 uppercase">Neural Key (Groq)</label>
+                        <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-black/60 border border-white/10 p-4 rounded-xl text-sm text-white outline-none">
+                    </div>
+                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-black px-8 py-4 rounded-xl font-black text-xs uppercase hover:bg-sky-400 transition">Save & Initialize</button>
+                    <button onclick="toggleSettings()" class="w-full text-white/30 text-[9px] font-bold uppercase tracking-widest mt-2">Close Settings</button>
                 </div>
-                <div>
-                    <label class="text-[10px] font-bold opacity-50 block mb-2 uppercase">Neural API Key</label>
-                    <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-sm outline-none">
-                </div>
-                <button onclick="saveAndClose()" class="bg-white text-black px-8 py-4 rounded-xl font-black text-xs uppercase hover:bg-sky-400 transition">Commit Changes</button>
             </div>
         </div>
 
-        <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 px-4 mb-6">
+        <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 px-4 mb-6 scroll-smooth">
             </div>
 
         <footer class="max-w-4xl mx-auto w-full">
-            <div class="glass-panel p-2 flex items-center gap-4 px-6">
-                <input type="text" id="userInput" placeholder="Command MobbyOS..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white">
-                <button id="sendBtn" class="bg-sky-500 hover:bg-sky-400 text-white p-3 rounded-xl transition">
+            <div class="glass-panel p-2 flex items-center gap-4 px-6 border-white/20 bg-black/20">
+                <span class="text-[10px] font-black opacity-30">CMD</span>
+                <input type="text" id="userInput" placeholder="Enter command for MobbyOS..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white placeholder:text-white/20">
+                <button id="sendBtn" class="bg-sky-500 hover:bg-sky-400 text-black p-3 rounded-xl transition shadow-lg shadow-sky-500/20">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
                 </button>
             </div>
@@ -129,12 +144,12 @@
             
             if(currentMode === 'adult') {
                 body.className = 'mode-adult';
-                status.innerText = 'ADULT_ADMIN_ACTIVE';
-                status.classList.replace('text-sky-300', 'text-red-500');
+                status.innerText = 'Clearance: SIC Admin';
+                status.className = 'text-[9px] font-bold text-red-500 tracking-widest mt-1 uppercase';
             } else {
                 body.className = 'mode-kid';
-                status.innerText = 'KID_MODE_ACTIVE';
-                status.classList.replace('text-red-500', 'text-sky-300');
+                status.innerText = 'Clearance: Instructional';
+                status.className = 'text-[9px] font-bold text-sky-400 tracking-widest mt-1 uppercase';
             }
         };
 
@@ -170,16 +185,16 @@
             const id = 'th_' + Date.now();
             chats[id] = [];
             currentChatId = id;
-            addThreadToUI(id, "NEW_SESSION");
+            addThreadToUI(id, "NEW SESSION");
             switchChat(id);
-            document.getElementById('settingsTab').classList.add('hidden'); // Ensure dashboard returns to chat
+            document.getElementById('settingsTab').classList.add('hidden');
         };
 
         function addThreadToUI(id, title) {
             const btn = document.createElement('button');
             btn.id = `tab-${id}`;
-            btn.className = "nav-item w-full px-4 text-[10px] opacity-50";
-            btn.innerText = `> ${title || 'THREAD'}`;
+            btn.className = "nav-item w-full px-4 text-[10px]";
+            btn.innerText = `_ ${title || 'THREAD'}`;
             btn.onclick = () => switchChat(id);
             document.getElementById('threadList').prepend(btn);
         }
@@ -194,14 +209,13 @@
         async function sendMessage() {
             const apiKey = localStorage.getItem('mobby_groq_key');
             if(!apiKey) return toggleSettings();
-            
             const input = document.getElementById('userInput');
             const text = input.value.trim();
             if(!text) return;
 
             const sys = currentMode === 'adult' 
-                ? "You are MobbyOS Adult. Sharp, professional, cynical. Loyal to Roy/SIC Corp." 
-                : "You are MobbyOS Kid. Friendly teacher mode for Roy.";
+                ? "You are MobbyOS Admin. Professional, cynical, and use complex technical language. Loyal to Roy/SIC Corp." 
+                : "You are MobbyOS Kid. Friendly, helpful teacher. Explain coding concepts simply to Roy.";
 
             if (chats[currentChatId].length === 0) chats[currentChatId].push({ role: "system", content: sys });
             chats[currentChatId].push({ role: "user", content: text });
@@ -222,7 +236,7 @@
                     title: text.substring(0, 15).toUpperCase(),
                     timestamp: Date.now()
                 });
-            } catch (err) { alert("Link Failed. Check API Key in Settings."); }
+            } catch (err) { alert("Core Link Failed."); }
         }
 
         function renderMessages() {
@@ -233,8 +247,8 @@
                 const isUser = msg.role === 'user';
                 box.innerHTML += `
                     <div class="${isUser ? 'text-right' : 'text-left'} mb-6">
-                        <div class="chat-bubble inline-block ${isUser ? 'user-msg' : 'mobby-msg'}">
-                            <p class="text-[8px] font-black opacity-30 mb-2 uppercase">${isUser ? 'ADMIN' : 'MOBBY'}</p>
+                        <div class="chat-bubble inline-block ${isUser ? 'user-msg' : 'mobby-msg'} shadow-xl">
+                            <p class="text-[7px] font-black opacity-20 mb-2 uppercase tracking-widest">${isUser ? 'ADMIN_ROY' : 'MOBBY_CORE'}</p>
                             <div class="text-sm leading-relaxed">${msg.content}</div>
                         </div>
                     </div>`;
