@@ -7,37 +7,43 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        :root { --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* THEMES */
+        /* THEME 1: KID (Cyan) */
         body.mode-kid { background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%); color: #f0f9ff; font-family: 'Inter', sans-serif; }
-        body.mode-adult { background: #1e293b; color: #cbd5e1; font-family: 'Inter', sans-serif; }
-        body.mode-admin { background: radial-gradient(circle at center, #111827 0%, #030617 100%); color: #f8fafc; font-family: 'JetBrains Mono', monospace; }
+        
+        /* THEME 2: ADULT (Slate Gray) */
+        body.mode-adult { background: #334155; color: #cbd5e1; font-family: 'Inter', sans-serif; }
+        
+        /* THEME 3: SIC ADMIN (Obsidian/Gray Scale) */
+        body.mode-admin { background: #0f172a; color: #f8fafc; font-family: 'JetBrains Mono', monospace; }
 
         body { transition: background var(--transition); height: 100vh; overflow: hidden; display: flex; }
 
-        .sidebar { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(30px); border-right: 1px solid rgba(255,255,255,0.1); width: 300px; }
+        .sidebar { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(30px); border-right: 1px solid rgba(255,255,255,0.1); width: 300px; }
 
         /* BUTTONS */
-        .btn-action { font-size: 0.7rem; font-weight: 900; padding: 12px; border-radius: 12px; text-transform: uppercase; transition: 0.3s; width: 100%; }
-        .btn-new { background: #38bdf8; color: #000; margin-bottom: 8px; }
+        .btn-action { font-size: 0.7rem; font-weight: 900; padding: 14px; border-radius: 12px; text-transform: uppercase; transition: 0.3s; width: 100%; }
+        .btn-new { background: #38bdf8; color: #000; margin-bottom: 10px; box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3); }
         .btn-term { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
         .btn-term:hover { background: #ef4444; color: #fff; }
 
         .nav-item { 
             display: flex; align-items: center; justify-content: space-between; padding: 12px; 
-            border-radius: 10px; font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.5); 
-            background: rgba(255,255,255,0.03); margin-bottom: 6px; transition: 0.3s;
+            border-radius: 10px; font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.4); 
+            background: rgba(255,255,255,0.03); margin-bottom: 6px; transition: 0.3s; border: 1px solid transparent;
         }
-        .active-glow { box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); border: 1px solid #38bdf8; color: white; }
+        .active-glow { border: 1px solid #38bdf8; color: white; background: rgba(56, 189, 248, 0.1); }
 
-        .glass-panel { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        .glass-panel { background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; }
         
         /* Mode Badges */
-        .badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 900; }
-        .badge-admin { background: #ef4444; color: white; }
+        .badge { font-size: 10px; padding: 3px 10px; border-radius: 6px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-admin { background: #ef4444; color: white; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
         .badge-adult { background: #64748b; color: white; }
         .badge-kid { background: #38bdf8; color: black; }
+
+        #adminOption { display: none; }
     </style>
 </head>
 <body id="mainBody" class="mode-kid">
@@ -45,50 +51,55 @@
     <aside class="sidebar flex flex-col p-6">
         <div class="mb-8 px-2">
             <h1 class="text-2xl font-black tracking-tighter text-white">MOBBY<span class="text-sky-400">OS</span></h1>
-            <div id="clearanceDisplay" class="mt-2"><span class="badge badge-kid">CLEARANCE: KID</span></div>
+            <div id="clearanceDisplay" class="mt-2"><span class="badge badge-kid">Clearance: Kid</span></div>
         </div>
 
         <div class="mb-6">
-            <button onclick="createNewChat()" class="btn-action btn-new">+ THREAD</button>
+            <button onclick="createNewChat()" class="btn-action btn-new hover:scale-[1.02] active:scale-95">+ NEW THREAD</button>
             <button onclick="location.reload()" class="btn-action btn-term">EXIT OS</button>
         </div>
 
         <nav class="flex-grow">
-            <button onclick="toggleSettings()" class="nav-item w-full mb-6">⚙️ SYSTEM CONFIG</button>
+            <button onclick="toggleSettings()" class="nav-item w-full mb-6 text-white/80 border-white/20">⚙️ SYSTEM CONFIG</button>
             <div class="mb-4 px-2 text-[10px] font-black text-white/20 tracking-widest uppercase">Memory Threads</div>
             <div id="threadList" class="space-y-2 overflow-y-auto max-h-[50vh] pr-2"></div>
         </nav>
+        
+        <div class="mt-auto pt-4 border-t border-white/10 opacity-30 text-[8px] font-bold text-center">
+            SIC CORP EXECUTIVE TERMINAL
+        </div>
     </aside>
 
     <main class="flex-grow flex flex-col p-6 relative">
-        <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl hidden flex items-center justify-center p-6">
+        <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl hidden flex items-center justify-center p-6">
             <div class="w-full max-w-md p-10 glass-panel">
-                <h2 class="text-xl font-black mb-8 text-white">OS PARAMETERS</h2>
+                <h2 class="text-xl font-black mb-8 text-white tracking-tight">CORE PARAMETERS</h2>
                 <div class="space-y-6">
                     <div>
-                        <label class="text-[10px] font-bold text-white/40 block mb-2 uppercase">Core Personality</label>
-                        <select id="modeSelect" onchange="applyMode()" class="w-full bg-black border border-white/20 p-4 rounded-xl text-white outline-none">
-                            <option value="kid">Kid Mode</option>
-                            <option value="adult">Adult Mode</option>
-                            <option value="admin" id="adminOption" style="display:none;">SIC ADMIN MODE</option>
+                        <label class="text-[10px] font-bold text-white/40 block mb-2 uppercase">Interface Personality</label>
+                        <select id="modeSelect" onchange="applyMode()" class="w-full bg-black/50 border border-white/20 p-4 rounded-xl text-white outline-none">
+                            <option value="kid">Kid Mode (Cyan)</option>
+                            <option value="adult">Adult Mode (Gray)</option>
+                            <option value="admin" id="adminOption">SIC ADMIN MODE (Obsidian)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-white/40 block mb-2 uppercase">Groq Link (API Key)</label>
-                        <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-black border border-white/20 p-4 rounded-xl text-white">
+                        <label class="text-[10px] font-bold text-white/40 block mb-2 uppercase">Neural Link Key</label>
+                        <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-black/50 border border-white/20 p-4 rounded-xl text-white">
                     </div>
-                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-black py-4 rounded-xl font-black uppercase">Initialize</button>
-                    <button onclick="toggleSettings()" class="w-full text-white/30 text-[9px] mt-4 font-bold">CLOSE</button>
+                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-black py-4 rounded-xl font-black uppercase shadow-lg">Save & Sync</button>
+                    <button onclick="toggleSettings()" class="w-full text-white/30 text-[9px] mt-4 font-bold uppercase">Cancel</button>
                 </div>
             </div>
         </div>
 
-        <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 px-4 mb-6"></div>
+        <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 px-4 mb-6 scroll-smooth"></div>
 
         <footer class="max-w-4xl mx-auto w-full">
-            <div class="glass-panel p-2 flex items-center gap-4 px-6 bg-black/40">
-                <input type="text" id="userInput" placeholder="Input command..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white">
-                <button id="sendBtn" class="bg-sky-500 text-black p-3 rounded-xl">
+            <div class="glass-panel p-2 flex items-center gap-4 px-6 bg-black/40 shadow-2xl">
+                <span class="text-[10px] font-black text-sky-400 opacity-50">CMD</span>
+                <input type="text" id="userInput" placeholder="Waiting for command, Roy..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white">
+                <button id="sendBtn" class="bg-sky-500 text-black p-3 rounded-xl hover:bg-sky-400 transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
                 </button>
             </div>
@@ -119,13 +130,13 @@
             
             if(currentMode === 'admin') {
                 body.className = 'mode-admin';
-                display.innerHTML = '<span class="badge badge-admin">CLEARANCE: SIC ADMIN</span>';
+                display.innerHTML = '<span class="badge badge-admin">Clearance: SIC Admin</span>';
             } else if (currentMode === 'adult') {
                 body.className = 'mode-adult';
-                display.innerHTML = '<span class="badge badge-adult">CLEARANCE: ADULT</span>';
+                display.innerHTML = '<span class="badge badge-adult">Clearance: Adult</span>';
             } else {
                 body.className = 'mode-kid';
-                display.innerHTML = '<span class="badge badge-kid">CLEARANCE: KID</span>';
+                display.innerHTML = '<span class="badge badge-kid">Clearance: Kid</span>';
             }
         };
 
@@ -136,11 +147,18 @@
             toggleSettings();
         };
 
+        // ENHANCED SECURITY CHECK
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                if (SIC_ADMINS.includes(user.email)) {
+                const isAdmin = SIC_ADMINS.some(email => email.toLowerCase() === user.email.toLowerCase());
+                if (isAdmin) {
                     document.getElementById('adminOption').style.display = 'block';
+                    console.log("SIC Admin Privileges Granted.");
+                } else {
+                    document.getElementById('adminOption').style.display = 'none';
+                    if (currentMode === 'admin') currentMode = 'adult'; 
                 }
+                
                 currentMode = localStorage.getItem('mobby_mode') || 'kid';
                 document.getElementById('modeSelect').value = currentMode;
                 applyMode();
@@ -170,12 +188,12 @@
             const div = document.createElement('div');
             div.id = `tab-${id}`;
             div.className = "nav-item cursor-pointer";
-            div.innerHTML = `<span class="truncate" onclick="switchChat('${id}')">${title}</span><button onclick="renameThread('${id}')" class="text-[8px] opacity-30">EDIT</button>`;
+            div.innerHTML = `<span class="truncate" onclick="switchChat('${id}')">${title}</span><button onclick="renameThread('${id}')" class="text-[8px] opacity-30 hover:opacity-100">EDIT</button>`;
             document.getElementById('threadList').prepend(div);
         }
 
         window.renameThread = async (id) => {
-            const newName = prompt("Rename:", chats[id].title);
+            const newName = prompt("Rename Session:", chats[id].title);
             if (newName) {
                 chats[id].title = newName.toUpperCase();
                 document.querySelector(`#tab-${id} span`).innerText = chats[id].title;
@@ -200,7 +218,7 @@
             const isFirst = chats[currentChatId].history.length === 0;
             let sys = "You are MobbyOS Kid. A friendly coding teacher.";
             if(currentMode === 'adult') sys = "You are MobbyOS Adult. Professional and efficient.";
-            if(currentMode === 'admin') sys = "You are MobbyOS SIC-ADMIN. Sharp, cynical, elite. Loyal to Roy.";
+            if(currentMode === 'admin') sys = "You are MobbyOS SIC-ADMIN. Sharp, cynical, elite. Loyal to Roy and SIC Corp.";
 
             if (isFirst) chats[currentChatId].history.push({ role: "system", content: sys });
             chats[currentChatId].history.push({ role: "user", content: text });
@@ -225,7 +243,7 @@
                     title: chats[currentChatId].title,
                     timestamp: Date.now()
                 });
-            } catch (err) { console.error("Link Failure."); }
+            } catch (err) { alert("Neural Link Failure."); }
         }
 
         function renderMessages() {
@@ -236,9 +254,9 @@
                 const isUser = msg.role === 'user';
                 box.innerHTML += `
                     <div class="${isUser ? 'text-right' : 'text-left'} mb-6">
-                        <div class="chat-bubble inline-block ${isUser ? 'bg-black/40 border-r-2' : 'bg-white/5 border-l-2 border-sky-500'} p-4 rounded-xl shadow-lg">
-                            <p class="text-[7px] font-black opacity-30 mb-1 tracking-widest uppercase">${isUser ? 'USER' : 'MOBBY'}</p>
-                            <div class="text-sm">${msg.content}</div>
+                        <div class="chat-bubble inline-block ${isUser ? 'bg-black/40 border-r-2 border-slate-500' : 'bg-white/5 border-l-2 border-sky-500'} p-4 rounded-xl shadow-lg">
+                            <p class="text-[7px] font-black opacity-30 mb-1 tracking-widest uppercase text-sky-400">${isUser ? 'ADMIN_ROY' : 'MOBBY_CORE'}</p>
+                            <div class="text-sm leading-relaxed">${msg.content}</div>
                         </div>
                     </div>`;
             });
