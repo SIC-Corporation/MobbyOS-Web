@@ -25,14 +25,11 @@
         .nav-btn { width: 100%; text-align: left; padding: 12px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); transition: 0.3s; }
         .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.05); color: white; }
 
-        /* PFP & THREADS */
-        .pfp-circle { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; background: #000; transition: 0.3s; }
-        .pfp-small { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); object-fit: cover; }
-        .thread-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-radius: 8px; transition: 0.2s; cursor: pointer; border-left: 0px solid #38bdf8; }
-        .thread-item:hover { background: rgba(255,255,255,0.05); border-left-width: 3px; color: white; }
-        .del-btn { opacity: 0; color: #ef4444; font-size: 8px; font-weight: 900; padding: 4px 8px; transition: 0.2s; }
-        .thread-item:hover .del-btn { opacity: 0.6; }
-        .del-btn:hover { opacity: 1 !important; transform: scale(1.1); }
+        /* THREADS */
+        .thread-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-radius: 8px; transition: 0.2s; cursor: pointer; }
+        .thread-item:hover { background: rgba(255,255,255,0.1); }
+        .del-btn { opacity: 0; color: #ef4444; font-size: 8px; font-weight: 900; transition: 0.2s; }
+        .thread-item:hover .del-btn { opacity: 1; }
     </style>
 </head>
 <body id="mainBody" class="mode-kid">
@@ -43,11 +40,8 @@
             <div class="space-y-3">
                 <input type="email" id="loginEmail" placeholder="Email" class="input-magical">
                 <input type="password" id="loginPass" placeholder="Password" class="input-magical">
-                <button id="emailAuthBtn" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-sky-400">Initialize</button>
-                <div class="flex items-center my-4 opacity-20"><hr class="flex-grow border-white/20"><span class="px-3 text-[10px] text-white">OR</span><hr class="flex-grow border-white/20"></div>
-                <button id="googleAuthBtn" class="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:bg-white/10">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4"> Continue with Google
-                </button>
+                <button id="emailAuthBtn" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[10px]">Initialize</button>
+                <button id="googleAuthBtn" class="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl font-black uppercase text-[10px]">Google</button>
             </div>
             <button id="switchAuthBtn" class="mt-6 text-[9px] text-white/40 font-bold uppercase hover:text-white">Need account? Register</button>
         </div>
@@ -56,21 +50,18 @@
     <div id="setupOverlay" class="fixed inset-0 overlay-glass flex items-center justify-center hidden">
         <div class="magic-card p-10 rounded-[2.5rem] w-full max-w-md text-center">
             <h2 class="text-2xl font-black text-white mb-2 uppercase italic">Neural Sync</h2>
-            <p class="text-white/40 text-[10px] uppercase tracking-widest mb-8">Establish Identity at SIC Corp</p>
             <div class="space-y-4 text-left">
-                <div class="flex justify-center mb-4"><img id="setupPFPPreview" src="https://i.imgur.com/r6oJp4O.png" class="pfp-circle"></div>
-                <label class="text-[8px] font-black text-sky-400 uppercase ml-2">Codename</label>
-                <input type="text" id="setupName" placeholder="Enter name..." class="input-magical">
-                <label class="text-[8px] font-black text-sky-400 uppercase ml-2">Visual ID (URL)</label>
-                <input type="text" id="setupPFP" placeholder="Paste image link..." class="input-magical" oninput="document.getElementById('setupPFPPreview').src = this.value || 'https://i.imgur.com/r6oJp4O.png'">
-                <button id="activateBtn" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest mt-4">Activate Identity</button>
+                <div class="flex justify-center mb-4"><img id="setupPFPPreview" src="https://i.imgur.com/r6oJp4O.png" style="width:80px; height:80px; border-radius:50%; object-fit:cover;"></div>
+                <input type="text" id="setupName" placeholder="Codename" class="input-magical">
+                <input type="text" id="setupPFP" placeholder="PFP URL" class="input-magical" oninput="document.getElementById('setupPFPPreview').src = this.value">
+                <button id="activateBtn" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px]">Activate Identity</button>
             </div>
         </div>
     </div>
 
     <aside class="sidebar flex flex-col p-6">
         <div class="mb-10 flex items-center gap-3">
-            <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="pfp-small">
+            <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
             <div>
                 <h1 class="text-sm font-black text-white tracking-tighter">MOBBYOS</h1>
                 <div id="clearanceDisplay" class="text-[8px] font-bold text-sky-400 uppercase tracking-widest">Active</div>
@@ -88,40 +79,54 @@
     <main class="flex-grow flex flex-col p-8 relative">
         <div id="view-dashboard" class="h-full flex flex-col space-y-8">
             <div class="flex items-center gap-6">
-                <img id="dashPFP" src="https://i.imgur.com/r6oJp4O.png" class="pfp-circle">
+                <img id="dashPFP" src="https://i.imgur.com/r6oJp4O.png" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
                 <div>
                     <h2 class="text-4xl font-black text-white tracking-tighter">Welcome, <span id="userNameDisplay">User</span></h2>
                     <p class="text-white/30 text-[10px] uppercase tracking-[0.3em]">ID: <span id="dashUID">---</span></p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-6 flex-grow">
-                <div class="bg-white/5 border border-white/5 p-8 rounded-[2rem]">
-                    <h3 class="text-[10px] font-black text-sky-400 uppercase mb-4">Core System</h3>
-                    <p class="text-sm text-white/60 leading-relaxed">MobbyOS is a proprietary interface built by <strong>Roy</strong>. SIC Corp owns the website and underlying code.</p>
-                </div>
-                <div class="bg-white/5 border border-white/5 p-8 rounded-[2rem]">
-                    <h3 class="text-[10px] font-black text-sky-400 uppercase mb-4">Sync Visuals</h3>
-                    <input type="text" id="pfpInput" placeholder="New Image URL..." class="input-magical mb-2">
-                    <button id="updatePfpBtn" class="text-[10px] font-bold text-white/40 hover:text-white uppercase">Apply Sync</button>
-                </div>
+            <div class="bg-white/5 border border-white/5 p-8 rounded-[2rem] max-w-lg">
+                <h3 class="text-[10px] font-black text-sky-400 uppercase mb-4">Mobby Info</h3>
+                <p class="text-sm text-white/60">Welcome to MobbyOS. SIC Corp owns the rights. You can modify your neural profile in Settings.</p>
             </div>
         </div>
 
         <div id="view-terminal" class="h-full flex flex-col hidden">
-            <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 mb-6"></div>
-            <div class="max-w-4xl mx-auto w-full p-2 flex gap-4 px-6 border border-white/10 rounded-2xl bg-black/40">
-                <input type="text" id="userInput" placeholder="Neural Command..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white">
-                <button id="sendBtn" class="text-sky-400 font-black text-xs uppercase">Execute</button>
+            <div id="chatBox" class="flex-grow overflow-y-auto space-y-4 mb-6 pr-4"></div>
+            <div class="max-w-4xl mx-auto w-full flex items-center gap-4 px-6 border border-white/10 rounded-2xl bg-black/40">
+                <label class="cursor-pointer opacity-40 hover:opacity-100">
+                    <span class="text-xl">📎</span>
+                    <input type="file" id="fileInput" class="hidden" onchange="handleFileUpload(event)">
+                </label>
+                <input type="text" id="userInput" placeholder="Ask Mobby..." class="flex-grow bg-transparent py-6 outline-none text-sm text-white">
+                <button id="sendBtn" class="text-sky-400 font-black text-xs uppercase">Run</button>
             </div>
         </div>
 
         <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-6 hidden">
             <div class="w-full max-w-md p-10 bg-slate-900 border border-white/10 rounded-[2.5rem]">
-                <h2 class="text-lg font-black text-white mb-6 uppercase">Config</h2>
+                <h2 class="text-lg font-black text-white mb-6 uppercase">System Config</h2>
                 <div class="space-y-4">
-                    <select id="modeSelect" class="input-magical"><option value="kid">Kid</option><option value="adult">Adult</option><option value="admin" id="adminOption" style="display:none;">Admin</option></select>
-                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px]">Commit Changes</button>
-                    <button id="logoutBtn" class="w-full text-red-500 py-4 font-black uppercase text-[10px] hover:bg-red-500/10 rounded-xl">Terminate Session</button>
+                    <div>
+                        <label class="text-[8px] font-black text-sky-400 uppercase">System Mode</label>
+                        <select id="modeSelect" class="input-magical w-full mt-1">
+                            <option value="kid">Kid</option>
+                            <option value="adult">Adult</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[8px] font-black text-sky-400 uppercase">Change Name (Once per 7 days)</label>
+                        <input type="text" id="settingName" class="input-magical w-full mt-1" placeholder="New Codename">
+                    </div>
+                    <div>
+                        <label class="text-[8px] font-black text-sky-400 uppercase">Visual ID (PFP URL)</label>
+                        <input type="text" id="settingPFP" class="input-magical w-full mt-1" placeholder="New Image Link">
+                    </div>
+                    <button id="saveSettingsBtn" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px]">Commit Changes</button>
+                    <button onclick="toggleSettings()" class="w-full text-white/20 py-2 text-[8px] font-black uppercase">Cancel</button>
+                    <hr class="border-white/5">
+                    <button id="logoutBtn" class="w-full text-red-500 py-2 font-black uppercase text-[10px]">Logoff</button>
                 </div>
             </div>
         </div>
@@ -129,7 +134,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, getDocs, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
@@ -138,9 +143,10 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
+        let currentChatId = null;
         let isLoginMode = true;
 
-        // AUTH HANDLERS
+        // AUTH & SETUP
         document.getElementById('emailAuthBtn').onclick = () => {
             const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPass').value;
             isLoginMode ? signInWithEmailAndPassword(auth, e, p) : createUserWithEmailAndPassword(auth, e, p);
@@ -149,53 +155,100 @@
         document.getElementById('switchAuthBtn').onclick = () => {
             isLoginMode = !isLoginMode;
             document.getElementById('emailAuthBtn').innerText = isLoginMode ? 'Initialize' : 'Register';
-            document.getElementById('switchAuthBtn').innerText = isLoginMode ? 'Need account? Register' : 'Have account? Login';
         };
-        document.getElementById('logoutBtn').onclick = () => confirm("Confirm Logout?") && signOut(auth).then(() => { localStorage.clear(); location.reload(); });
+        document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
 
-        // SETUP HANDLER (FIXED)
         document.getElementById('activateBtn').onclick = async () => {
             const user = auth.currentUser;
-            const name = document.getElementById('setupName').value || "MobbyUser";
+            const name = document.getElementById('setupName').value || "User";
             const pfp = document.getElementById('setupPFP').value || "https://i.imgur.com/r6oJp4O.png";
+            await setDoc(doc(db, "users", user.uid), { setupComplete: true, displayName: name, pfp: pfp, last_name_change: Date.now() });
+            location.reload();
+        };
+
+        // SETTINGS: NAME CHANGE (7 DAY COOLDOWN) & PFP & THEME
+        document.getElementById('saveSettingsBtn').onclick = async () => {
+            const user = auth.currentUser;
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            const data = userSnap.data();
+
+            let updates = {};
+            const newName = document.getElementById('settingName').value;
+            const newPFP = document.getElementById('settingPFP').value;
+            const newMode = document.getElementById('modeSelect').value;
+
+            // Name Logic
+            if(newName && newName !== data.displayName) {
+                const now = Date.now();
+                const sevenDays = 7 * 24 * 60 * 60 * 1000;
+                if(now - (data.last_name_change || 0) < sevenDays) {
+                    alert("Name change locked. Wait 7 days.");
+                } else {
+                    updates.displayName = newName;
+                    updates.last_name_change = now;
+                }
+            }
+            if(newPFP) updates.pfp = newPFP;
             
-            try {
-                await updateProfile(user, { displayName: name, photoURL: pfp });
-                await setDoc(doc(db, "users", user.uid), { setupComplete: true, displayName: name, pfp: pfp }, { merge: true });
-                localStorage.setItem('mobby_setup_done', 'true');
-                localStorage.setItem('mobby_pfp', pfp);
-                location.reload();
-            } catch (err) { alert("Setup Error: " + err.message); }
+            await updateDoc(userRef, updates);
+            document.getElementById('mainBody').className = `mode-${newMode}`;
+            alert("Settings Synced.");
+            toggleSettings();
+            if(newName || newPFP) location.reload();
+        };
+
+        // TERMINAL: FILE & AUTO-THREAD
+        window.handleFileUpload = (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                const chat = document.getElementById('chatBox');
+                chat.innerHTML += `<div class="text-[10px] text-sky-400">[File Uploaded: ${file.name}]</div>`;
+            }
+        };
+
+        document.getElementById('sendBtn').onclick = async () => {
+            const text = document.getElementById('userInput').value;
+            if(!text) return;
+
+            if(!currentChatId) {
+                // AUTO-CREATE THREAD
+                const threadRef = await addDoc(collection(db, "users", auth.currentUser.uid, "threads"), {
+                    title: text.substring(0, 15),
+                    timestamp: serverTimestamp()
+                });
+                currentChatId = threadRef.id;
+                loadUserChats(auth.currentUser.uid);
+            }
+            
+            const chat = document.getElementById('chatBox');
+            chat.innerHTML += `<div class="text-white text-sm"><b>You:</b> ${text}</div>`;
+            document.getElementById('userInput').value = '';
+            // Add your AI fetch logic here
         };
 
         // UI HELPERS
         window.showView = (name) => {
             ['dashboard', 'terminal'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
-            ['dashboard', 'terminal'].forEach(b => document.getElementById(`btn-${b}`).classList.remove('active'));
             document.getElementById(`view-${name}`).classList.remove('hidden');
-            document.getElementById(`btn-${name}`).classList.add('active');
         };
         window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
 
-        // APP LOGIC
+        // APP LOAD
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('loginOverlay').classList.add('hidden');
                 const userDoc = await getDoc(doc(db, "users", user.uid));
-                
                 if (!userDoc.exists() || !userDoc.data().setupComplete) {
                     document.getElementById('setupOverlay').classList.remove('hidden');
                 } else {
-                    document.getElementById('setupOverlay').classList.add('hidden');
-                    document.getElementById('userNameDisplay').innerText = userDoc.data().displayName;
+                    const d = userDoc.data();
+                    document.getElementById('userNameDisplay').innerText = d.displayName;
                     document.getElementById('dashUID').innerText = user.uid.substring(0,8);
-                    const pfp = userDoc.data().pfp || "https://i.imgur.com/r6oJp4O.png";
-                    document.getElementById('sidePFP').src = pfp;
-                    document.getElementById('dashPFP').src = pfp;
+                    document.getElementById('sidePFP').src = d.pfp;
+                    document.getElementById('dashPFP').src = d.pfp;
                     loadUserChats(user.uid);
                 }
-            } else {
-                document.getElementById('loginOverlay').classList.remove('hidden');
             }
         });
 
@@ -207,26 +260,16 @@
             snap.forEach(docSnap => {
                 const item = document.createElement('div');
                 item.className = "thread-item";
-                item.innerHTML = `<span class="truncate" onclick="window.selectThread('${docSnap.id}')">${docSnap.data().title || 'Log Session'}</span><button class="del-btn" onclick="window.deleteThread(event, '${docSnap.id}')">ERASE</button>`;
+                item.innerHTML = `<span onclick="window.currentChatId='${docSnap.id}'; showView('terminal')">${docSnap.data().title}</span>
+                                 <button class="del-btn" onclick="window.delThread('${docSnap.id}')">DEL</button>`;
                 list.appendChild(item);
             });
         }
 
-        window.deleteThread = async (e, id) => {
-            e.stopPropagation();
-            if(confirm("Erase from SIC Cloud?")) {
-                await deleteDoc(doc(db, "users", auth.currentUser.uid, "threads", id));
-                loadUserChats(auth.currentUser.uid);
-            }
-        };
-
-        document.getElementById('updatePfpBtn').onclick = async () => {
-            const url = document.getElementById('pfpInput').value;
-            if(url) {
-                await setDoc(doc(db, "users", auth.currentUser.uid), { pfp: url }, { merge: true });
-                location.reload();
-            }
-        };
+        window.delThread = async (id) => {
+            await deleteDoc(doc(db, "users", auth.currentUser.uid, "threads", id));
+            location.reload();
+        }
     </script>
 </body>
 </html>
