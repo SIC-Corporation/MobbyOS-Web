@@ -9,7 +9,6 @@
     <style>
         :root { --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* THEMES - Deep Midnight Cyan */
         body.mode-kid { 
             background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%); 
             color: #f0f9ff; 
@@ -23,51 +22,36 @@
 
         body { transition: background var(--transition); height: 100vh; overflow: hidden; display: flex; }
 
-        /* SIDEBAR - Increased contrast for Roy */
         .sidebar { 
-            background: rgba(0, 0, 0, 0.6); /* Darker for better button visibility */
+            background: rgba(0, 0, 0, 0.6); 
             backdrop-filter: blur(30px); 
             border-right: 1px solid rgba(255,255,255,0.2); 
             width: 280px;
         }
 
+        /* DUAL ACTION BUTTONS */
+        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 24px; }
+        
+        .btn-action {
+            font-size: 0.65rem; font-weight: 900; padding: 14px 8px; border-radius: 12px;
+            text-align: center; letter-spacing: 0.05em; transition: 0.2s;
+            text-transform: uppercase;
+        }
+        .btn-new { background: #38bdf8; color: #000; }
+        .btn-term { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .btn-term:hover { background: #ef4444; color: #fff; }
+
         .nav-item {
             display: flex; align-items: center; gap: 12px;
             padding: 14px 18px; border-radius: 12px;
-            font-size: 0.85rem; font-weight: 800; letter-spacing: 0.05em;
-            transition: 0.2s; color: rgba(255,255,255,0.8); /* Much brighter */
-            text-transform: uppercase; margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.8rem; font-weight: 800; transition: 0.2s; 
+            color: rgba(255,255,255,0.8); text-transform: uppercase; margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .nav-item:hover, .nav-item.active { 
-            background: rgba(56, 189, 248, 0.2); 
-            color: #7dd3fc; 
-            border-color: #38bdf8;
-        }
+        .nav-item:hover, .nav-item.active { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border-color: #38bdf8; }
 
-        /* NEW THREAD BUTTON */
-        .btn-new-chat {
-            background: #38bdf8;
-            color: #000;
-            font-weight: 900;
-            padding: 12px;
-            border-radius: 12px;
-            width: 100%;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 0.75rem;
-            letter-spacing: 0.1em;
-        }
-
-        /* CHAT BUBBLES */
-        .glass-panel {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-        }
-
-        .chat-bubble { padding: 20px; border-radius: 16px; max-width: 85%; }
+        .glass-panel { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; }
+        .chat-bubble { padding: 20px; border-radius: 16px; max-width: 85%; shadow: 0 10px 15px -3px rgba(0,0,0,0.4); }
         .mobby-msg { background: rgba(255,255,255,0.07); border-left: 4px solid #38bdf8; }
         .user-msg { background: rgba(0,0,0,0.5); border-right: 4px solid #94a3b8; text-align: right; margin-left: auto; }
         
@@ -77,38 +61,41 @@
 <body id="mainBody" class="mode-kid">
 
     <aside class="sidebar flex flex-col p-6">
-        <div class="mb-10 px-2">
+        <div class="mb-8 px-2">
             <h1 class="text-xl font-black tracking-tighter text-white">MOBBYOS V1</h1>
             <p id="statusTag" class="text-[9px] font-bold text-sky-400 tracking-widest mt-1 uppercase">Clearance: Instructional</p>
         </div>
 
-        <button onclick="createNewChat()" class="btn-new-chat hover:brightness-110 transition">
-            + NEW THREAD
-        </button>
+        <div class="control-grid">
+            <button onclick="createNewChat()" class="btn-action btn-new hover:brightness-110">
+                + THREAD
+            </button>
+            <button onclick="location.reload()" class="btn-action btn-term">
+                EXIT OS
+            </button>
+        </div>
 
         <nav class="flex-grow">
             <button onclick="location.reload()" class="nav-item w-full">
                 <span>🏠</span> DASHBOARD
             </button>
-            <button onclick="toggleSettings()" class="nav-item w-full" id="settingsBtn">
-                <span>⚙️</span> SYSTEM SETTINGS
+            <button onclick="toggleSettings()" class="nav-item w-full">
+                <span>⚙️</span> SETTINGS
             </button>
             
-            <div class="mt-8 mb-4 px-4 text-[10px] font-black text-white/40 tracking-widest uppercase">Saved Threads</div>
+            <div class="mt-8 mb-4 px-4 text-[10px] font-black text-white/30 tracking-widest uppercase italic">Memory Archives</div>
             <div id="threadList" class="space-y-2 overflow-y-auto max-h-[40vh] pr-2"></div>
         </nav>
 
         <div class="mt-auto pt-6 border-t border-white/10 px-2">
-            <p class="text-[9px] text-white/40 font-bold uppercase mb-4">Owner: Roy | SIC Corp</p>
-            <button onclick="location.reload()" class="text-[10px] font-bold text-red-400 hover:text-red-300 uppercase tracking-widest transition">Terminate Session</button>
+            <p class="text-[9px] text-white/40 font-bold uppercase tracking-tighter text-center">SIC CORP &copy; 2026 | ADMIN: ROY</p>
         </div>
     </aside>
 
     <main class="flex-grow flex flex-col p-6 relative">
-        
         <div id="settingsTab" class="fixed inset-0 z-[100] settings-overlay hidden flex flex-col items-center justify-center p-6">
             <div class="w-full max-w-md p-10 glass-panel border-white/20 bg-black/60">
-                <h2 class="text-xl font-black mb-8 tracking-tighter text-white">CORE CONFIGURATION</h2>
+                <h2 class="text-xl font-black mb-8 tracking-tighter text-white">SYSTEM CONFIG</h2>
                 <div class="space-y-6">
                     <div>
                         <label class="text-[10px] font-bold text-white/50 block mb-2 uppercase">Interface Personality</label>
@@ -121,20 +108,19 @@
                         <label class="text-[10px] font-bold text-white/50 block mb-2 uppercase">Neural Key (Groq)</label>
                         <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-black/80 border border-white/20 p-4 rounded-xl text-sm text-white outline-none">
                     </div>
-                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-black px-8 py-4 rounded-xl font-black text-xs uppercase hover:bg-sky-400 transition">Save & Initialize</button>
-                    <button onclick="toggleSettings()" class="w-full text-white/40 text-[9px] font-bold uppercase tracking-widest mt-4">Close Settings</button>
+                    <button onclick="saveAndClose()" class="w-full bg-sky-500 text-black px-8 py-4 rounded-xl font-black text-xs uppercase hover:bg-sky-400 transition">Initialize Core</button>
+                    <button onclick="toggleSettings()" class="w-full text-white/40 text-[9px] font-bold uppercase tracking-widest mt-4">Cancel</button>
                 </div>
             </div>
         </div>
 
-        <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 px-4 mb-6 scroll-smooth">
-            </div>
+        <div id="chatBox" class="flex-grow overflow-y-auto space-y-6 px-4 mb-6 scroll-smooth"></div>
 
         <footer class="max-w-4xl mx-auto w-full">
             <div class="glass-panel p-2 flex items-center gap-4 px-6 border-white/30 bg-black/40 shadow-2xl">
                 <span class="text-[10px] font-black text-sky-400">CMD</span>
-                <input type="text" id="userInput" placeholder="Enter command for MobbyOS..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white placeholder:text-white/30">
-                <button id="sendBtn" class="bg-sky-500 hover:bg-sky-400 text-black p-3 rounded-xl transition shadow-lg shadow-sky-500/40">
+                <input type="text" id="userInput" placeholder="Authorize command..." class="flex-grow bg-transparent py-4 outline-none text-sm text-white placeholder:text-white/30">
+                <button id="sendBtn" class="bg-sky-500 hover:bg-sky-400 text-black p-3 rounded-xl transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
                 </button>
             </div>
@@ -155,16 +141,12 @@
         let chats = {};
         let currentMode = 'kid';
 
-        window.toggleSettings = () => {
-            const el = document.getElementById('settingsTab');
-            el.classList.toggle('hidden');
-        };
+        window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
 
         window.applyMode = () => {
             currentMode = document.getElementById('modeSelect').value;
             const body = document.getElementById('mainBody');
             const status = document.getElementById('statusTag');
-            
             if(currentMode === 'adult') {
                 body.className = 'mode-adult';
                 status.innerText = 'Clearance: SIC Admin';
@@ -237,7 +219,7 @@
             if(!text) return;
 
             const sys = currentMode === 'adult' 
-                ? "You are MobbyOS Admin. Professional, cynical. Loyal to Roy/SIC Corp." 
+                ? "You are MobbyOS Admin. Sharp, professional, cynical. Loyal to Roy/SIC Corp." 
                 : "You are MobbyOS Kid. Friendly, helpful teacher for Roy.";
 
             if (chats[currentChatId].length === 0) chats[currentChatId].push({ role: "system", content: sys });
@@ -259,7 +241,7 @@
                     title: text.substring(0, 15).toUpperCase(),
                     timestamp: Date.now()
                 });
-            } catch (err) { alert("Core Link Failed."); }
+            } catch (err) { alert("Neural Link Failure."); }
         }
 
         function renderMessages() {
@@ -270,7 +252,7 @@
                 const isUser = msg.role === 'user';
                 box.innerHTML += `
                     <div class="${isUser ? 'text-right' : 'text-left'} mb-6">
-                        <div class="chat-bubble inline-block ${isUser ? 'user-msg' : 'mobby-msg'} shadow-xl">
+                        <div class="chat-bubble inline-block ${isUser ? 'user-msg' : 'mobby-msg'} shadow-2xl">
                             <p class="text-[7px] font-black opacity-40 mb-2 uppercase tracking-widest text-sky-400">${isUser ? 'ADMIN_ROY' : 'MOBBY_CORE'}</p>
                             <div class="text-sm leading-relaxed">${msg.content}</div>
                         </div>
