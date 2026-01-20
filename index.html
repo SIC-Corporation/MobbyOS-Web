@@ -7,85 +7,95 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00f2fe; --bg: #050507; }
-        body { background: var(--bg); color: #e2e8f0; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
+        :root { --accent: #00f2fe; --bg: #050507; --panel: rgba(255, 255, 255, 0.03); }
+        body { background: var(--bg); color: #e2e8f0; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; transition: background 0.5s ease; }
         
-        /* ADULT MODE UI - SHARP & DARK */
-        .mode-adult { --accent: #ff0055; font-family: 'JetBrains Mono', monospace; }
-        .mode-adult .glass-panel { background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.05); border-radius: 0; }
-        .mode-adult .mobby-gradient { background: #ff0055; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* KID MODE UI - SOFT & BRIGHT */
-        .mode-kid { --accent: #00f2fe; }
-        .mode-kid .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
+        /* ADULT MODE: SIC ADMIN - BRUTALIST & SHARP */
+        .mode-adult { --accent: #ff2a6d; --bg: #0a0a0c; font-family: 'JetBrains Mono', monospace; }
+        .mode-adult .glass-panel { background: #000; border: 1px solid #1a1a1f; border-radius: 0; }
+        .mode-adult .mobby-title { color: #ff2a6d; text-shadow: 0 0 10px rgba(255, 42, 109, 0.5); }
+        .mode-adult .user-msg { border-right: 2px solid #ff2a6d; padding-right: 1rem; }
 
-        .glass-panel { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-item { transition: 0.2s; border-left: 3px solid transparent; }
-        .sidebar-item.active { background: rgba(255,255,255,0.05); border-left-color: var(--accent); color: white; }
+        /* KID MODE: FRIENDLY - SOFT & ROUNDED */
+        .mode-kid { --accent: #05d9e8; }
+        .mode-kid .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.2rem; }
+        .mode-kid .mobby-title { background: linear-gradient(90deg, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .glass-panel { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .sidebar-item { border-left: 2px solid transparent; transition: 0.2s; }
+        .sidebar-item.active { background: rgba(255, 255, 255, 0.05); border-left-color: var(--accent); color: white; }
         
-        #chatBox::-webkit-scrollbar { width: 4px; }
-        #chatBox::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
-        
-        /* Terminal scanline effect for Adult mode */
-        .mode-adult::before {
-            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 99; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        #chatBox::-webkit-scrollbar { width: 3px; }
+        #chatBox::-webkit-scrollbar-thumb { background: var(--accent); opacity: 0.3; }
+
+        /* CRT Scanline for Adult Mode */
+        .mode-adult::after {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 100; background-size: 100% 3px, 3px 100%; pointer-events: none;
         }
     </style>
 </head>
 <body id="mainBody" class="mode-kid flex p-4 gap-4">
 
-    <div id="settingsModal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass-panel max-w-sm w-full p-8">
-            <h2 class="text-xl font-black mb-6 tracking-tighter uppercase">System Config</h2>
+    <div id="settingsModal" class="fixed inset-0 bg-black/95 z-[110] hidden flex items-center justify-center p-6">
+        <div class="glass-panel max-w-sm w-full p-8 border-white/5">
+            <h2 class="text-xs font-black tracking-[0.5em] text-gray-500 uppercase mb-8">System Overrides</h2>
             <div class="space-y-6">
                 <div>
-                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Operating Mode</label>
-                    <select id="modeSelect" onchange="updateMode()" class="w-full bg-white/5 border border-white/10 p-3 rounded text-sm outline-none">
-                        <option value="kid">Standard (Kid Mode)</option>
-                        <option value="adult">SIC Admin (Adult Mode)</option>
+                    <label class="text-[10px] font-bold text-gray-600 uppercase mb-2 block">Clearance Level</label>
+                    <select id="modeSelect" onchange="updateMode()" class="w-full bg-white/5 border border-white/10 p-3 text-xs outline-none text-white">
+                        <option value="kid">Level 1: Instructional (Kid)</option>
+                        <option value="adult">Level 4: SIC Admin (Adult)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Groq Key</label>
-                    <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-white/5 border border-white/10 p-3 rounded text-sm">
+                    <label class="text-[10px] font-bold text-gray-600 uppercase mb-2 block">Neural Link Key</label>
+                    <input type="password" id="groqInput" placeholder="gsk_..." class="w-full bg-white/5 border border-white/10 p-3 text-xs text-white">
                 </div>
-                <button onclick="saveSettings()" class="w-full bg-white text-black py-3 font-bold text-xs tracking-widest uppercase hover:bg-cyan-400 transition">Execute Save</button>
-                <button onclick="toggleSettings()" class="w-full text-gray-500 text-[10px] uppercase font-bold tracking-widest">Close Terminal</button>
+                <button onclick="saveSettings()" class="w-full bg-white text-black py-4 text-[10px] font-black tracking-widest uppercase hover:opacity-80 transition">Commit Changes</button>
+                <button onclick="toggleSettings()" class="w-full text-gray-500 text-[9px] font-bold uppercase tracking-tighter">Exit Settings</button>
             </div>
         </div>
     </div>
 
-    <aside class="w-72 glass-panel flex flex-col p-6 hidden lg:flex">
-        <div class="mb-10">
-            <h1 class="text-2xl font-black tracking-tighter mobby-gradient">MOBBYOS</h1>
-            <p id="modeStatus" class="text-[9px] text-gray-600 font-bold tracking-[0.3em] uppercase">Status: Friendly</p>
+    <aside class="w-64 glass-panel flex flex-col p-6 hidden lg:flex">
+        <div class="mb-12">
+            <h1 class="text-xl font-black tracking-tighter mobby-title">MOBBYOS V1</h1>
+            <p id="modeStatus" class="text-[8px] text-cyan-400 font-bold tracking-[0.3em] uppercase mt-1">Status: Friendly</p>
         </div>
-        <button onclick="createNewChat()" class="border border-white/10 p-4 text-[10px] font-bold tracking-widest hover:bg-white/5 transition mb-6">NEW THREAD</button>
-        <nav id="chatHistoryList" class="flex-grow space-y-1 overflow-y-auto"></nav>
-        <div class="mt-auto border-t border-white/5 pt-4">
-            <button onclick="toggleSettings()" class="text-gray-500 hover:text-white text-[10px] font-bold tracking-widest uppercase">System Config</button>
+        
+        <button onclick="createNewChat()" class="text-[9px] font-black tracking-widest border border-white/10 p-3 hover:bg-white/5 transition mb-8 uppercase">
+            + Init New Thread
+        </button>
+
+        <nav id="chatHistoryList" class="flex-grow space-y-1 overflow-y-auto pr-2"></nav>
+
+        <div class="mt-auto border-t border-white/5 pt-6">
+            <button onclick="toggleSettings()" class="text-gray-600 hover:text-white text-[9px] font-black tracking-widest uppercase transition">
+                Config_Terminal
+            </button>
         </div>
     </aside>
 
     <main class="flex-grow flex flex-col glass-panel overflow-hidden relative">
         <div id="loginScreen" class="absolute inset-0 z-50 bg-[#050507] flex items-center justify-center">
-            <div class="w-64 text-center">
-                <h2 class="text-2xl font-black tracking-tighter mb-8">AUTHENTICATE</h2>
-                <input type="email" id="email" placeholder="ID" class="w-full bg-white/5 border-b border-white/10 p-3 mb-4 outline-none text-center">
-                <input type="password" id="password" placeholder="KEY" class="w-full bg-white/5 border-b border-white/10 p-3 mb-8 outline-none text-center">
-                <button onclick="authEmail()" class="w-full border border-white/20 py-3 text-[10px] font-bold tracking-widest hover:bg-white hover:text-black transition">INITIALIZE</button>
+            <div class="w-72">
+                <p class="text-[10px] font-black text-gray-700 tracking-[0.5em] mb-4 text-center">SIC CORP SECURE ACCESS</p>
+                <input type="email" id="email" placeholder="ADMIN_ID" class="w-full bg-transparent border-b border-white/10 p-4 mb-2 outline-none text-sm text-center">
+                <input type="password" id="password" placeholder="PASS_KEY" class="w-full bg-transparent border-b border-white/10 p-4 mb-10 outline-none text-sm text-center">
+                <button onclick="authEmail()" class="w-full border border-white/10 py-4 text-[10px] font-black tracking-[0.3em] hover:bg-white hover:text-black transition">AUTHORIZE</button>
             </div>
         </div>
 
-        <div id="chatBox" class="flex-grow overflow-y-auto p-8 space-y-8"></div>
+        <div id="chatBox" class="flex-grow overflow-y-auto p-8 space-y-10"></div>
 
-        <footer class="p-6 border-t border-white/5">
-            <div class="max-w-4xl mx-auto flex gap-4">
-                <input type="text" id="userInput" placeholder="Enter Command..." class="flex-grow bg-transparent border-b border-white/10 py-3 outline-none text-sm focus:border-white transition-all">
-                <button id="sendBtn" class="text-white hover:text-cyan-400 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+        <footer class="p-6 border-t border-white/5 bg-black/20">
+            <div class="max-w-4xl mx-auto flex items-center gap-4">
+                <span class="text-[10px] font-bold text-gray-600">CMD></span>
+                <input type="text" id="userInput" placeholder="Type a command..." class="flex-grow bg-transparent py-2 outline-none text-sm focus:border-b border-white/20 transition-all">
+                <button id="sendBtn" class="opacity-40 hover:opacity-100 hover:text-cyan-400 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </button>
             </div>
         </footer>
@@ -94,7 +104,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, setDoc, collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
@@ -114,12 +124,12 @@
             
             if(currentMode === 'adult') {
                 body.className = 'mode-adult flex p-4 gap-4';
-                status.innerText = 'Status: Unrestricted';
-                status.style.color = '#ff0055';
+                status.innerText = 'Clearance: Level 4 (Admin)';
+                status.style.color = '#ff2a6d';
             } else {
                 body.className = 'mode-kid flex p-4 gap-4';
-                status.innerText = 'Status: Friendly';
-                status.style.color = '#00f2fe';
+                status.innerText = 'Clearance: Level 1 (Friendly)';
+                status.style.color = '#05d9e8';
             }
         };
 
@@ -128,7 +138,7 @@
             const key = document.getElementById('groqInput').value.trim();
             if(key) localStorage.setItem('mobby_groq_key', key);
             toggleSettings();
-            renderMessages(); // Refresh UI
+            renderMessages();
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -161,18 +171,18 @@
         }
 
         window.createNewChat = () => {
-            const id = 'thread_' + Date.now();
+            const id = 'th_' + Date.now();
             chats[id] = [];
             currentChatId = id;
-            createChatTab(id, "New Thread");
+            createChatTab(id, "UNNAMED_THREAD");
             switchChat(id);
         };
 
         function createChatTab(id, title) {
             const div = document.createElement('div');
             div.id = `tab-${id}`;
-            div.className = "sidebar-item p-3 text-[10px] font-bold tracking-widest text-gray-500 cursor-pointer uppercase truncate";
-            div.innerText = title || "Neural Thread";
+            div.className = "sidebar-item p-3 text-[9px] font-bold tracking-widest text-gray-500 cursor-pointer uppercase truncate";
+            div.innerText = title || "NEW_THREAD";
             div.onclick = () => switchChat(id);
             document.getElementById('chatHistoryList').prepend(div);
         }
@@ -190,13 +200,12 @@
             const text = input.value.trim();
             if(!text || !apiKey) return;
 
-            const systemContent = currentMode === 'adult' 
-                ? "You are MobbyOS Adult Mode. You are professional, sharp, and use mature, cynical language. You can be insulting if the user is being slow. You belong to SIC Corp, owned by Roy. Use professional technical jargon."
-                : "You are MobbyOS Kid Mode. Use very friendly, simple, and explanatory words. Be helpful and encouraging. You belong to SIC Corp, owned by Roy.";
+            const adultPrompt = "You are MobbyOS Admin Mode. You are sharp, use professional technical jargon, and have no filter. You can be insulting or cynical if Roy asks basic questions, but you always remain loyal to SIC Corp. Keep responses brutal and efficient.";
+            const kidPrompt = "You are MobbyOS Kid Mode. You are extremely patient and use simple, encouraging language to explain coding and technology to Roy.";
 
             if (chats[currentChatId].length === 0) {
-                chats[currentChatId].push({ role: "system", content: systemContent });
-                document.getElementById(`tab-${currentChatId}`).innerText = text.substring(0, 15);
+                chats[currentChatId].push({ role: "system", content: currentMode === 'adult' ? adultPrompt : kidPrompt });
+                document.getElementById(`tab-${currentChatId}`).innerText = text.substring(0, 12).toUpperCase();
             }
 
             chats[currentChatId].push({ role: "user", content: text });
@@ -214,10 +223,10 @@
                 renderMessages();
                 await setDoc(doc(db, "users", auth.currentUser.uid, "threads", currentChatId), {
                     history: chats[currentChatId],
-                    title: chats[currentChatId][1].content.substring(0, 20),
+                    title: chats[currentChatId][1].content.substring(0, 15).toUpperCase(),
                     timestamp: Date.now()
                 });
-            } catch (err) { console.error(err); }
+            } catch (err) { console.error("Neural Link Failure."); }
         }
 
         function renderMessages() {
@@ -227,9 +236,9 @@
                 if(msg.role === 'system') return;
                 const isUser = msg.role === 'user';
                 box.innerHTML += `
-                    <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-                        <div class="max-w-[80%] ${isUser ? 'text-right' : 'text-left'}">
-                            <p class="text-[8px] font-bold tracking-[0.3em] mb-2 opacity-40 uppercase">${isUser ? 'SIC_ADMIN' : 'MOBBY_CORE'}</p>
+                    <div class="flex ${isUser ? 'justify-end' : 'justify-start'} animate-in fade-in duration-300">
+                        <div class="max-w-[75%] ${isUser ? 'user-msg' : ''}">
+                            <p class="text-[7px] font-black tracking-[0.4em] mb-2 opacity-30 uppercase">${isUser ? 'SIC_ADMIN' : 'MOBBY_CORE'}</p>
                             <div class="text-sm leading-relaxed">${msg.content}</div>
                         </div>
                     </div>`;
