@@ -7,87 +7,109 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --transition: 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        :root { --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         body.mode-kid { background: #0c4a6e; color: #f0f9ff; }
         body.mode-adult { background: #1e293b; color: #e2e8f0; }
         body.mode-admin { background: #020617; color: #f8fafc; font-family: 'JetBrains Mono', monospace; }
         body { transition: background var(--transition); height: 100vh; overflow: hidden; display: flex; }
         .hidden { display: none !important; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .animate-slide-up { animation: slideUp 0.5s ease forwards; }
-        .boot-screen { background: #000; z-index: 10000; position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.5s; }
-        .typewriter { overflow: hidden; border-right: 3px solid #38bdf8; white-space: nowrap; margin: 0 auto; letter-spacing: .15em; animation: typing 2s steps(30, end), blink-caret .75s step-end infinite; }
+
+        /* Welcome Animation Fix */
+        .typewriter-text { 
+            display: inline-block;
+            overflow: hidden; 
+            white-space: nowrap; 
+            border-right: 3px solid #38bdf8;
+            width: 0;
+        }
+        .start-typing {
+            animation: typing 2s steps(30, end) forwards, blink-caret .75s step-end infinite;
+        }
         @keyframes typing { from { width: 0 } to { width: 100% } }
         @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #38bdf8; } }
+
         .magic-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .input-magical { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 12px; width: 100%; outline: none; font-size: 0.8rem; }
-        .sidebar { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.05); width: 280px; }
-        .nav-btn { width: 100%; text-align: left; padding: 12px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; color: rgba(255,255,255,0.4); }
-        .nav-btn.active { color: white; background: rgba(255,255,255,0.05); }
-        .thread-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.6); }
-        .thread-item:hover { background: rgba(255,255,255,0.1); }
+        .sidebar { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.05); width: 280px; }
+        .nav-btn { width: 100%; text-align: left; padding: 12px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; color: rgba(255,255,255,0.4); transition: 0.3s; }
+        .nav-btn.active { color: white; background: rgba(255,255,255,0.1); }
+        .thread-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 9px; }
+        .thread-item:hover { background: rgba(255,255,255,0.05); color: white; }
     </style>
 </head>
 <body id="mainBody" class="mode-kid">
 
-    <div id="bootScreen" class="boot-screen font-mono">
-        <div class="text-sky-400 text-xs mb-2 animate-pulse">MOBBY_OS // GROQ LPU ENGINE</div>
-        <div class="w-64 h-1 bg-white/10 rounded-full overflow-hidden mb-2">
-            <div id="bootProgress" class="h-full bg-sky-500 w-0 transition-all duration-700"></div>
-        </div>
-        <div id="bootLog" class="text-[9px] text-white/40 uppercase tracking-widest">Injecting Groq Code...</div>
-    </div>
-
-    <div id="loginOverlay" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black hidden">
-        <div class="magic-card p-10 rounded-[2.5rem] w-full max-w-sm text-center">
-            <h1 class="text-3xl font-black text-white mb-8 italic">MOBBY<span class="text-sky-400">OS</span></h1>
-            <input type="email" id="loginEmail" placeholder="Email" class="input-magical mb-3">
-            <input type="password" id="loginPass" placeholder="Password" class="input-magical mb-6">
-            <button id="emailAuthBtn" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[10px]">Initialize</button>
+    <div id="bootScreen" class="fixed inset-0 bg-black z-[10000] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="text-sky-400 font-mono text-xs mb-4 animate-pulse">MOBBY_OS // SIC CORP PROTOCOL</div>
+        <div class="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+            <div id="bootProgress" class="h-full bg-sky-500 w-0 transition-all duration-1000"></div>
         </div>
     </div>
 
     <aside class="sidebar flex flex-col p-6">
-        <div class="mb-10 flex items-center gap-3">
-            <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
-            <div><h1 class="text-sm font-black text-white">MOBBYOS</h1><div class="text-[8px] font-bold text-sky-400 uppercase">SIC Corp</div></div>
+        <div class="mb-8 flex items-center gap-3">
+            <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="w-10 h-10 rounded-full object-cover border border-white/10">
+            <div class="overflow-hidden">
+                <h1 class="text-sm font-black text-white truncate" id="sideName">MOBBYOS</h1>
+                <div id="userEmailDisplay" class="text-[7px] font-bold text-sky-400 uppercase truncate opacity-60">Not Logged In</div>
+            </div>
         </div>
+
         <nav class="space-y-1">
             <button onclick="showView('dashboard')" class="nav-btn active" id="btn-dashboard">Dashboard</button>
             <button onclick="showView('terminal')" class="nav-btn" id="btn-terminal">Terminal</button>
-            <button onclick="toggleSettings()" class="nav-btn">Settings</button>
+            <button onclick="toggleSettings()" class="nav-btn">Config</button>
         </nav>
+
         <div class="mt-10 mb-4 px-2 flex justify-between items-center">
-            <span class="text-[9px] font-black text-white/10 uppercase">Memory Threads</span>
-            <button id="addThreadBtn" class="text-sky-400 text-lg font-bold hover:scale-125 transition">+</button>
+            <span class="text-[9px] font-black text-white/10 uppercase tracking-widest">Memories</span>
+            <button id="addThreadBtn" class="text-sky-400 text-lg hover:scale-125 transition">+</button>
         </div>
-        <div id="threadList" class="flex-grow overflow-y-auto space-y-1 text-[9px]"></div>
+        <div id="threadList" class="flex-grow overflow-y-auto space-y-1"></div>
     </aside>
 
-    <main class="flex-grow flex flex-col p-8 relative">
-        <div id="view-dashboard" class="h-full flex flex-col space-y-8">
-            <h2 class="text-5xl font-black text-white typewriter">Welcome, <span id="userNameDisplay">User</span></h2>
-            <div class="bg-white/5 border border-white/5 p-8 rounded-[2rem] max-w-lg animate-slide-up">
-                <p class="text-sm text-white/60">Groq LPU Engine: <span class="text-emerald-400">Online</span></p>
+    <main class="flex-grow flex flex-col p-10 relative">
+        <div id="view-dashboard" class="h-full flex flex-col space-y-6">
+            <div>
+                <h2 class="text-5xl font-black text-white tracking-tighter">
+                    <span id="welcomeMsg" class="typewriter-text">Welcome, User</span>
+                </h2>
+                <p class="text-sky-400 text-[10px] uppercase mt-2 tracking-[0.4em]">System Authorization: Granted</p>
+            </div>
+            <div class="bg-white/5 border border-white/10 p-6 rounded-3xl max-w-md">
+                <p class="text-xs text-white/50 leading-relaxed italic">"Developing the future under SIC Corp license. Mobby LPU Engine is active."</p>
             </div>
         </div>
 
         <div id="view-terminal" class="h-full flex flex-col hidden">
             <div id="chatBox" class="flex-grow overflow-y-auto space-y-4 mb-6 pr-4 font-mono text-sm"></div>
-            <div class="max-w-4xl mx-auto w-full flex items-center gap-4 px-6 border border-white/10 rounded-2xl bg-black/40">
-                <textarea id="userInput" placeholder="Ask Mobby via Groq..." rows="1" class="flex-grow bg-transparent py-6 outline-none text-sm text-white resize-none"></textarea>
-                <button id="sendBtn" class="text-sky-400 font-black text-xs uppercase">Run</button>
+            <div class="max-w-4xl mx-auto w-full flex flex-col gap-2 p-4 border border-white/10 rounded-2xl bg-black/40">
+                <textarea id="userInput" placeholder="Ask Mobby..." rows="1" class="bg-transparent outline-none text-white resize-none w-full"></textarea>
+                <div class="flex justify-between items-center">
+                    <span class="text-[8px] text-white/20 uppercase font-bold">Shift+Enter for new line</span>
+                    <button id="sendBtn" class="text-sky-400 font-black text-xs uppercase hover:text-white transition">Execute</button>
+                </div>
             </div>
         </div>
 
-        <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-6 hidden">
-            <div class="w-full max-w-md p-10 bg-slate-900 border border-white/10 rounded-[2.5rem]">
-                <h2 class="text-lg font-black text-white mb-6 uppercase">Config</h2>
+        <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-6 hidden">
+            <div class="w-full max-w-sm p-8 magic-card rounded-[2rem]">
+                <h2 class="text-sm font-black text-white mb-6 uppercase tracking-widest text-sky-400">System Configuration</h2>
                 <div class="space-y-4">
-                    <select id="modeSelect" class="input-magical w-full"><option value="kid">Kid</option><option value="adult">Adult</option><option value="admin">Admin</option></select>
-                    <input type="text" id="settingName" class="input-magical w-full" placeholder="Codename">
-                    <button id="saveSettingsBtn" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px]">Commit Changes</button>
-                    <button onclick="toggleSettings()" class="w-full text-white/20 py-2 text-[8px] font-black uppercase">Cancel</button>
+                    <div>
+                        <label class="text-[8px] text-white/40 uppercase ml-2">Display Name</label>
+                        <input type="text" id="settingName" class="input-magical" placeholder="Codename">
+                    </div>
+                    <div>
+                        <label class="text-[8px] text-white/40 uppercase ml-2">Profile Image URL</label>
+                        <input type="text" id="settingPFP" class="input-magical" placeholder="https://link-to-image.png">
+                    </div>
+                    <div>
+                        <label class="text-[8px] text-white/40 uppercase ml-2">OS Mode</label>
+                        <select id="modeSelect" class="input-magical"><option value="kid">Kid</option><option value="adult">Adult</option><option value="admin">Admin</option></select>
+                    </div>
+                    <button id="saveSettingsBtn" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px] mt-4 shadow-lg shadow-sky-500/20">Commit Changes</button>
+                    <button onclick="toggleSettings()" class="w-full text-white/20 py-2 text-[8px] font-black uppercase">Close</button>
                 </div>
             </div>
         </div>
@@ -95,8 +117,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, getDocs, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
@@ -105,37 +127,76 @@
 
         let currentChatId = null;
 
-        // --- STARTUP ---
-        window.addEventListener('DOMContentLoaded', () => {
-            const bar = document.getElementById('bootProgress');
-            setTimeout(() => { 
-                bar.style.width = '100%';
-                setTimeout(() => {
-                    document.getElementById('bootScreen').style.opacity = '0';
-                    setTimeout(() => document.getElementById('bootScreen').classList.add('hidden'), 500);
-                }, 800);
-            }, 100);
-        });
-
-        // --- UI NAVIGATION ---
+        // --- ANIMATION CONTROLLER ---
         window.showView = (name) => {
             document.getElementById('view-dashboard').classList.add('hidden');
             document.getElementById('view-terminal').classList.add('hidden');
             document.getElementById(`view-${name}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-${name}`)?.classList.add('active');
+            
+            if(name === 'dashboard') {
+                const wel = document.getElementById('welcomeMsg');
+                wel.classList.remove('start-typing');
+                void wel.offsetWidth; // Trigger reflow
+                wel.classList.add('start-typing');
+            }
         };
+
         window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
 
-        // --- CORE CHAT LOGIC ---
+        // --- AUTH & USER DATA ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('userEmailDisplay').innerText = user.email;
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    updateUISettings(data.displayName, data.pfp);
+                } else {
+                    await setDoc(doc(db, "users", user.uid), { displayName: "New User", pfp: "" });
+                }
+                loadUserChats(user.uid);
+            }
+        });
+
+        function updateUISettings(name, pfp) {
+            const finalName = name || "User";
+            const finalPFP = pfp || "https://i.imgur.com/r6oJp4O.png";
+            document.getElementById('welcomeMsg').innerText = `Welcome, ${finalName}`;
+            document.getElementById('sideName').innerText = finalName;
+            document.getElementById('sidePFP').src = finalPFP;
+            document.getElementById('settingName').value = finalName;
+            document.getElementById('settingPFP').value = finalPFP;
+            showView('dashboard'); // Trigger initial animation
+        }
+
+        // --- SETTINGS COMMIT ---
+        document.getElementById('saveSettingsBtn').onclick = async () => {
+            const user = auth.currentUser;
+            const newName = document.getElementById('settingName').value;
+            const newPFP = document.getElementById('settingPFP').value;
+            const newMode = document.getElementById('modeSelect').value;
+
+            if (user) {
+                await updateDoc(doc(db, "users", user.uid), { 
+                    displayName: newName,
+                    pfp: newPFP 
+                });
+                document.getElementById('mainBody').className = `mode-${newMode}`;
+                updateUISettings(newName, newPFP);
+                alert("Profile and OS settings updated.");
+                toggleSettings();
+            }
+        };
+
+        // --- CHAT SYSTEM ---
         const handleSend = async () => {
             const input = document.getElementById('userInput');
             const text = input.value.trim();
             if (!text) return;
-
             input.value = '';
+            
             const chatBox = document.getElementById('chatBox');
-            chatBox.innerHTML += `<div class="text-white opacity-80 p-2 bg-white/5 rounded"><b>YOU:</b> ${text}</div>`;
+            chatBox.innerHTML += `<div class="p-3 bg-white/5 rounded-lg text-white/80"><b>YOU:</b> ${text}</div>`;
 
             if (!currentChatId) {
                 const threadRef = await addDoc(collection(db, "users", auth.currentUser.uid, "threads"), {
@@ -145,17 +206,9 @@
                 currentChatId = threadRef.id;
                 loadUserChats(auth.currentUser.uid);
             }
-
-            // Simulate Bot Response
-            chatBox.innerHTML += `<div class="text-sky-400 p-2 animate-pulse" id="loading">Mobby is thinking...</div>`;
-            setTimeout(() => {
-                document.getElementById('loading').remove();
-                chatBox.innerHTML += `<div class="text-sky-400 p-2 bg-sky-400/5 rounded"><b>MOBBY:</b> Connection established. SIC Corp protocols active. How can I assist?</div>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 1000);
+            chatBox.scrollTop = chatBox.scrollHeight;
         };
 
-        // Key Listener (Enter / Shift+Enter)
         document.getElementById('userInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -163,43 +216,13 @@
             }
         });
         document.getElementById('sendBtn').onclick = handleSend;
-
-        // --- THREADS & SETTINGS ---
         document.getElementById('addThreadBtn').onclick = () => {
             currentChatId = null;
-            document.getElementById('chatBox').innerHTML = '<div class="text-sky-500 italic">Starting new memory thread...</div>';
+            document.getElementById('chatBox').innerHTML = '<div class="text-[10px] text-sky-500 uppercase">New Thread Created.</div>';
             showView('terminal');
         };
 
-        document.getElementById('saveSettingsBtn').onclick = async () => {
-            const user = auth.currentUser;
-            const newName = document.getElementById('settingName').value;
-            const newMode = document.getElementById('modeSelect').value;
-
-            if (user) {
-                await updateDoc(doc(db, "users", user.uid), { displayName: newName });
-                document.getElementById('mainBody').className = `mode-${newMode}`;
-                document.getElementById('userNameDisplay').innerText = newName;
-                alert("Settings Synced to SIC Corp Cloud.");
-                toggleSettings();
-            }
-        };
-
-        // --- AUTH & LOAD ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                document.getElementById('loginOverlay').classList.add('hidden');
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    document.getElementById('userNameDisplay').innerText = userDoc.data().displayName || "User";
-                    document.getElementById('settingName').value = userDoc.data().displayName || "User";
-                }
-                loadUserChats(user.uid);
-            } else {
-                document.getElementById('loginOverlay').classList.remove('hidden');
-            }
-        });
-
+        // --- LOAD HISTORY ---
         async function loadUserChats(uid) {
             const q = query(collection(db, "users", uid, "threads"), orderBy("timestamp", "desc"));
             const snap = await getDocs(q);
@@ -208,20 +231,18 @@
             snap.forEach(docSnap => {
                 const div = document.createElement('div');
                 div.className = "thread-item";
-                div.innerHTML = `<span>${docSnap.data().title}</span>`;
-                div.onclick = () => {
-                    currentChatId = docSnap.id;
-                    showView('terminal');
-                    document.getElementById('chatBox').innerHTML = `<div class="text-xs opacity-30 italic">Restored thread ${docSnap.id}</div>`;
-                };
+                div.innerHTML = `<span>⚡ ${docSnap.data().title}</span>`;
+                div.onclick = () => { currentChatId = docSnap.id; showView('terminal'); };
                 list.appendChild(div);
             });
         }
-        
-        document.getElementById('emailAuthBtn').onclick = () => {
-            const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPass').value;
-            signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
-        };
+
+        // Startup progress
+        setTimeout(() => {
+            document.getElementById('bootProgress').style.width = '100%';
+            setTimeout(() => document.getElementById('bootScreen').classList.add('opacity-0'), 1000);
+            setTimeout(() => document.getElementById('bootScreen').classList.add('hidden'), 1500);
+        }, 100);
     </script>
 </body>
 </html>
