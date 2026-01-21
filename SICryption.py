@@ -82,6 +82,10 @@ if __name__ == "__main__":
 # --- SAFE BOOT BINDINGS ---
         def start_mobby(ev=None):
             try:
+                # Try to find the first button
+                btn_check = document["btn-dash"]
+                
+                # If we found it, bind everything
                 document["btn-dash"].bind("click", change_view)
                 document["btn-term"].bind("click", change_view)
                 document["btn-config"].bind("click", toggle_config)
@@ -95,9 +99,9 @@ if __name__ == "__main__":
                 # Check auth only after UI is ready
                 window.auth.onAuthStateChanged(on_auth)
                 print("MobbyOS Engine: Bindings Secured.")
-            except KeyError as e:
-                print(f"SIC Corp Error: Element {e} not found yet. Retrying...")
-                timer.set_timeout(start_mobby, 500)
+            except KeyError:
+                # If the button isn't there yet, wait 200ms and try again
+                timer.set_timeout(start_mobby, 200)
 
-        # Start the boot sequence
+        # Kick off the safe start
         start_mobby()
