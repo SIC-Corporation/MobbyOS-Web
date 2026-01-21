@@ -1,38 +1,40 @@
 import base64
 import hashlib
-import json
 from datetime import datetime
 
 class SICryption:
     """
-    SIC Corp Ultra-Advanced Encryption Module (V3.0)
-    Proprietary Technology of Roy, SIC Corp.
+    SIC Corp Ultra-Advanced Encryption Module (V3.1)
+    Optimized for MobbyOS Micro-Fastboot & Brython Compatibility
+    Creator: Roy (Owner of SIC Corp)
     """
     def __init__(self, master_key="Roy_SIC_Corp_2026"):
-        # Layer 1: SHA-256
+        # Layer 1: Initial Hash
         h1 = hashlib.sha256(master_key.encode()).hexdigest()
-        # Layer 2: Recursive Hashing for complexity
-        self.key = hashlib.sha3_512(h1.encode()).hexdigest()
+        # Layer 2: Nested Hashing (Browser-compatible replacement for SHA3)
+        self.key = hashlib.sha256(h1.encode()).hexdigest()
         self.header = "SIC|VAULT|V3|"
 
     def _generate_dynamic_salt(self):
-        # Generates a unique salt based on precise nanoseconds
-        return hashlib.blake2b(str(datetime.now().timestamp()).encode()).hexdigest()[:12]
+        # High-speed entropy generation using timestamp and MD5
+        raw_salt = str(datetime.now().timestamp()) + "SIC_SALT"
+        return hashlib.md5(raw_salt.encode()).hexdigest()[:12]
 
     def encrypt(self, data):
         if not data: return ""
         salt = self._generate_dynamic_salt()
-        # Combine key and salt for the encryption stream
+        # Create a unique working key for this specific encryption turn
         working_key = hashlib.sha256((self.key + salt).encode()).hexdigest()
         
         encrypted_chars = []
         for i, char in enumerate(str(data)):
             key_c = working_key[i % len(working_key)]
-            # Advanced Caesar-XOR Hybrid logic
+            # SIC Advanced Caesar-XOR Logic
             shift = (ord(char) + ord(key_c)) % 1114112
             encrypted_chars.append(chr(shift))
             
         raw_combined = salt + "".join(encrypted_chars)
+        # URL-safe encoding for web transmission
         encoded = base64.urlsafe_b64encode(raw_combined.encode()).decode()
         return f"{self.header}{encoded}"
 
@@ -61,10 +63,9 @@ def identify_access(email):
     """
     The Gatekeeper. Connects MobbyOS to the SICryption Clearance Levels.
     """
-    # Initialize the Vault
     vault = SICryption()
     
-    # MASTER ADMIN EMAILS (Stored as plain for logic, but verified by clearance)
+    # Master SIC Personnel
     admins = ["SICMailCenter1@gmail.com", "Roystonslijkerman@gmail.com"]
     email = email.lower().strip()
 
