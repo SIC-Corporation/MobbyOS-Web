@@ -26,7 +26,7 @@
     <div id="boot-screen">
         <div class="boot-loader mb-4"></div>
         <p class="text-[10px] tracking-[0.5em] uppercase text-sky-400 font-bold">MobbyOS Handshake</p>
-        <p id="boot-status" class="text-[8px] text-white/20 mt-2 uppercase italic">Initializing Protocols...</p>
+        <p id="boot-status" class="text-[8px] text-white/20 mt-2 uppercase italic">Awaiting Engine...</p>
     </div>
 
     <div class="flex h-screen w-screen">
@@ -40,9 +40,9 @@
             </div>
             
             <nav class="space-y-2 flex-grow">
-                <button id="btn-dash" class="w-full text-left p-3 text-[10px] font-bold uppercase text-white/40 hover:bg-white/5 rounded-xl">Dashboard</button>
-                <button id="btn-term" class="w-full text-left p-3 text-[10px] font-bold uppercase text-white/40 hover:bg-white/5 rounded-xl">Terminal</button>
-                <button id="btn-config" class="w-full text-left p-3 text-[10px] font-bold uppercase text-white/40 hover:bg-white/5 rounded-xl">Settings</button>
+                <button id="btn-dash" class="w-full text-left p-3 text-[10px] font-bold uppercase text-white/40 hover:bg-white/5 rounded-xl transition-all">Dashboard</button>
+                <button id="btn-term" class="w-full text-left p-3 text-[10px] font-bold uppercase text-white/40 hover:bg-white/5 rounded-xl transition-all">Terminal</button>
+                <button id="btn-config" class="w-full text-left p-3 text-[10px] font-bold uppercase text-white/40 hover:bg-white/5 rounded-xl transition-all">Settings</button>
             </nav>
 
             <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
@@ -50,25 +50,25 @@
                     <div id="statusDot" class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
                     <p class="text-[8px] font-bold text-white/30 uppercase">Engine</p>
                 </div>
-                <p id="mobbyStatus" class="text-[9px] font-bold uppercase italic">Offline</p>
+                <p id="mobbyStatus" class="text-[9px] font-bold uppercase italic text-white/40">Offline</p>
             </div>
         </aside>
 
         <main class="flex-grow bg-[#020617] relative">
             <div id="view-dashboard" class="absolute inset-0 p-20">
-                <h1 id="welcomeMsg" class="text-6xl font-black italic">MobbyOS</h1>
+                <h1 id="welcomeMsg" class="text-6xl font-black italic tracking-tighter">MobbyOS</h1>
             </div>
-            </main>
+        </main>
     </div>
 
     <div id="configModal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-[100]">
         <div class="bg-[#0a0a0a] border border-white/10 p-10 rounded-[3rem] w-[400px]">
             <h2 class="text-2xl font-black uppercase italic mb-6">Settings</h2>
-            <input id="cfgName" placeholder="Display Name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-sm">
-            <input id="cfgGroq" type="password" placeholder="Groq API Key" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-sm">
-            <input id="cfgPFPLink" placeholder="PFP URL" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 text-sm">
-            <button id="commitBtn" class="w-full bg-sky-500 text-black font-black p-4 rounded-xl text-xs uppercase">Save Changes</button>
-            <button id="closeConfig" class="w-full text-white/20 text-[10px] mt-4 uppercase font-bold">Close</button>
+            <input id="cfgName" placeholder="Display Name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-sm text-white outline-none focus:border-sky-500">
+            <input id="cfgGroq" type="password" placeholder="Groq API Key" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-sm text-white outline-none focus:border-sky-500">
+            <input id="cfgPFPLink" placeholder="PFP URL" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 text-sm text-white outline-none focus:border-sky-500">
+            <button id="commitBtn" class="w-full bg-sky-500 text-black font-black p-4 rounded-xl text-xs uppercase hover:bg-sky-400 transition-all">Save Changes</button>
+            <button id="closeConfig" class="w-full text-white/20 text-[10px] mt-4 uppercase font-bold">Close Window</button>
         </div>
     </div>
 
@@ -76,91 +76,92 @@
 from browser import document, window, html, timer, ajax
 import json
 
-# FALLSAFE: Try to import SICryption, otherwise use a fake one so it doesn't crash
-try:
-    from SICryption import SICryption
-    cipher = SICryption("Roy_SIC_Corp_2026")
-except Exception as e:
-    print(f"SICryption Error: {e}")
-    cipher = None
-
-# --- STATE ---
-user_data = {"displayName": "User", "groqKey": "", "pfp": "https://i.imgur.com/r6oJp4O.png", "mode": "ADULT"}
-current_uid = None
-
-def refresh_ui():
-    document["sideName"].text = user_data["displayName"]
-    document["sidePFP"].src = user_data["pfp"]
-    document["userRole"].text = f"{user_data['mode']} MODE ACTIVATED"
-    document["welcomeMsg"].text = f"Hello, {user_data['displayName']}"
+def initialize_sic_engine():
+    global cipher
+    document["boot-status"].text = "Engine Warm-up..."
     
-    if user_data["groqKey"]:
-        document["mobbyStatus"].text = "Neural Online"
-        document["statusDot"].style.backgroundColor = "#22c55e"
-    else:
-        document["mobbyStatus"].text = "Awaiting Key"
-        document["statusDot"].style.backgroundColor = "#ef4444"
-
-def on_auth(user):
-    global current_uid
-    if user:
-        current_uid = user.uid
-        document["boot-screen"].style.opacity = "0"
-        timer.set_timeout(lambda: document["boot-screen"].classList.add("hidden"), 500)
-        
-        def load_data(snap):
-            if snap.exists():
-                user_data.update(snap.data().to_dict())
-                refresh_ui()
-        window.getDoc(window.doc(window.db, "users", user.uid)).then(load_data)
-    else:
-        window.location.href = "login.html"
-
-def commit_changes(ev):
-    document["commitBtn"].text = "SECURING..."
-    raw_key = document["cfgGroq"].value or user_data["groqKey"]
-    
-    # Use SICryption if available
-    final_key = cipher.encrypt(raw_key) if cipher and raw_key and not raw_key.startswith("SIC|") else raw_key
-    
-    updates = {
-        "displayName": document["cfgName"].value or user_data["displayName"],
-        "groqKey": final_key,
-        "pfp": document["cfgPFPLink"].value or user_data["pfp"]
-    }
-    
-    def success(res):
-        user_data.update(updates)
-        refresh_ui()
-        document["configModal"].classList.add("hidden")
-        document["commitBtn"].text = "Save Changes"
-        window.alert("SIC Corp Cloud Updated.")
-
-    window.updateDoc(window.doc(window.db, "users", current_uid), updates).then(success)
-
-def toggle_config(ev):
-    document["configModal"].classList.toggle("hidden")
-
-# --- THE SAFE START LOAD LOOP ---
-def safe_start():
     try:
-        # Test if the UI is actually there
-        test = document["btn-dash"]
-        
-        # Bind Buttons
-        document["btn-dash"].bind("click", lambda e: print("Dash Clicked"))
-        document["btn-config"].bind("click", toggle_config)
-        document["closeConfig"].bind("click", toggle_config)
-        document["commitBtn"].bind("click", commit_changes)
-        
-        # Start Firebase Auth
-        window.auth.onAuthStateChanged(on_auth)
-        print("SIC Engine: Handshake Successful.")
-    except KeyError:
-        # If the buttons aren't ready yet, wait 100ms and try again
-        timer.set_timeout(safe_start, 100)
+        from SICryption import SICryption
+        cipher = SICryption("Roy_SIC_Corp_2026")
+        print("SICryption: Active")
+    except Exception as e:
+        print(f"SICryption Load Error: {e}")
+        cipher = None
 
-safe_start()
+    # --- INTERNAL STATE ---
+    user_data = {"displayName": "User", "groqKey": "", "pfp": "https://i.imgur.com/r6oJp4O.png", "mode": "ADULT"}
+    current_uid = None
+
+    def refresh_ui():
+        document["sideName"].text = user_data["displayName"]
+        document["sidePFP"].src = user_data["pfp"]
+        document["userRole"].text = f"{user_data['mode']} MODE ACTIVATED"
+        document["welcomeMsg"].text = f"Hello, {user_data['displayName']}"
+        
+        if user_data["groqKey"]:
+            document["mobbyStatus"].text = "Neural Online"
+            document["statusDot"].style.backgroundColor = "#22c55e"
+        else:
+            document["mobbyStatus"].text = "Awaiting Key"
+            document["statusDot"].style.backgroundColor = "#ef4444"
+
+    def on_auth(user):
+        global current_uid
+        if user:
+            current_uid = user.uid
+            document["boot-status"].text = "Protocol Secure."
+            document["boot-screen"].style.opacity = "0"
+            timer.set_timeout(lambda: document["boot-screen"].classList.add("hidden"), 500)
+            
+            def load_data(snap):
+                if snap.exists():
+                    user_data.update(snap.data().to_dict())
+                    refresh_ui()
+            window.getDoc(window.doc(window.db, "users", user.uid)).then(load_data)
+        else:
+            window.location.href = "login.html"
+
+    def commit_changes(ev):
+        document["commitBtn"].text = "SECURING..."
+        raw_key = document["cfgGroq"].value or user_data["groqKey"]
+        
+        final_key = cipher.encrypt(raw_key) if cipher and raw_key and not raw_key.startswith("SIC|") else raw_key
+        
+        updates = {
+            "displayName": document["cfgName"].value or user_data["displayName"],
+            "groqKey": final_key,
+            "pfp": document["cfgPFPLink"].value or user_data["pfp"]
+        }
+        
+        def success(res):
+            user_data.update(updates)
+            refresh_ui()
+            document["configModal"].classList.add("hidden")
+            document["commitBtn"].text = "Save Changes"
+            window.alert("Cloud Sync Successful.")
+
+        window.updateDoc(window.doc(window.db, "users", current_uid), updates).then(success)
+
+    def toggle_config(ev):
+        document["configModal"].classList.toggle("hidden")
+
+    # --- BOOT BINDINGS ---
+    def start_handshake():
+        try:
+            document["boot-status"].text = "Handshaking UI..."
+            document["btn-config"].bind("click", toggle_config)
+            document["closeConfig"].bind("click", toggle_config)
+            document["commitBtn"].bind("click", commit_changes)
+            
+            window.auth.onAuthStateChanged(on_auth)
+            print("SIC Engine: Handshake Successful.")
+        except KeyError:
+            timer.set_timeout(start_handshake, 100)
+
+    start_handshake()
+
+# DELAY START: Give HTML/CSS 1 second to breathe
+timer.set_timeout(initialize_sic_engine, 1000)
     </script>
 </body>
 </html>
