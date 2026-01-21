@@ -3,232 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS V1 | SIC Corp</title>
+    <title>MobbyOS V1.1.0 | SIC Corp</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --sky: #38bdf8; --glow: 0 0 20px rgba(56, 189, 248, 0.2); }
-        body { background: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; margin: 0; }
-        
+        :root { --sky: #38bdf8; --glass: rgba(255, 255, 255, 0.03); }
+        body { background: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; margin: 0; display: flex; }
         .hidden { display: none !important; }
-
-        /* V1 Typewriter Reset Logic */
+        .glass { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        
+        /* Typewriter Animation Fix */
         .typewriter { overflow: hidden; white-space: nowrap; border-right: 3px solid var(--sky); width: 0; }
         .animate-v1 { animation: typing 1.5s steps(30, end) forwards, blink .75s step-end infinite; }
         @keyframes typing { from { width: 0 } to { width: 100% } }
         @keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--sky); } }
 
-        /* Magical Glassmorphism */
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .sidebar { transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100; }
-
-        /* Mobile Adjustments */
+        .sidebar { transition: 0.4s ease; z-index: 50; }
         @media (max-width: 768px) {
-            .sidebar { position: fixed; left: -100%; height: 100%; width: 85%; background: rgba(0,0,0,0.95); }
+            .sidebar { position: fixed; left: -100%; height: 100%; width: 85%; background: #000; }
             .sidebar.open { left: 0; }
         }
 
-        .input-magical { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 14px; border-radius: 16px; width: 100%; outline: none; transition: 0.3s; }
-        .input-magical:focus { border-color: var(--sky); box-shadow: var(--glow); }
+        .input-magical { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 14px; border-radius: 16px; width: 100%; outline: none; transition: 0.3s; }
+        .input-magical:focus { border-color: var(--sky); box-shadow: 0 0 15px rgba(56, 189, 248, 0.1); }
         
-        /* Loading Spinner */
-        .loader { border: 2px solid #f3f3f3; border-top: 2px solid var(--sky); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .tab-btn.active { background: rgba(56, 189, 248, 0.1); color: var(--sky); border-left: 3px solid var(--sky); }
+        .pfp-drop-zone { border: 2px dashed rgba(56, 189, 248, 0.2); transition: 0.3s; }
+        .pfp-drop-zone.dragover { background: rgba(56, 189, 248, 0.1); border-color: var(--sky); }
     </style>
 </head>
 <body class="flex flex-col md:flex-row">
 
-    <div class="md:hidden p-4 flex justify-between items-center glass border-b border-white/5">
-        <h1 class="font-black tracking-tighter text-lg uppercase">Mobby<span class="text-sky-400">OS V1</span></h1>
+    <div class="md:hidden p-4 flex justify-between items-center glass border-b border-white/5 w-full">
+        <h1 class="font-black tracking-tighter">MOBBY<span class="text-sky-400">OS</span></h1>
         <button onclick="document.getElementById('sideBar').classList.toggle('open')" class="text-white text-2xl">☰</button>
     </div>
 
     <aside id="sideBar" class="sidebar w-[300px] bg-black flex flex-col p-8 border-r border-white/5">
-        <div class="mb-12 flex items-center gap-4">
-            <div class="relative">
-                <img id="sidePFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-12 h-12 rounded-2xl object-cover ring-1 ring-white/10">
-                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-black"></div>
+        <div class="mb-10 flex items-center gap-4">
+            <div id="dropZoneSide" class="pfp-drop-zone rounded-full p-1">
+                <img id="sidePFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-12 h-12 rounded-full object-cover">
             </div>
             <div class="overflow-hidden">
                 <p id="sideName" class="text-sm font-black truncate">Initializing...</p>
-                <p id="userEmail" class="text-[7px] text-sky-400 font-black uppercase tracking-widest opacity-60 truncate">SIC CORP SECURE</p>
+                <p class="text-[7px] text-sky-400 font-black uppercase tracking-widest opacity-60">MobbyOS V1.1.0</p>
             </div>
         </div>
 
-        <nav class="space-y-2 flex-grow">
-            <button onclick="showView('dashboard')" class="w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase hover:bg-white/5 transition tracking-widest" id="nav-dashboard">Dashboard</button>
-            <button onclick="checkKeyBeforeTerminal()" class="w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase hover:bg-white/5 transition tracking-widest" id="nav-terminal">Terminal</button>
-            <button onclick="toggleSettings()" class="w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase hover:bg-white/5 transition tracking-widest">Config</button>
+        <nav class="space-y-1 flex-grow">
+            <button onclick="showView('dashboard')" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase hover:bg-white/5 transition">Dashboard</button>
+            <button onclick="checkKeyBeforeTerminal()" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase hover:bg-white/5 transition">Terminal</button>
+            <button onclick="toggleSettings()" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase hover:bg-white/5 transition">Config</button>
+            <button onclick="toggleHistory()" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase hover:bg-white/5 transition">Ver. History</button>
         </nav>
 
-        <div class="mt-auto border-t border-white/5 pt-6">
-            <button onclick="logout()" class="w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase text-red-500 hover:bg-red-500/10 transition">Logout System</button>
-        </div>
+        <button onclick="logout()" class="mt-auto text-left p-4 rounded-xl text-[10px] font-black uppercase text-red-500 hover:bg-red-500/10 transition">Logout System</button>
     </aside>
 
-    <main class="flex-grow relative p-8 md:p-16 overflow-y-auto bg-gradient-to-br from-slate-950 to-black">
-        
-        <div id="view-dashboard" class="h-full flex flex-col justify-center items-start animate-in fade-in duration-700">
-            <img id="dashPFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-28 h-28 md:w-40 md:h-40 rounded-[2.5rem] mb-8 shadow-2xl border border-white/10 bg-slate-900">
+    <main class="flex-grow relative p-8 md:p-16 overflow-y-auto">
+        <div id="view-dashboard" class="h-full flex flex-col justify-center">
+            <div id="dropZoneDash" class="pfp-drop-zone w-32 h-32 rounded-[2rem] mb-8 flex items-center justify-center overflow-hidden bg-slate-900 border border-white/5">
+                <img id="dashPFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-full h-full object-cover">
+            </div>
             <div class="h-20">
-                <h2 id="welcomeMsg" class="text-5xl md:text-7xl font-black mb-4 typewriter">Welcome</h2>
+                <h2 id="welcomeMsg" class="text-5xl md:text-7xl font-black typewriter">Welcome</h2>
             </div>
-            <div class="flex items-center gap-4 mt-4">
-                <span class="px-3 py-1 bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[9px] font-black rounded-full uppercase tracking-tighter">MobbyOS V1</span>
-                <span class="text-white/20 text-[9px] font-black uppercase tracking-[0.3em]">SIC Corp Protocol Active</span>
-            </div>
+            <p class="text-sky-400 text-[10px] mt-4 font-black tracking-[0.5em] uppercase">SIC Corp Identity Confirmed</p>
         </div>
 
         <div id="view-terminal" class="h-full flex flex-col hidden">
-            <div id="chatBox" class="flex-grow overflow-y-auto mb-6 space-y-4 p-6 glass rounded-[2rem] font-mono text-xs leading-relaxed"></div>
-            <div class="flex flex-col gap-3 glass p-4 rounded-[2rem]">
-                <textarea id="userInput" placeholder="Execute command..." rows="1" class="bg-transparent p-2 outline-none text-sm resize-none w-full"></textarea>
+            <div id="chatBox" class="flex-grow overflow-y-auto mb-6 p-6 glass rounded-[2.5rem] text-xs font-mono space-y-4"></div>
+            <div class="glass p-4 rounded-[1.5rem] flex flex-col gap-2">
+                <textarea id="userInput" rows="1" class="bg-transparent outline-none text-sm resize-none w-full p-2" placeholder="Execute command..."></textarea>
                 <div class="flex justify-between items-center px-2">
-                    <span class="text-[8px] text-white/20 font-black uppercase">V1 Engine // LPU Active</span>
-                    <button onclick="handleSend()" class="bg-sky-500 text-white px-6 py-2 rounded-xl font-black text-[10px] uppercase hover:scale-105 transition shadow-lg shadow-sky-500/20">Send</button>
+                    <span class="text-[8px] text-white/20 font-black uppercase">Shift+Enter for newline | Enter to send</span>
+                    <button onclick="handleSend()" class="text-sky-400 font-black text-xs hover:scale-105 transition">SEND</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="keySetup" class="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-md p-10 glass rounded-[3rem] text-center border-sky-500/20 shadow-2xl">
-            <div class="w-16 h-16 bg-sky-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-sky-500/20">
-                <span class="text-sky-400 text-2xl font-black">!</span>
+    <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-4xl h-[550px] glass rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl">
+            <div class="w-full md:w-64 bg-white/5 p-8 border-r border-white/5 flex flex-col gap-2">
+                <h3 class="text-[10px] font-black text-sky-400 uppercase mb-8">Navigation</h3>
+                <button onclick="setTab('profile')" id="btn-profile" class="tab-btn active w-full text-left p-4 rounded-xl text-[10px] font-bold uppercase transition">Profile</button>
+                <button onclick="setTab('neural')" id="btn-neural" class="tab-btn w-full text-left p-4 rounded-xl text-[10px] font-bold uppercase transition">Neural Link</button>
+                <button onclick="setTab('security')" id="btn-security" class="tab-btn w-full text-left p-4 rounded-xl text-[10px] font-bold uppercase transition">Security</button>
+                <button onclick="toggleSettings()" class="mt-auto text-[9px] font-black text-white/20 uppercase">Close</button>
             </div>
-            <h2 class="text-2xl font-black text-white mb-2 uppercase tracking-tight">V1 Initialization</h2>
-            <p class="text-[11px] text-white/40 mb-8 leading-relaxed">System security requires a <b>Groq API Key</b> to link MobbyOS V1 to the neural network.</p>
-            <input type="password" id="forcedKey" class="input-magical mb-4 text-center" placeholder="Paste gsk_ key here">
-            <button onclick="saveForcedKey()" class="w-full bg-sky-500 p-5 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:brightness-110 transition">Connect Engine</button>
+            <div class="flex-grow p-10 overflow-y-auto">
+                <div id="tab-profile" class="tab-content space-y-6">
+                    <h2 class="text-2xl font-black italic uppercase">Profile</h2>
+                    <input type="text" id="setName" class="input-magical" placeholder="New Display Name">
+                </div>
+                <div id="tab-neural" class="tab-content hidden space-y-6">
+                    <h2 class="text-2xl font-black italic uppercase">Neural</h2>
+                    <input type="password" id="setGroq" class="input-magical" placeholder="Groq API Key (gsk_...)">
+                </div>
+                <div id="tab-security" class="tab-content hidden space-y-6">
+                    <h2 class="text-2xl font-black italic uppercase">Security</h2>
+                    <input type="password" id="setAuthPass" class="input-magical mb-2" placeholder="New Login Password">
+                    <input type="password" id="setNewSysPass" class="input-magical" placeholder="New System Pin">
+                </div>
+                <div class="mt-12 flex justify-end">
+                    <button onclick="preSync()" class="bg-sky-500 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg shadow-sky-500/20">Sync Changes</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm p-10 glass rounded-[3rem]">
-            <h3 class="text-xs font-black text-sky-400 mb-8 uppercase tracking-[0.2em] text-center">Sync Config</h3>
-            <div class="space-y-4">
-                <input type="text" id="setName" class="input-magical" placeholder="Change Display Name">
-                <input type="text" id="setPFP" class="input-magical" placeholder="Profile Picture URL">
-                <button onclick="syncChanges()" class="w-full bg-sky-500 p-5 rounded-2xl font-black text-[11px] uppercase tracking-widest mt-4">Sync to SIC Cloud</button>
-                <button onclick="toggleSettings()" class="w-full text-white/20 text-[9px] font-black uppercase mt-4">Discard</button>
+    <div id="historyTab" class="fixed inset-0 z-[150] bg-black/90 flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-lg p-10 glass rounded-[3rem]">
+            <h2 class="text-xl font-black mb-6 uppercase italic text-sky-400">Version History</h2>
+            <div class="space-y-6 max-h-[350px] overflow-y-auto pr-4 font-mono text-[11px]">
+                <div>
+                    <p class="text-white font-black">V1.1.0 (Stable)</p>
+                    <p class="text-white/40">- Added Categorized Settings Menu<br>- Added Version History Log<br>- Added Auth Password Updating<br>- Fixed Shift+Enter logic</p>
+                </div>
+                <div>
+                    <p class="text-white/60">V1.1 (Security)</p>
+                    <p class="text-white/40">- 7-Day Username Lock<br>- System Pin Authorization<br>- Drag-and-Drop PFP Support</p>
+                </div>
+                <div>
+                    <p class="text-white/60">V1.0 (Core)</p>
+                    <p class="text-white/40">- Initial MobbyOS Framework<br>- Groq API Neural Integration</p>
+                </div>
             </div>
+            <button onclick="toggleHistory()" class="w-full mt-8 bg-white/5 p-4 rounded-xl font-black text-[10px] uppercase">Acknowledge</button>
+        </div>
+    </div>
+
+    <div id="passConfirm" class="fixed inset-0 z-[300] bg-black/95 flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-sm p-8 glass rounded-3xl text-center">
+            <h2 class="text-sm font-black mb-4 uppercase text-sky-400">Security Check</h2>
+            <input type="password" id="sysPass" class="input-magical mb-4 text-center" placeholder="System Pin">
+            <button id="confirmYes" class="w-full bg-white text-black p-4 rounded-xl font-black text-[10px] uppercase">Verify & Commit</button>
+            <button onclick="document.getElementById('passConfirm').classList.add('hidden')" class="mt-4 text-[9px] text-white/20 uppercase">Cancel</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        let currentUserData = null;
+        let uData = null;
 
         onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = "login.html"; // Ensure you have this file
-                return;
-            }
-            document.getElementById('userEmail').innerText = user.email;
+            if (!user) return window.location.href = "login.html";
             const snap = await getDoc(doc(db, "users", user.uid));
-            if (snap.exists()) {
-                currentUserData = snap.data();
-                updateUI();
+            if(snap.exists()) {
+                uData = snap.data();
             } else {
-                const defaults = { displayName: "User", pfp: "", groqKey: "" };
-                await setDoc(doc(db, "users", user.uid), defaults);
-                currentUserData = defaults;
-                updateUI();
+                uData = { displayName: "New User", pfp: "", groqKey: "", sysPass: "1234", lastUserUpdate: 0 };
+                await setDoc(doc(db, "users", user.uid), uData);
             }
+            updateUI();
         });
 
-        window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
+        function updateUI() {
+            document.getElementById('sideName').innerText = uData.displayName;
+            document.getElementById('sidePFP').src = uData.pfp;
+            document.getElementById('dashPFP').src = uData.pfp;
+            showView('dashboard');
+        }
 
         window.showView = (name) => {
             document.getElementById('view-dashboard').classList.add('hidden');
             document.getElementById('view-terminal').classList.add('hidden');
             document.getElementById(`view-${name}`).classList.remove('hidden');
-            
             if(name === 'dashboard') {
                 const el = document.getElementById('welcomeMsg');
-                el.innerText = `Welcome, ${currentUserData?.displayName || 'User'}`;
+                el.innerText = `Welcome, ${uData.displayName}`;
                 el.classList.remove('animate-v1');
-                void el.offsetWidth; 
+                void el.offsetWidth;
                 el.classList.add('animate-v1');
             }
-            if(window.innerWidth < 768) document.getElementById('sideBar').classList.remove('open');
         };
 
-        window.checkKeyBeforeTerminal = () => {
-            if (!currentUserData?.groqKey) {
-                document.getElementById('keySetup').classList.remove('hidden');
-            } else {
-                showView('terminal');
-            }
-        };
-
-        window.syncChanges = async () => {
-            const name = document.getElementById('setName').value.trim();
-            const pfp = document.getElementById('setPFP').value.trim();
-            let updates = {};
-            if (name) updates.displayName = name;
-            if (pfp) updates.pfp = pfp;
-
-            if (Object.keys(updates).length > 0) {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
-                currentUserData = { ...currentUserData, ...updates };
-                updateUI();
-            }
-            toggleSettings();
-        };
-
-        window.saveForcedKey = async () => {
-            const key = document.getElementById('forcedKey').value.trim();
-            if (key.startsWith('gsk_')) {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { groqKey: key });
-                currentUserData.groqKey = key;
-                document.getElementById('keySetup').classList.add('hidden');
-                showView('terminal');
-            } else {
-                alert("Invalid Key Format. Must start with gsk_");
-            }
-        };
-
-        function updateUI() {
-            document.getElementById('sideName').innerText = currentUserData.displayName || "User";
-            document.getElementById('sidePFP').src = currentUserData.pfp || "";
-            document.getElementById('dashPFP').src = currentUserData.pfp || "";
-            showView('dashboard');
-        }
-
-        window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
+        // --- TERMINAL WORKFLOW ---
+        const inputArea = document.getElementById('userInput');
+        inputArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+        });
 
         window.handleSend = async () => {
-            const input = document.getElementById('userInput');
-            const text = input.value.trim();
-            if(!text) return;
-            input.value = '';
-
+            const text = inputArea.value.trim();
+            if(!text || !uData.groqKey) return;
+            inputArea.value = '';
             const chat = document.getElementById('chatBox');
-            chat.innerHTML += `<div class="mb-2 text-white/40 uppercase font-black text-[9px] tracking-widest">User</div><div class="mb-6">${text}</div>`;
+            chat.innerHTML += `<div><span class="text-white/20">YOU:</span> ${text}</div>`;
+            chat.scrollTop = chat.scrollHeight;
 
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
-                    headers: { "Authorization": `Bearer ${currentUserData.groqKey}`, "Content-Type": "application/json" },
+                    headers: { "Authorization": `Bearer ${uData.groqKey}`, "Content-Type": "application/json" },
                     body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] })
                 });
                 const data = await res.json();
-                const botReply = data.choices[0].message.content;
-                chat.innerHTML += `<div class="mb-2 text-sky-400 uppercase font-black text-[9px] tracking-widest">MobbyOS V1</div><div class="mb-6 text-sky-100/90">${botReply}</div>`;
-            } catch (e) {
-                chat.innerHTML += `<div class="text-red-500 font-black text-[10px]">!! SYSTEM LINK FAILURE !!</div>`;
-            }
+                chat.innerHTML += `<div class="text-sky-400"><b>MOBBY:</b> ${data.choices[0].message.content}</div>`;
+            } catch { chat.innerHTML += `<div class="text-red-500">ENGINE ERROR</div>`; }
             chat.scrollTop = chat.scrollHeight;
         };
+
+        // --- SETTINGS LOGIC ---
+        window.setTab = (tabName) => {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${tabName}`).classList.add('active');
+        };
+
+        window.preSync = () => {
+            const name = document.getElementById('setName').value.trim();
+            if(name && name !== uData.displayName) {
+                const diff = Date.now() - (uData.lastUserUpdate || 0);
+                if(diff < 604800000) return alert("Username change locked for 7 days.");
+                if(!confirm("Are you sure? This locks your name for 7 days.")) return;
+            }
+            document.getElementById('passConfirm').classList.remove('hidden');
+        };
+
+        document.getElementById('confirmYes').onclick = async () => {
+            if (document.getElementById('sysPass').value !== uData.sysPass) return alert("Wrong Pin.");
+            
+            const updates = {};
+            const n = document.getElementById('setName').value.trim();
+            const g = document.getElementById('setGroq').value.trim();
+            const s = document.getElementById('setNewSysPass').value.trim();
+            const a = document.getElementById('setAuthPass').value.trim();
+
+            if (n) { updates.displayName = n; updates.lastUserUpdate = Date.now(); }
+            if (g) updates.groqKey = g;
+            if (s) updates.sysPass = s;
+            
+            try {
+                if (a) await updatePassword(auth.currentUser, a);
+                if (Object.keys(updates).length > 0) {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
+                    uData = {...uData, ...updates};
+                    updateUI();
+                }
+                alert("V1.1.0 Sync Complete.");
+                toggleSettings();
+                document.getElementById('passConfirm').classList.add('hidden');
+            } catch (e) { alert(e.message); }
+        };
+
+        // --- PFP DRAG DROP ---
+        const handleDrop = async (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if(file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    const base64 = ev.target.result;
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { pfp: base64 });
+                    uData.pfp = base64;
+                    updateUI();
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        ['dropZoneSide', 'dropZoneDash'].forEach(id => {
+            const el = document.getElementById(id);
+            el.ondragover = (e) => { e.preventDefault(); el.classList.add('dragover'); };
+            el.ondragleave = () => el.classList.remove('dragover');
+            el.ondrop = (e) => { el.classList.remove('dragover'); handleDrop(e); };
+        });
+
+        window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
+        window.toggleHistory = () => document.getElementById('historyTab').classList.toggle('hidden');
+        window.logout = () => signOut(auth);
+        window.checkKeyBeforeTerminal = () => uData.groqKey ? showView('terminal') : alert("Configure Groq API in Settings first.");
     </script>
 </body>
 </html>
