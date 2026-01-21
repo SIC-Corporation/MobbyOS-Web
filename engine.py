@@ -1,71 +1,72 @@
 from browser import document, window, timer, alert
 import SICHelper
-import SICryption # We use this to verify the secure hash of the emails
-
-# MASTER ADMIN LIST
-SIC_ADMINS = ["SICMailCenter1@gmail.com", "Roystonslijkerman@gmail.com"]
+import SICryption
 
 def run_os():
     try:
-        # BIND BUTTONS
+        # BINDINGS
         document["auth-btn"].bind("click", handle_auth)
         document["logoutBtn"].bind("click", kill_session)
+        document["btn-config"].bind("click", lambda e: document["configModal"].classList.remove("hidden"))
+        document["closeConfig"].bind("click", lambda e: document["configModal"].classList.add("hidden"))
         
+        # BOOT SEQUENCE
+        timer.set_timeout(lambda: document["boot-screen"].classList.add("hidden"), 1000)
+
+        # SESSION CHECK
         user = window.localStorage.getItem("mobby_user")
         email = window.localStorage.getItem("mobby_email")
-        
-        # CLEAR BOOT SCREEN
-        timer.set_timeout(lambda: document["boot-screen"].classList.add("hidden"), 800)
 
         if not user or not email:
             document["auth-screen"].classList.remove("hidden")
         else:
-            launch_os(user, email)
+            initialize_session(user, email)
 
     except Exception as e:
-        print(f"SIC Engine Crash: {e}")
+        print(f"OS Logic Failure: {e}")
 
 def handle_auth(ev):
     name = document["auth-user"].value
     email = document["auth-email"].value.strip()
-    
     if name and email:
         window.localStorage.setItem("mobby_user", name)
         window.localStorage.setItem("mobby_email", email)
-        launch_os(name, email)
+        initialize_session(name, email)
 
-def launch_os(name, email):
+def initialize_session(name, email):
     document["auth-screen"].classList.add("hidden")
     document["sideName"].text = name
+    document["displayEmail"].text = email
     
-    # 🕵️ MODE CHECKER
-    role = "ADULT" # Default
-    color = "#ffffff" # White for Adults
+    # 🕵️ ACCESS CLEARANCE VIA SICRYPTION
+    # We ask SICryption to identify the role based on the email
+    role_data = SICryption.identify_access(email)
     
-    if email in SIC_ADMINS:
-        role = "ADMIN (SIC CORP)"
-        color = "#38bdf8" # Sky Blue for Roy/Admin
-        document["role-border"].style.borderColor = "#38bdf8"
-        print("ADMIN CLEARANCE GRANTED")
-    elif "@kids.com" in email: # Example logic for Kids mode
-        role = "KIDS"
-        color = "#fbbf24" # Yellow for Kids
-        document["role-border"].style.borderColor = "#fbbf24"
+    role_label = role_data["role"]
+    role_color = role_data["color"]
     
-    # Update UI with Role
-    display = document["userRoleDisplay"]
-    display.text = role
-    display.style.backgroundColor = f"{color}22" # 20% opacity
-    display.style.color = color
+    # Update UI Role Card
+    document["userRole"].text = role_label
+    document["userRole"].style.color = role_color
+    document["userRole"].style.backgroundColor = f"{role_color}15"
     
-    animate_welcome(f"MobbyOS: {role} Mode Active.")
+    if role_label == "ADMIN (SIC CORP)":
+        document["role-card"].classList.add("admin-glow")
+        document["modeDesc"].text = "SIC MASTER OVERRIDE ACTIVE"
+    else:
+        document["modeDesc"].text = f"{role_label} MODE ACTIVE"
+
+    # Status Dot
+    document["status-dot"].style.backgroundColor = role_color
+    
+    animate_welcome(f"System: {role_label}")
 
 def animate_welcome(text):
     document["welcomeMsg"].text = ""
     def type_char(i):
         if i <= len(text):
             document["welcomeMsg"].text = text[:i]
-            timer.set_timeout(lambda: type_char(i+1), 30)
+            timer.set_timeout(lambda: type_char(i+1), 40)
     type_char(0)
 
 def kill_session(ev):
