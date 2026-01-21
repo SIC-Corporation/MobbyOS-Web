@@ -78,3 +78,26 @@ if __name__ == "__main__":
     print(f"STATUS: SECURE")
     print(f"CIPHERTEXT: {locked}")
     print(f"DECODED:    {unlocked}")
+
+# --- SAFE BOOT BINDINGS ---
+        def start_mobby(ev=None):
+            try:
+                document["btn-dash"].bind("click", change_view)
+                document["btn-term"].bind("click", change_view)
+                document["btn-config"].bind("click", toggle_config)
+                document["closeConfig"].bind("click", toggle_config)
+                document["tabProfile"].bind("click", show_tab)
+                document["tabModes"].bind("click", show_tab)
+                document["commitBtn"].bind("click", commit_changes)
+                document["sendBtn"].bind("click", send_msg)
+                document["termInput"].bind("keydown", key_handler)
+                
+                # Check auth only after UI is ready
+                window.auth.onAuthStateChanged(on_auth)
+                print("MobbyOS Engine: Bindings Secured.")
+            except KeyError as e:
+                print(f"SIC Corp Error: Element {e} not found yet. Retrying...")
+                timer.set_timeout(start_mobby, 500)
+
+        # Start the boot sequence
+        start_mobby()
