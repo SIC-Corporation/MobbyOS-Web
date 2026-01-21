@@ -14,7 +14,7 @@
         #boot-screen { position: fixed; inset: 0; background: black; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
         .boot-loader { width: 30px; height: 30px; border: 2px solid #38bdf822; border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        /* This hides any rogue text from showing up on screen */
+        /* This prevents Python code from appearing as text if the engine lags */
         script[type="text/python"] { display: none !important; }
     </style>
 </head>
@@ -64,10 +64,7 @@
         </div>
     </div>
 
-    <script type="text/python">
-<script type="text/python" src="engine.py"></script>
-</body>
-    </script>
+    <script type="text/python" src="engine.py"></script>
 
 </body>
 </html>
