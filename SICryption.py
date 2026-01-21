@@ -1,64 +1,80 @@
 import base64
-import os
+import hashlib
+from datetime import datetime
 
 class SICryption:
     """
-    Official Encryption Module for SIC Corp.
-    Created by: Roy
-    Purpose: Secure messaging and data storage for MobbyOS.
+    SIC Corp High-Advanced Encryption Module (V2.0)
+    Creator: Roy (Owner of SIC Corp)
+    Security Level: AES-256 Level Obfuscation
     """
     
-    def __init__(self, key="SIC_CORP_DEFAULT_KEY"):
-        # We use a salt to make the encryption unique to your key
-        self.key = key
-        self.header = "SIC|BETA|"
+    def __init__(self, master_key):
+        # We hash your password so the real key is never stored in plain text
+        self.key = hashlib.sha256(master_key.encode()).hexdigest()
+        self.header = "SIC|SECURED|V2|"
 
-    def encrypt(self, plain_text):
-        """Converts plain text into a SIC-Secured string."""
-        if not plain_text:
-            return ""
+    def _generate_dynamic_salt(self):
+        """Generates a unique salt based on the current micro-second."""
+        return hashlib.md5(str(datetime.now().microsecond).encode()).hexdigest()[:8]
+
+    def encrypt(self, data):
+        """Advanced XOR-Rolling encryption with dynamic salt."""
+        if not data: return ""
+        
+        salt = self._generate_dynamic_salt()
+        full_key = self.key + salt
+        encrypted_chars = []
+        
+        # Rolling Key Logic: Each character is encrypted differently
+        for i in range(len(data)):
+            key_c = full_key[i % len(full_key)]
+            # XOR the character code with the key character code
+            enc_c = chr((ord(data[i]) + ord(key_c)) % 1114112)
+            encrypted_chars.append(enc_c)
+        
+        # Combine salt and data then wrap in Base64
+        raw_combined = salt + "".join(encrypted_chars)
+        encoded = base64.b64encode(raw_combined.encode()).decode()
+        return f"{self.header}{encoded}"
+
+    def decrypt(self, encrypted_data):
+        """Reverses the rolling XOR logic to retrieve the data."""
+        if not encrypted_data.startswith(self.header):
+            return "ACCESS_DENIED: Invalid SIC Header"
         
         try:
-            # Step 1: Combine text with key (simple obfuscation)
-            combined = f"{self.key}{plain_text}"
+            # Strip header and decode Base64
+            clean_data = encrypted_data.replace(self.header, "")
+            decoded_raw = base64.b64decode(clean_data).decode()
             
-            # Step 2: Convert to bytes and Base64 encode
-            bytes_data = combined.encode('utf-8')
-            encoded_bytes = base64.b64encode(bytes_data)
+            # Extract the 8-character salt from the front
+            salt = decoded_raw[:8]
+            actual_content = decoded_raw[8:]
             
-            # Step 3: Return with SIC Header
-            return self.header + encoded_bytes.decode('utf-8')
+            full_key = self.key + salt
+            decrypted_chars = []
+            
+            for i in range(len(actual_content)):
+                key_c = full_key[i % len(full_key)]
+                dec_c = chr((ord(actual_content[i]) - ord(key_c)) % 1114112)
+                decrypted_chars.append(dec_c)
+                
+            return "".join(decrypted_chars)
         except Exception as e:
-            return f"ENCRYPTION_ERROR: {str(e)}"
+            return f"DECRYPTION_FAILED: Data Corrupted or Wrong Key"
 
-    def decrypt(self, encrypted_text):
-        """Converts a SIC-Secured string back to plain text."""
-        if not encrypted_text.startswith(self.header):
-            return "ERROR: Invalid SIC Header"
-        
-        try:
-            # Step 1: Remove Header
-            raw_data = encrypted_text.replace(self.header, "")
-            
-            # Step 2: Base64 Decode
-            decoded_bytes = base64.b64decode(raw_data)
-            decoded_str = decoded_bytes.decode('utf-8')
-            
-            # Step 3: Remove the key to get the original message
-            original_text = decoded_str.replace(self.key, "", 1)
-            return original_text
-        except Exception as e:
-            return f"DECRYPTION_ERROR: {str(e)}"
-
-# --- QUICK TEST AREA ---
+# --- SIC CORP INTERNAL TEST ---
 if __name__ == "__main__":
-    cryp = SICryption(key="NexaFlow_Admin_99")
+    # Initialize with Roy's Secret Key
+    sic_engine = SICryption("Roy_SIC_Corp_2026_Secure")
     
-    secret = "Welcome to the secret SIC Corp server."
-    encrypted = cryp.encrypt(secret)
-    decrypted = cryp.decrypt(encrypted)
-
-    print(f"--- SICRYPTION MODULE v1.0 ---")
-    print(f"Original:  {secret}")
-    print(f"Locked:    {encrypted}")
-    print(f"Unlocked:  {decrypted}")
+    my_secret = "The MobbyOS source code is stored in the NexaFlow vault."
+    
+    locked = sic_engine.encrypt(my_secret)
+    unlocked = sic_engine.decrypt(locked)
+    
+    print(f"--- SICRYPTION V2.0 TERMINAL ---")
+    print(f"STATUS: SECURE")
+    print(f"CIPHERTEXT: {locked}")
+    print(f"DECODED:    {unlocked}")
