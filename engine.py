@@ -1,63 +1,77 @@
 from browser import document, window, timer, alert
 import SICHelper
+import SICryption # We use this to verify the secure hash of the emails
 
-mobby_link = SICHelper.SICHandshake("Roy_SIC_Corp_2026")
+# MASTER ADMIN LIST
+SIC_ADMINS = ["SICMailCenter1@gmail.com", "Roystonslijkerman@gmail.com"]
 
 def run_os():
     try:
-        # 1. BIND BUTTONS
-        document["btn-config"].bind("click", lambda e: document["configModal"].classList.remove("hidden"))
-        document["closeConfig"].bind("click", lambda e: document["configModal"].classList.add("hidden"))
-        document["commitBtn"].bind("click", save_settings)
-        document["logoutBtn"].bind("click", logout_action)
-        document["entryBtn"].bind("click", login_action)
+        # BIND BUTTONS
+        document["auth-btn"].bind("click", handle_auth)
+        document["logoutBtn"].bind("click", kill_session)
         
-        # 2. CHECK SESSION
-        current_user = window.localStorage.getItem("mobby_username")
+        user = window.localStorage.getItem("mobby_user")
+        email = window.localStorage.getItem("mobby_email")
         
-        if not current_user:
-            document["login-screen"].classList.remove("hidden")
+        # CLEAR BOOT SCREEN
+        timer.set_timeout(lambda: document["boot-screen"].classList.add("hidden"), 800)
+
+        if not user or not email:
+            document["auth-screen"].classList.remove("hidden")
         else:
-            start_dashboard(current_user)
+            launch_os(user, email)
 
-        # 3. STATUS UPDATE
-        document["mobbyStatus"].text = "Neural Online"
-        document["statusDot"].style.backgroundColor = "#22c55e"
-        
-        timer.set_timeout(lambda: document["boot-screen"].classList.add("hidden"), 500)
-        
     except Exception as e:
-        print(f"OS Error: {e}")
+        print(f"SIC Engine Crash: {e}")
 
-def start_dashboard(name):
-    document["login-screen"].classList.add("hidden")
+def handle_auth(ev):
+    name = document["auth-user"].value
+    email = document["auth-email"].value.strip()
+    
+    if name and email:
+        window.localStorage.setItem("mobby_user", name)
+        window.localStorage.setItem("mobby_email", email)
+        launch_os(name, email)
+
+def launch_os(name, email):
+    document["auth-screen"].classList.add("hidden")
     document["sideName"].text = name
-    animate_text(f"Welcome, {name}")
+    
+    # 🕵️ MODE CHECKER
+    role = "ADULT" # Default
+    color = "#ffffff" # White for Adults
+    
+    if email in SIC_ADMINS:
+        role = "ADMIN (SIC CORP)"
+        color = "#38bdf8" # Sky Blue for Roy/Admin
+        document["role-border"].style.borderColor = "#38bdf8"
+        print("ADMIN CLEARANCE GRANTED")
+    elif "@kids.com" in email: # Example logic for Kids mode
+        role = "KIDS"
+        color = "#fbbf24" # Yellow for Kids
+        document["role-border"].style.borderColor = "#fbbf24"
+    
+    # Update UI with Role
+    display = document["userRoleDisplay"]
+    display.text = role
+    display.style.backgroundColor = f"{color}22" # 20% opacity
+    display.style.color = color
+    
+    animate_welcome(f"MobbyOS: {role} Mode Active.")
 
-def animate_text(full_text):
+def animate_welcome(text):
     document["welcomeMsg"].text = ""
-    def type_char(index):
-        if index <= len(full_text):
-            document["welcomeMsg"].text = full_text[:index]
-            timer.set_timeout(lambda: type_char(index + 1), 50)
+    def type_char(i):
+        if i <= len(text):
+            document["welcomeMsg"].text = text[:i]
+            timer.set_timeout(lambda: type_char(i+1), 30)
     type_char(0)
 
-def login_action(ev):
-    name = document["loginUser"].value
-    if name:
-        window.localStorage.setItem("mobby_username", name)
-        start_dashboard(name)
-
-def save_settings(ev):
-    new_name = document["cfgName"].value
-    if new_name:
-        window.localStorage.setItem("mobby_username", new_name)
-        document["sideName"].text = new_name
-        animate_text(f"Hello, {new_name}")
-        document["configModal"].classList.add("hidden")
-
-def logout_action(ev):
+def kill_session(ev):
     window.localStorage.clear()
     window.location.reload()
 
+# SIC Handshake
+mobby_link = SICHelper.SICHandshake("Roy_SIC_Corp_2026")
 SICHelper.boot_sequence(run_os)
