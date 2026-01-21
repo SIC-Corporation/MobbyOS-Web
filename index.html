@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS V1.1.0 | Stable</title>
+    <title>MobbyOS V1.1.0 | Python Engine</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
@@ -12,257 +16,238 @@
         .hidden { display: none !important; }
         .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
         
-        /* BOOT ANIMATION */
+        /* BOOT SCREEN */
         #boot-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .boot-loader { width: 40px; height: 40px; border: 3px solid rgba(56, 189, 248, 0.1); border-top-color: var(--sky); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* WELCOME TYPEWRITER */
+        /* TYPEWRITER */
         .typewriter { display: inline-block; overflow: hidden; white-space: nowrap; border-right: 3px solid var(--sky); width: 0; }
         .run-anim { animation: typing 1s steps(20, end) forwards, blink .75s step-end infinite; }
         @keyframes typing { from { width: 0 } to { width: 100% } }
         @keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--sky); } }
 
-        .nav-btn { border-radius: 12px; transition: 0.2s; }
         .nav-active { background: rgba(56, 189, 248, 0.1); color: var(--sky); border: 1px solid rgba(56, 189, 248, 0.2); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
     </style>
 </head>
-<body class="flex h-screen w-screen overflow-hidden">
+<body onload="brython()" class="flex h-screen w-screen overflow-hidden">
 
     <div id="boot-screen">
         <div class="boot-loader mb-4"></div>
-        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-sky-400">MobbyOS V1.1.0 Initializing</p>
-        <p id="boot-status" class="text-[8px] text-white/20 uppercase mt-2 font-mono">Loading Neural Core...</p>
-    </div>
-
-    <div id="setup-overlay" class="fixed inset-0 z-[5000] bg-black/95 flex items-center justify-center hidden">
-        <div class="max-w-md w-full p-10 glass rounded-[3rem] text-center">
-            <h2 class="text-2xl font-black italic mb-2">SYSTEM SETUP</h2>
-            <p class="text-[10px] text-white/40 uppercase mb-8">Neural Engine key required to continue</p>
-            <input id="setup-key" type="password" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm mb-4 outline-none focus:border-sky-500" placeholder="Enter Groq Key (gsk_...)">
-            <button onclick="saveSetup()" class="w-full bg-sky-500 p-4 rounded-2xl font-black uppercase text-xs">Initialize Mobby</button>
-        </div>
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-sky-400">MobbyOS V1.1.0 Python Core</p>
     </div>
 
     <aside class="w-72 bg-black border-r border-white/5 flex flex-col p-6 z-50">
         <div class="mb-10 flex items-center gap-4">
-            <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="w-12 h-12 rounded-2xl object-cover border border-white/10 shadow-lg">
-            <div class="overflow-hidden">
-                <p id="sideName" class="text-xs font-black uppercase truncate tracking-tighter">Connecting...</p>
-                <p id="userRole" class="text-[8px] text-sky-400 font-bold uppercase tracking-widest opacity-60">V1.1.0 Stable</p>
+            <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="w-12 h-12 rounded-2xl object-cover border border-white/10">
+            <div>
+                <p id="sideName" class="text-xs font-black uppercase tracking-tighter">Loading...</p>
+                <p id="userRole" class="text-[8px] text-sky-400 font-bold uppercase">Standard Mode</p>
             </div>
         </div>
         <nav class="space-y-1 flex-grow">
-            <button onclick="changeView('dashboard')" id="btn-dash" class="nav-btn w-full text-left p-4 text-[10px] font-black uppercase text-white/40 hover:bg-white/5">Dashboard</button>
-            <button onclick="changeView('terminal')" id="btn-term" class="nav-btn w-full text-left p-4 text-[10px] font-black uppercase text-white/40 hover:bg-white/5">Terminal</button>
-            <button onclick="openConfig()" class="nav-btn w-full text-left p-4 text-[10px] font-black uppercase text-white/40 hover:bg-white/5">Config</button>
+            <button id="btn-dash" class="w-full text-left p-4 text-[10px] font-black uppercase text-white/40 hover:bg-white/5 rounded-xl">Dashboard</button>
+            <button id="btn-term" class="w-full text-left p-4 text-[10px] font-black uppercase text-white/40 hover:bg-white/5 rounded-xl">Terminal</button>
+            <button id="btn-config" class="w-full text-left p-4 text-[10px] font-black uppercase text-white/40 hover:bg-white/5 rounded-xl">Config</button>
         </nav>
         <div class="p-4 glass rounded-2xl border border-white/5">
-            <p class="text-[8px] font-black uppercase text-white/20 mb-1">Mobby Status</p>
-            <p id="mobbyStatus" class="text-[9px] font-bold text-red-500 uppercase italic">Engine Offline</p>
+            <p id="mobbyStatus" class="text-[9px] font-bold text-red-500 uppercase italic">Python Engine Ready</p>
         </div>
     </aside>
 
-    <main class="flex-grow relative bg-[#010409]">
+    <main class="flex-grow relative">
         <div id="view-dashboard" class="absolute inset-0 flex flex-col justify-center p-12 md:p-24">
-            <img id="dashPFP" src="https://i.imgur.com/r6oJp4O.png" class="w-32 h-32 rounded-[2.5rem] mb-10 border border-white/10 shadow-2xl">
-            <h1 class="text-[10px] font-black text-sky-400 tracking-[0.6em] mb-4 uppercase">Identity Confirmed</h1>
+            <img id="dashPFP" src="https://i.imgur.com/r6oJp4O.png" class="w-32 h-32 rounded-[2.5rem] mb-10 border border-white/10">
             <div class="h-24">
-                <span id="welcomeMsg" class="text-6xl md:text-8xl font-black text-white typewriter">Welcome</span>
+                <span id="welcomeMsg" class="text-6xl md:text-8xl font-black text-white typewriter"></span>
             </div>
         </div>
 
         <div id="view-terminal" class="absolute inset-0 flex flex-col p-8 hidden">
             <div id="chatBox" class="flex-grow overflow-y-auto glass rounded-[2.5rem] p-8 mb-6 font-mono text-[11px] leading-relaxed space-y-6 border border-white/5"></div>
             <div class="glass p-5 rounded-[1.5rem] flex gap-4 border border-white/10">
-                <textarea id="termInput" rows="1" class="bg-transparent flex-grow outline-none text-sm text-white resize-none py-2" placeholder="Talk to Mobby..."></textarea>
-                <button onclick="sendMessage()" class="bg-sky-500 text-white px-6 rounded-xl font-black text-[10px] uppercase">Execute</button>
+                <textarea id="termInput" rows="1" class="bg-transparent flex-grow outline-none text-sm text-white resize-none py-2" placeholder="Enter = Send | Shift+Enter = New Line"></textarea>
+                <button id="sendBtn" class="bg-sky-500 text-white px-6 rounded-xl font-black text-[10px] uppercase">Execute</button>
             </div>
         </div>
     </main>
 
     <div id="configModal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-center justify-center hidden">
-        <div class="w-full max-w-4xl h-[600px] glass rounded-[3rem] flex overflow-hidden border border-white/10 shadow-3xl">
+        <div class="w-full max-w-4xl h-[600px] glass rounded-[3rem] flex overflow-hidden border border-white/10">
             <div class="w-64 bg-white/5 p-10 flex flex-col gap-3 border-r border-white/5">
                 <h3 class="text-[10px] font-black text-sky-400 uppercase mb-8">Settings</h3>
-                <button onclick="showTab('tab-general')" class="tab-link text-[10px] font-black uppercase text-left p-4 hover:bg-white/5 rounded-xl transition">Profile</button>
-                <button onclick="showTab('tab-security')" class="tab-link text-[10px] font-black uppercase text-left p-4 hover:bg-white/5 rounded-xl transition">Security</button>
-                <button onclick="showTab('tab-modes')" class="tab-link text-[10px] font-black uppercase text-left p-4 hover:bg-white/5 rounded-xl transition">Modes</button>
-                <button onclick="closeConfig()" class="mt-auto text-[10px] font-black uppercase p-4 text-red-500 hover:bg-red-500/10 rounded-xl transition">Exit</button>
+                <button id="tabProfile" class="text-[10px] font-black uppercase text-left p-4 hover:bg-white/5 rounded-xl">Profile</button>
+                <button id="tabModes" class="text-[10px] font-black uppercase text-left p-4 hover:bg-white/5 rounded-xl">Modes</button>
+                <button id="closeConfig" class="mt-auto text-[10px] font-black uppercase p-4 text-red-500">Exit</button>
             </div>
-            <div class="flex-grow p-12 overflow-y-auto">
-                <div id="tab-general" class="tab-content active space-y-8">
+            <div class="flex-grow p-12">
+                <div id="tab-content-profile" class="tab-content active space-y-8">
                     <h2 class="text-3xl font-black uppercase italic">Identity</h2>
                     <input id="cfgName" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm" placeholder="Display Name">
-                    <input id="cfgPFPLink" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm" placeholder="PFP Image URL">
                     <input id="cfgGroq" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm" type="password" placeholder="Groq API Key">
+                    <input id="cfgPFPLink" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm" placeholder="PFP Link">
                 </div>
-                <div id="tab-security" class="tab-content space-y-8">
-                    <h2 class="text-3xl font-black uppercase italic">Authentication</h2>
-                    <p class="text-[10px] text-white/30 uppercase">Change your system login password</p>
-                    <input id="cfgPass" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm" type="password" placeholder="New Password">
-                </div>
-                <div id="tab-modes" class="tab-content space-y-6">
-                    <h2 class="text-3xl font-black uppercase italic">System Modes</h2>
-                    <div class="grid grid-cols-1 gap-4 pt-4">
-                        <button onclick="setMode('KID')" class="p-5 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase hover:border-sky-500">Kid Mode</button>
-                        <button onclick="setMode('ADULT')" class="p-5 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase hover:border-sky-500">Adult Mode</button>
-                        <button id="adminBtn" onclick="setMode('ADMIN')" class="p-5 bg-red-500/10 border border-red-500/20 rounded-2xl text-[10px] font-black uppercase opacity-20 cursor-not-allowed">Admin Mode</button>
+                <div id="tab-content-modes" class="tab-content space-y-8">
+                    <h2 class="text-3xl font-black uppercase italic">Modes</h2>
+                    <div class="flex flex-col gap-4">
+                        <button id="modeKid" class="p-5 bg-white/5 border border-white/10 rounded-2xl font-black">KID MODE</button>
+                        <button id="modeAdult" class="p-5 bg-white/5 border border-white/10 rounded-2xl font-black">ADULT MODE</button>
                     </div>
                 </div>
-
-                <button onclick="applyChanges()" id="syncBtn" class="mt-12 w-full bg-sky-500 p-5 rounded-3xl font-black text-[11px] uppercase tracking-widest">Commit Changes</button>
+                <button id="commitBtn" class="mt-12 w-full bg-sky-500 p-5 rounded-3xl font-black text-[11px] uppercase tracking-widest">Commit Changes</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        window.firebase_app = initializeApp(firebaseConfig);
+        window.db = getFirestore(window.firebase_app);
+        window.auth = getAuth(window.firebase_app);
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.updateDoc = updateDoc;
+    </script>
 
-        let uData = { displayName: "User", groqKey: "", pfp: "https://i.imgur.com/r6oJp4O.png", mode: "ADULT" };
-        const admins = ["SICMailCenter1@gmail.com", "Roystonslijkerman@gmail.com"];
+    <script type="text/python">
+        from browser import document, window, html, timer, ajax
+        import json
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) return window.location.href = "login.html";
+        # State management
+        user_data = {"displayName": "User", "groqKey": "", "pfp": "https://i.imgur.com/r6oJp4O.png", "mode": "ADULT"}
+        current_uid = None
+
+        def refresh_ui():
+            document["sideName"].text = user_data["displayName"]
+            document["sidePFP"].src = user_data["pfp"]
+            document["dashPFP"].src = user_data["pfp"]
+            document["userRole"].text = f"{user_data['mode']} MODE"
             
-            document.getElementById('boot-status').innerText = "Syncing Profile...";
+            if user_data["groqKey"]:
+                document["mobbyStatus"].text = "Engine Online"
+                document["mobbyStatus"].style.color = "#22c55e"
             
-            try {
-                const userRef = doc(db, "users", user.uid);
-                const snap = await getDoc(userRef);
-                
-                if(snap.exists()) {
-                    uData = { ...uData, ...snap.data() };
-                } else {
-                    // New user creation
-                    await setDoc(userRef, uData);
-                }
+            # Restart Animation
+            welcome = document["welcomeMsg"]
+            welcome.text = f"Welcome, {user_data['displayName']}"
+            welcome.classList.remove("run-anim")
+            timer.set_timeout(lambda: welcome.classList.add("run-anim"), 10)
 
-                if(admins.includes(user.email)) {
-                    document.getElementById('adminBtn').classList.remove('opacity-20', 'cursor-not-allowed');
-                }
-
-                // CHECK FOR MISSING GROQ
-                if(!uData.groqKey) {
-                    document.getElementById('setup-overlay').classList.remove('hidden');
-                }
-
-            } catch (e) { console.error(e); }
-
-            // END LOADING
-            setTimeout(() => {
-                document.getElementById('boot-screen').classList.add('hidden');
-                refreshUI();
-            }, 1000);
-        });
-
-        window.saveSetup = async () => {
-            const key = document.getElementById('setup-key').value.trim();
-            if(key.startsWith('gsk_')) {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { groqKey: key });
-                uData.groqKey = key;
-                document.getElementById('setup-overlay').classList.add('hidden');
-                refreshUI();
-            } else { alert("Invalid Groq Key Format"); }
-        };
-
-        window.applyChanges = async () => {
-            const btn = document.getElementById('syncBtn');
-            btn.innerText = "UPLOADING...";
+        # View Switching
+        def change_view(ev):
+            target = ev.target.id.split("-")[-1]
+            for v in ["dashboard", "terminal"]:
+                document[f"view-{v}"].classList.add("hidden")
+            document[f"view-{target}"].classList.remove("hidden")
             
-            const updates = {
-                displayName: document.getElementById('cfgName').value.trim() || uData.displayName,
-                groqKey: document.getElementById('cfgGroq').value.trim() || uData.groqKey,
-                pfp: document.getElementById('cfgPFPLink').value.trim() || uData.pfp,
-                mode: uData.mode
-            };
-
-            const newPass = document.getElementById('cfgPass').value.trim();
-
-            try {
-                if(newPass) await updatePassword(auth.currentUser, newPass);
-                await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
-                uData = {...uData, ...updates};
-                refreshUI();
-                alert("Cloud Sync Successful.");
-                closeConfig();
-            } catch (e) { alert("Error: " + e.message); }
-            btn.innerText = "Commit Changes";
-        };
-
-        window.sendMessage = async () => {
-            const input = document.getElementById('termInput');
-            const chat = document.getElementById('chatBox');
-            const text = input.value.trim();
-            if(!text || !uData.groqKey) return;
-
-            input.value = '';
-            chat.innerHTML += `<div class="p-4 bg-white/5 rounded-2xl border border-white/5"><span class="text-white/30 font-black uppercase text-[8px]">${uData.displayName}</span><p class="mt-1">${text}</p></div>`;
-            chat.scrollTop = chat.scrollHeight;
-
-            try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${uData.groqKey}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        model: "llama3-8b-8192", 
-                        messages: [{role: "system", content: `You are MobbyOS. Addressing the user as ${uData.displayName}.`}, {role: "user", content: text}] 
-                    })
-                });
-                const data = await res.json();
-                const reply = data.choices[0].message.content;
-                chat.innerHTML += `<div class="p-4 bg-sky-500/5 rounded-2xl border border-sky-500/10"><span class="text-sky-400 font-black uppercase text-[8px]">MobbyOS</span><p class="mt-1 text-sky-100">${reply}</p></div>`;
-            } catch { chat.innerHTML += `<div class="text-red-500 font-black">!! NEURAL FAILURE !!</div>`; }
-            chat.scrollTop = chat.scrollHeight;
-        };
-
-        function refreshUI() {
-            document.getElementById('sideName').innerText = uData.displayName;
-            document.getElementById('userRole').innerText = uData.mode + " MODE";
-            document.getElementById('sidePFP').src = uData.pfp;
-            document.getElementById('dashPFP').src = uData.pfp;
+            for b in ["btn-dash", "btn-term"]:
+                document[b].classList.remove("nav-active")
+            ev.target.classList.add("nav-active")
             
-            const status = document.getElementById('mobbyStatus');
-            if(uData.groqKey) {
-                status.innerText = "Engine Online";
-                status.classList.replace('text-red-500', 'text-green-500');
+            if target == "dashboard": refresh_ui()
+
+        # Modal Controls
+        def toggle_config(ev):
+            document["configModal"].classList.toggle("hidden")
+
+        def show_tab(ev):
+            tab_id = ev.target.id.replace("tab", "tab-content-").lower()
+            for content in document.select(".tab-content"):
+                content.classList.remove("active")
+            document[tab_id].classList.add("active")
+
+        # Message Handling
+        def send_msg(ev=None):
+            text = document["termInput"].value.strip()
+            if not text or not user_data["groqKey"]: return
+            
+            document["termInput"].value = ""
+            add_chat_ui(user_data["displayName"], text)
+            
+            # API Call to Groq
+            def on_complete(req):
+                if req.status == 200:
+                    data = json.loads(req.text)
+                    reply = data['choices'][0]['message']['content']
+                    add_chat_ui("MobbyOS", reply)
+                else:
+                    add_chat_ui("System", "Neural Error")
+
+            ajax.post("https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {user_data['groqKey']}", "Content-Type": "application/json"},
+                data=json.dumps({
+                    "model": "llama3-8b-8192",
+                    "messages": [{"role": "system", "content": f"You are MobbyOS. Addressing {user_data['displayName']}"}, {"role": "user", "content": text}]
+                }),
+                oncomplete=on_complete)
+
+        def add_chat_ui(sender, text):
+            color = "#38bdf8" if sender == "MobbyOS" else "#ffffff4d"
+            msg_html = html.DIV(Class="p-4 bg-white/5 rounded-2xl border border-white/5")
+            msg_html <= html.SPAN(sender, Class="font-black uppercase text-[8px]", style={"color": color})
+            msg_html <= html.P(text, Class="mt-1")
+            document["chatBox"] <= msg_html
+            document["chatBox"].scrollTop = document["chatBox"].scrollHeight
+
+        # Shift+Enter Logic
+        def key_handler(ev):
+            if ev.keyCode == 13: # Enter
+                if not ev.shiftKey:
+                    ev.preventDefault()
+                    send_msg()
+
+        # Sync Changes
+        def commit_changes(ev):
+            document["commitBtn"].text = "SYNCING..."
+            new_data = {
+                "displayName": document["cfgName"].value or user_data["displayName"],
+                "groqKey": document["cfgGroq"].value or user_data["groqKey"],
+                "pfp": document["cfgPFPLink"].value or user_data["pfp"]
             }
-            changeView('dashboard');
-        }
+            
+            def success(res):
+                nonlocal user_data
+                user_data.update(new_data)
+                refresh_ui()
+                toggle_config(None)
+                document["commitBtn"].text = "Commit Changes"
+                window.alert("SIC Corp Cloud Updated.")
 
-        window.changeView = (v) => {
-            document.getElementById('view-dashboard').classList.add('hidden');
-            document.getElementById('view-terminal').classList.add('hidden');
-            document.getElementById(`view-${v}`).classList.remove('hidden');
-            if(v === 'dashboard') {
-                const w = document.getElementById('welcomeMsg');
-                w.innerText = `Welcome, ${uData.displayName}`;
-                w.classList.remove('run-anim');
-                void w.offsetWidth;
-                w.classList.add('run-anim');
-            }
-        };
+            # Calling Javascript Firebase from Python
+            window.updateDoc(window.doc(window.db, "users", current_uid), new_data).then(success)
 
-        window.showTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        };
-        window.openConfig = () => document.getElementById('configModal').classList.remove('hidden');
-        window.closeConfig = () => document.getElementById('configModal').classList.add('hidden');
-        window.setMode = (m) => {
-            if(m === 'ADMIN' && !admins.includes(auth.currentUser.email)) return alert("Permission Denied.");
-            uData.mode = m;
-            alert(`Mode set to ${m}.`);
-        };
+        # Auth Observer
+        def on_auth(user):
+            global current_uid, user_data
+            if user:
+                current_uid = user.uid
+                def load_data(snap):
+                    if snap.exists():
+                        user_data.update(snap.data().to_dict())
+                    document["boot-screen"].classList.add("hidden")
+                    refresh_ui()
+                window.getDoc(window.doc(window.db, "users", user.uid)).then(load_data)
+            else:
+                window.location.href = "login.html"
+
+        # Bind Events
+        document["btn-dash"].bind("click", change_view)
+        document["btn-term"].bind("click", change_view)
+        document["btn-config"].bind("click", toggle_config)
+        document["closeConfig"].bind("click", toggle_config)
+        document["tabProfile"].bind("click", show_tab)
+        document["tabModes"].bind("click", show_tab)
+        document["commitBtn"].bind("click", commit_changes)
+        document["sendBtn"].bind("click", send_msg)
+        document["termInput"].bind("keydown", key_handler)
+
+        window.auth.onAuthStateChanged(on_auth)
     </script>
 </body>
 </html>
