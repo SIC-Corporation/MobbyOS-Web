@@ -1,5 +1,7 @@
 from browser import document, window, timer
 import SICryption
+# Then call it using:
+vault = SICryption.SICryption("Roy_SIC_Corp_2026")
 
 def run_os():
     # Initialize the class correctly
