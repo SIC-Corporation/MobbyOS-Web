@@ -1,176 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS V1.1.2 | SIC Corp Python Engine</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --sky: #38bdf8; --neon: #0ea5e9; }
-        body { background: #010409; color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; margin: 0; }
-        .hidden { display: none !important; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .neon-border { border: 1px solid var(--sky); box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
-        
-        /* BOOT SCREEN */
-        #boot-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
-        .boot-loader { width: 50px; height: 50px; border: 2px solid rgba(56, 189, 248, 0.1); border-top-color: var(--sky); border-radius: 50%; animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* TYPEWRITER */
-        .typewriter { display: inline-block; overflow: hidden; white-space: nowrap; border-right: 4px solid var(--sky); width: 0; }
-        .run-anim { animation: typing 1.5s steps(30, end) forwards, blink .8s step-end infinite; }
-        @keyframes typing { from { width: 0 } to { width: 100% } }
-        @keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--sky); } }
-
-        .nav-active { background: rgba(56, 189, 248, 0.15); color: var(--sky); border: 1px solid rgba(56, 189, 248, 0.3); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* TEXTAREA AUTO-RESIZE SIMULATION */
-        #termInput { max-height: 200px; min-height: 44px; }
-    </style>
-</head>
-<body onload="brython()" class="flex h-screen w-screen overflow-hidden">
+<body onload="brython({debug:0, cache:true})" class="flex h-screen w-screen overflow-hidden">
 
     <div id="boot-screen">
         <div class="boot-loader mb-6"></div>
         <div class="text-center">
             <p class="text-[11px] font-black uppercase tracking-[0.6em] text-sky-400">MobbyOS Core</p>
-            <p class="text-[8px] text-white/20 mt-2 uppercase tracking-widest italic">Initializing SIC Corp Protocols...</p>
+            <div id="boot-status" class="text-[8px] text-white/20 mt-2 uppercase tracking-widest italic">Initializing...</div>
         </div>
     </div>
-
-    <aside class="w-80 bg-black border-r border-white/5 flex flex-col p-8 z-50">
-        <div class="mb-12 flex items-center gap-5">
-            <div class="relative">
-                <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="w-14 h-14 rounded-2xl object-cover border border-white/10">
-                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-4 border-black rounded-full"></div>
-            </div>
-            <div class="overflow-hidden">
-                <p id="sideName" class="text-sm font-black uppercase truncate tracking-tighter text-white">Guest User</p>
-                <p id="userRole" class="text-[9px] text-sky-400 font-bold uppercase tracking-widest opacity-70 italic">Scanning...</p>
-            </div>
-        </div>
-
-        <nav class="space-y-2 flex-grow">
-            <button id="btn-dash" class="w-full text-left px-5 py-4 text-[10px] font-black uppercase text-white/40 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300">Dashboard</button>
-            <button id="btn-term" class="w-full text-left px-5 py-4 text-[10px] font-black uppercase text-white/40 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300">Mobby Terminal</button>
-            <button id="btn-config" class="w-full text-left px-5 py-4 text-[10px] font-black uppercase text-white/40 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300">System Config</button>
-        </nav>
-
-        <div class="p-5 glass rounded-[2rem] border border-white/5">
-            <div class="flex items-center gap-2 mb-2">
-                <div id="statusDot" class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <p class="text-[9px] font-black uppercase text-white/30">Engine Status</p>
-            </div>
-            <p id="mobbyStatus" class="text-[10px] font-bold text-white uppercase italic">Offline</p>
-        </div>
-    </aside>
-
-    <main class="flex-grow relative bg-[#020617]">
-        <div id="view-dashboard" class="absolute inset-0 flex flex-col justify-center p-20">
-            <div class="relative w-40 h-40 mb-12">
-                <img id="dashPFP" src="https://i.imgur.com/r6oJp4O.png" class="w-full h-full rounded-[3rem] object-cover border border-white/10 shadow-2xl">
-                <div class="absolute inset-0 rounded-[3rem] border border-sky-400/20 animate-ping"></div>
-            </div>
-            <h2 class="text-[11px] font-black text-sky-400 tracking-[0.8em] mb-4 uppercase">Authorized Personnel Only</h2>
-            <div class="h-32">
-                <span id="welcomeMsg" class="text-7xl md:text-9xl font-black text-white typewriter"></span>
-            </div>
-        </div>
-
-        <div id="view-terminal" class="absolute inset-0 flex flex-col p-10 hidden">
-            <div id="chatBox" class="flex-grow overflow-y-auto glass rounded-[3rem] p-10 mb-8 font-mono text-[12px] leading-relaxed space-y-8 border border-white/5 scroll-smooth"></div>
-            
-            <div class="glass p-2 rounded-[2.5rem] flex items-center gap-4 border border-white/10 focus-within:neon-border transition-all duration-500">
-                <textarea id="termInput" rows="1" class="bg-transparent flex-grow outline-none text-sm text-white resize-none py-4 px-6" placeholder="Message Mobby... (Shift+Enter for new line)"></textarea>
-                <button id="sendBtn" class="bg-sky-500 hover:bg-sky-400 text-black w-14 h-14 rounded-full flex items-center justify-center transition-transform active:scale-90">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <div id="configModal" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-3xl flex items-center justify-center hidden p-6">
-        <div class="w-full max-w-5xl h-[700px] glass rounded-[4rem] flex overflow-hidden border border-white/10 shadow-3xl">
-            <div class="w-72 bg-white/5 p-12 flex flex-col gap-4 border-r border-white/5">
-                <p class="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-10">SIC Settings</p>
-                <button id="tabProfile" class="text-[11px] font-black uppercase text-left p-5 hover:bg-white/5 rounded-2xl transition">User Profile</button>
-                <button id="tabModes" class="text-[11px] font-black uppercase text-left p-5 hover:bg-white/5 rounded-2xl transition">OS Modes</button>
-                <button id="closeConfig" class="mt-auto text-[11px] font-black uppercase p-5 text-red-500 hover:bg-red-500/10 rounded-2xl transition">Close System</button>
-            </div>
-            
-            <div class="flex-grow p-16 overflow-y-auto">
-                <div id="tab-content-profile" class="tab-content active space-y-10">
-                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Identity</h2>
-                    <div class="space-y-6">
-                        <div class="space-y-2">
-                            <label class="text-[9px] font-black uppercase text-white/30 ml-2">Display Name</label>
-                            <input id="cfgName" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-sm focus:border-sky-500 outline-none transition" placeholder="How should Mobby address you?">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[9px] font-black uppercase text-white/30 ml-2">Groq Neural Key</label>
-                            <input id="cfgGroq" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-sm focus:border-sky-500 outline-none transition" type="password" placeholder="gsk_...">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[9px] font-black uppercase text-white/30 ml-2">Avatar URL</label>
-                            <input id="cfgPFPLink" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-sm focus:border-sky-500 outline-none transition" placeholder="https://i.imgur.com/...">
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-content-modes" class="tab-content space-y-10">
-                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">OS Modes</h2>
-                    <div class="grid grid-cols-2 gap-6">
-                        <button id="modeKid" class="p-10 bg-white/5 border border-white/10 rounded-[2.5rem] font-black text-xs hover:border-sky-500 transition">KID MODE</button>
-                        <button id="modeAdult" class="p-10 bg-white/5 border border-white/10 rounded-[2.5rem] font-black text-xs hover:border-sky-500 transition">ADULT MODE</button>
-                    </div>
-                </div>
-
-                <button id="commitBtn" class="mt-16 w-full bg-sky-500 hover:bg-sky-400 text-black p-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all">Commit Cloud Sync</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", 
-            authDomain: "mobbyoswebapp.firebaseapp.com", 
-            projectId: "mobbyoswebapp", 
-            storageBucket: "mobbyoswebapp.firebasestorage.app", 
-            messagingSenderId: "6814948758", 
-            appId: "1:6814948758:web:a87a03eff182e0029091b7" 
-        };
-
-        window.firebase_app = initializeApp(firebaseConfig);
-        window.db = getFirestore(window.firebase_app);
-        window.auth = getAuth(window.firebase_app);
-        window.doc = doc;
-        window.getDoc = getDoc;
-        window.updateDoc = updateDoc;
-    </script>
 
     <script type="text/python">
         from browser import document, window, html, timer, ajax
         import json
+        # Import your high-advanced encryption
+        # Note: Ensure SICryption.py is in the same folder as index.html
+        from SICryption import SICryption
 
-        # --- SYSTEM STATE ---
+        # Initialize SICryption with Roy's Master Key
+        cipher = SICryption("SIC_CORP_ROY_2026")
+
         user_data = {"displayName": "User", "groqKey": "", "pfp": "https://i.imgur.com/r6oJp4O.png", "mode": "ADULT"}
         current_uid = None
 
         def refresh_ui():
+            # If the groqKey is encrypted, we decrypt it just for the session
+            display_key = user_data["groqKey"]
+            if display_key.startswith("SIC|SECURED"):
+                decrypted_key = cipher.decrypt(display_key)
+                # We don't overwrite user_data["groqKey"] yet to keep the cloud version safe
+            
             document["sideName"].text = user_data["displayName"]
             document["sidePFP"].src = user_data["pfp"]
             document["dashPFP"].src = user_data["pfp"]
@@ -188,40 +45,74 @@
                 status_text.style.color = "#f8fafc4d"
                 status_dot.style.backgroundColor = "#ef4444"
             
-            # DASHBOARD WELCOME REFRESH
             welcome = document["welcomeMsg"]
             welcome.text = f"Hello, {user_data['displayName']}"
             welcome.classList.remove("run-anim")
-            # Force reflow and restart animation
-            timer.set_timeout(lambda: welcome.classList.add("run-anim"), 50)
+            timer.set_timeout(lambda: welcome.classList.add("run-anim"), 10)
 
-        # --- NAVIGATION ---
-        def change_view(ev):
-            view_id = ev.target.id.split("-")[-1]
-            for v in ["dashboard", "terminal"]:
-                document[f"view-{v}"].classList.add("hidden")
-            document[f"view-{view_id}"].classList.remove("hidden")
+        # --- OPTIMIZED BOOT ---
+        def hide_boot():
+            document["boot-screen"].style.opacity = "0"
+            timer.set_timeout(lambda: document["boot-screen"].classList.add("hidden"), 400)
+
+        def on_auth(user):
+            global current_uid
+            document["boot-status"].text = "Authenticating..."
             
-            for b in ["btn-dash", "btn-term"]:
-                document[b].classList.remove("nav-active")
-            ev.target.classList.add("nav-active")
+            if user:
+                current_uid = user.uid
+                # FAST BOOT: Hide the screen as soon as we know WHO the user is
+                hide_boot()
+                
+                def load_data(snap):
+                    if snap.exists():
+                        data = snap.data().to_dict()
+                        user_data.update(data)
+                        refresh_ui()
+                
+                # Fetch data in the background
+                window.getDoc(window.doc(window.db, "users", user.uid)).then(load_data)
+            else:
+                window.location.href = "login.html"
+
+        # --- ADVANCED SYNC (WITH ENCRYPTION) ---
+        def commit_changes(ev):
+            document["commitBtn"].text = "SICRYPTING & SYNCING..."
             
-            if view_id == "dashboard": refresh_ui()
+            raw_key = document["cfgGroq"].value or user_data["groqKey"]
+            
+            # If the key isn't already encrypted, LOCK IT DOWN
+            if raw_key and not raw_key.startswith("SIC|SECURED"):
+                secure_key = cipher.encrypt(raw_key)
+            else:
+                secure_key = raw_key
 
-        def toggle_config(ev):
-            document["configModal"].classList.toggle("hidden")
+            updates = {
+                "displayName": document["cfgName"].value or user_data["displayName"],
+                "groqKey": secure_key,
+                "pfp": document["cfgPFPLink"].value or user_data["pfp"]
+            }
+            
+            def success(res):
+                user_data.update(updates)
+                refresh_ui()
+                document["configModal"].classList.add("hidden")
+                document["commitBtn"].text = "Commit Cloud Sync"
+                window.alert("SIC Corp: Data Encrypted & Saved.")
 
-        def show_tab(ev):
-            tab_id = ev.target.id.replace("tab", "tab-content-").lower()
-            for content in document.select(".tab-content"):
-                content.classList.remove("active")
-            document[tab_id].classList.add("active")
+            window.updateDoc(window.doc(window.db, "users", current_uid), updates).then(success)
 
-        # --- CHAT ENGINE ---
+        # --- CHAT ENGINE (WITH DECRYPTION) ---
         def send_msg(ev=None):
             input_box = document["termInput"]
             text = input_box.value.strip()
-            if not text or not user_data["groqKey"]: return
+            
+            # Decrypt key on the fly for the API call
+            actual_key = user_data["groqKey"]
+            if actual_key.startswith("SIC|SECURED"):
+                actual_key = cipher.decrypt(actual_key)
+
+            if not text or not actual_key: return
             
             input_box.value = ""
             add_chat_ui(user_data["displayName"], text)
@@ -229,86 +120,28 @@
             def on_complete(req):
                 if req.status == 200:
                     res = json.loads(req.text)
-                    reply = res['choices'][0]['message']['content']
-                    add_chat_ui("MobbyOS", reply)
+                    add_chat_ui("MobbyOS", res['choices'][0]['message']['content'])
                 else:
-                    add_chat_ui("System", "Neural Link Interrupted. Verify API Key.")
+                    add_chat_ui("System", "Neural Error.")
 
             ajax.post("https://api.groq.com/openai/v1/chat/completions",
-                headers={"Authorization": f"Bearer {user_data['groqKey']}", "Content-Type": "application/json"},
+                headers={"Authorization": f"Bearer {actual_key}", "Content-Type": "application/json"},
                 data=json.dumps({
                     "model": "llama3-8b-8192",
                     "messages": [
-                        {"role": "system", "content": f"You are MobbyOS. Created by Roy for SIC Corp. Be concise, helpful, and tech-focused. User: {user_data['displayName']}"},
+                        {"role": "system", "content": f"You are MobbyOS. Created by Roy for SIC Corp."},
                         {"role": "user", "content": text}
                     ]
                 }),
                 oncomplete=on_complete)
 
-        def add_chat_ui(sender, text):
-            is_mobby = sender == "MobbyOS"
-            container = html.DIV(Class=f"p-6 rounded-3xl border {'bg-sky-500/5 border-sky-500/10' if is_mobby else 'bg-white/5 border-white/5'}")
-            container <= html.SPAN(sender, Class=f"font-black uppercase text-[9px] tracking-widest {'text-sky-400' if is_mobby else 'text-white/20'}")
-            container <= html.P(text, Class="mt-2 text-white/90")
-            
-            document["chatBox"] <= container
-            document["chatBox"].scrollTop = document["chatBox"].scrollHeight
-
-        # --- KEYBOARD LOGIC ---
-        def key_handler(ev):
-            if ev.keyCode == 13: # Enter
-                if not ev.shiftKey:
-                    ev.preventDefault()
-                    send_msg()
-                # Shift+Enter allows default behavior (new line)
-
-        # --- SYNC ENGINE ---
-        def commit_changes(ev):
-            document["commitBtn"].text = "ESTABLISHING SIC CLOUD LINK..."
-            updates = {
-                "displayName": document["cfgName"].value or user_data["displayName"],
-                "groqKey": document["cfgGroq"].value or user_data["groqKey"],
-                "pfp": document["cfgPFPLink"].value or user_data["pfp"]
-            }
-            
-            def success(res):
-                user_data.update(updates)
-                refresh_ui()
-                toggle_config(None)
-                document["commitBtn"].text = "Commit Cloud Sync"
-                window.alert("SIC Corp: Cloud Identity Updated.")
-
-            window.updateDoc(window.doc(window.db, "users", current_uid), updates).then(success)
-
-        # --- BOOT & AUTH ---
-        def on_auth(user):
-            global current_uid
-            if user:
-                current_uid = user.uid
-                def load_data(snap):
-                    if snap.exists():
-                        data = snap.data().to_dict()
-                        user_data.update(data)
-                    document["boot-screen"].style.opacity = "0"
-                    timer.set_timeout(lambda: document["boot-screen"].classList.add("hidden"), 800)
-                    refresh_ui()
-                window.getDoc(window.doc(window.db, "users", user.uid)).then(load_data)
-            else:
-                window.location.href = "login.html"
-
-        # BINDINGS
+        # ... Bindings remain the same ...
         document["btn-dash"].bind("click", change_view)
         document["btn-term"].bind("click", change_view)
         document["btn-config"].bind("click", toggle_config)
-        document["closeConfig"].bind("click", toggle_config)
-        document["tabProfile"].bind("click", show_tab)
-        document["tabModes"].bind("click", show_tab)
         document["commitBtn"].bind("click", commit_changes)
         document["sendBtn"].bind("click", send_msg)
         document["termInput"].bind("keydown", key_handler)
 
         window.auth.onAuthStateChanged(on_auth)
-        print("MobbyOS Python Engine: Online & SIC Secured")
     </script>
-</body>
-</html>
