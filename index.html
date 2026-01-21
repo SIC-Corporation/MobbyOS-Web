@@ -3,89 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS V1.1.0 | SIC Corp</title>
+    <title>MobbyOS V1.1.0 | Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         :root { --sky: #38bdf8; }
-        body { background: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
+        body { background: #010409; color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
         
-        /* THE ANIMATION */
+        /* ANIMATION FIX */
         .typewriter { display: inline-block; overflow: hidden; white-space: nowrap; border-right: 3px solid var(--sky); width: 0; }
         .run-anim { animation: typing 1s steps(20, end) forwards, blink .75s step-end infinite; }
         @keyframes typing { from { width: 0 } to { width: 100% } }
         @keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--sky); } }
 
-        .nav-active { background: rgba(56, 189, 248, 0.1); color: var(--sky); border-left: 3px solid var(--sky); }
+        .nav-btn { border-radius: 12px; transition: 0.2s; border: 1px solid transparent; }
+        .nav-active { background: rgba(56, 189, 248, 0.1); color: var(--sky); border: 1px solid rgba(56, 189, 248, 0.2); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
     </style>
 </head>
-<body class="flex h-screen w-screen">
+<body class="flex h-screen w-screen overflow-hidden">
 
-    <aside class="w-64 bg-black border-r border-white/5 flex flex-col p-6 z-50">
-        <div class="mb-10 flex items-center gap-3">
-            <div id="statusDot" class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div>
-            <div>
-                <p id="sideName" class="text-xs font-black uppercase tracking-tighter">Mobby User</p>
-                <p id="userRole" class="text-[7px] text-sky-400 font-bold uppercase">Standard Mode</p>
+    <aside class="w-72 bg-black border-r border-white/5 flex flex-col p-6 z-50">
+        <div class="mb-10 flex items-center gap-4">
+            <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="w-12 h-12 rounded-2xl object-cover border border-white/10">
+            <div class="overflow-hidden">
+                <p id="sideName" class="text-xs font-black uppercase truncate tracking-tighter">Connecting...</p>
+                <p id="userRole" class="text-[8px] text-sky-400 font-bold uppercase tracking-widest opacity-60">V1.1.0 Stable</p>
             </div>
         </div>
         <nav class="space-y-1 flex-grow">
-            <button onclick="changeView('dashboard')" id="btn-dash" class="w-full text-left p-3 rounded-lg text-[10px] font-black uppercase text-white/40 hover:text-white">Dashboard</button>
-            <button onclick="checkTerminal()" id="btn-term" class="w-full text-left p-3 rounded-lg text-[10px] font-black uppercase text-white/40 hover:text-white">Terminal</button>
-            <button onclick="openConfig()" class="w-full text-left p-3 rounded-lg text-[10px] font-black uppercase text-white/40 hover:text-white">Config</button>
+            <button onclick="changeView('dashboard')" id="btn-dash" class="nav-btn w-full text-left p-4 text-[10px] font-black uppercase text-white/40 hover:bg-white/5">Dashboard</button>
+            <button onclick="changeView('terminal')" id="btn-term" class="nav-btn w-full text-left p-4 text-[10px] font-black uppercase text-white/40 hover:bg-white/5">Terminal</button>
+            <button onclick="openConfig()" class="nav-btn w-full text-left p-4 text-[10px] font-black uppercase text-white/40 hover:bg-white/5">Config</button>
         </nav>
+        <div class="p-4 glass rounded-2xl">
+            <p class="text-[8px] font-black uppercase text-white/20 mb-1">Mobby Status</p>
+            <p id="mobbyStatus" class="text-[9px] font-bold text-red-500 uppercase italic underline">Neural Key Missing</p>
+        </div>
     </aside>
 
-    <main class="flex-grow relative">
-        <div id="view-dashboard" class="absolute inset-0 flex flex-col justify-center p-20">
-            <span id="welcomeMsg" class="text-6xl font-black text-white typewriter">Welcome</span>
-            <p id="adminTag" class="text-sky-400 text-[10px] mt-4 font-black uppercase tracking-[0.5em] hidden">ADMIN PRIVILEGES GRANTED</p>
+    <main class="flex-grow relative bg-[#010409]">
+        <div id="view-dashboard" class="absolute inset-0 flex flex-col justify-center p-12 md:p-24 transition-all duration-500">
+            <img id="dashPFP" src="https://i.imgur.com/r6oJp4O.png" class="w-32 h-32 rounded-[2.5rem] mb-10 border border-white/10 shadow-2xl">
+            <h1 class="text-[10px] font-black text-sky-400 tracking-[0.6em] mb-4 uppercase">Identity Confirmed</h1>
+            <div class="h-24">
+                <span id="welcomeMsg" class="text-6xl md:text-8xl font-black text-white typewriter">Welcome</span>
+            </div>
         </div>
 
-        <div id="view-terminal" class="absolute inset-0 flex flex-col p-10 hidden bg-[#020617]">
-            <div id="chatBox" class="flex-grow overflow-y-auto glass rounded-3xl p-6 mb-4 font-mono text-xs space-y-4"></div>
-            <div class="glass p-4 rounded-2xl flex gap-4">
-                <input id="termInput" class="bg-transparent flex-grow outline-none text-sm" placeholder="Execute command...">
-                <button onclick="sendMessage()" class="text-sky-400 font-black text-xs uppercase">Run</button>
+        <div id="view-terminal" class="absolute inset-0 flex flex-col p-8 hidden">
+            <div id="chatBox" class="flex-grow overflow-y-auto glass rounded-[2.5rem] p-8 mb-6 font-mono text-[11px] leading-relaxed space-y-6 border border-white/5">
+                <div class="text-sky-400 font-black">[SYSTEM] Welcome to Mobby Terminal V1.1.0. Connect Groq key to begin.</div>
+            </div>
+            <div class="glass p-5 rounded-[1.5rem] flex gap-4 border border-white/10">
+                <textarea id="termInput" rows="1" class="bg-transparent flex-grow outline-none text-sm text-white resize-none py-2" placeholder="Message Mobby..."></textarea>
+                <button onclick="sendMessage()" class="bg-sky-500 text-white px-6 rounded-xl font-black text-[10px] uppercase hover:scale-105 active:scale-95 transition">Execute</button>
             </div>
         </div>
     </main>
 
-    <div id="configModal" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center hidden p-4">
-        <div class="w-full max-w-4xl h-[500px] glass rounded-[2.5rem] flex overflow-hidden">
-            <div class="w-48 bg-white/5 p-6 flex flex-col gap-2 border-r border-white/5">
-                <button onclick="showTab('tab-general')" class="text-[9px] font-black uppercase p-3 text-left hover:bg-white/5 rounded-lg">General</button>
-                <button onclick="showTab('tab-security')" class="text-[9px] font-black uppercase p-3 text-left hover:bg-white/5 rounded-lg">Security</button>
-                <button onclick="showTab('tab-modes')" class="text-[9px] font-black uppercase p-3 text-left hover:bg-white/5 rounded-lg">System Modes</button>
-                <button onclick="closeConfig()" class="mt-auto text-[9px] font-black uppercase p-3 text-red-500">Exit</button>
+    <div id="configModal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-center justify-center hidden">
+        <div class="w-full max-w-4xl h-[600px] glass rounded-[3rem] flex overflow-hidden border border-white/10 shadow-3xl">
+            <div class="w-64 bg-white/5 p-10 flex flex-col gap-3 border-r border-white/5">
+                <h3 class="text-[10px] font-black text-sky-400 uppercase mb-8 tracking-widest">Settings</h3>
+                <button onclick="showTab('tab-general')" class="tab-link text-[10px] font-black uppercase text-left p-4 hover:bg-white/5 rounded-xl transition">Profile</button>
+                <button onclick="showTab('tab-modes')" class="tab-link text-[10px] font-black uppercase text-left p-4 hover:bg-white/5 rounded-xl transition">Modes</button>
+                <button onclick="closeConfig()" class="mt-auto text-[10px] font-black uppercase p-4 text-red-500 hover:bg-red-500/10 rounded-xl transition">Exit Config</button>
             </div>
-            <div class="flex-grow p-10 overflow-y-auto">
-                <div id="tab-general" class="tab-content active space-y-6">
-                    <h2 class="text-xl font-black uppercase italic">General</h2>
-                    <input id="cfgName" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm" placeholder="Update Display Name">
-                    <input id="cfgGroq" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm" type="password" placeholder="Groq API Key (gsk_...)">
-                </div>
-
-                <div id="tab-security" class="tab-content space-y-6">
-                    <h2 class="text-xl font-black uppercase italic">Security</h2>
-                    <input id="cfgPass" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm" type="password" placeholder="New Login Password">
-                    <p class="text-[10px] text-white/30 uppercase italic">Changes your actual Firebase Login.</p>
-                </div>
-
-                <div id="tab-modes" class="tab-content space-y-6">
-                    <h2 class="text-xl font-black uppercase italic">System Modes</h2>
-                    <div class="grid grid-cols-1 gap-4">
-                        <button onclick="setSystemMode('KID')" class="p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-[10px] font-black uppercase">Kid Mode</button>
-                        <button onclick="setSystemMode('ADULT')" class="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl text-[10px] font-black uppercase">Adult Mode</button>
-                        <button id="adminModeBtn" onclick="setSystemMode('ADMIN')" class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-[10px] font-black uppercase opacity-20 cursor-not-allowed">Admin Mode (Restricted)</button>
+            <div class="flex-grow p-12 overflow-y-auto">
+                <div id="tab-general" class="tab-content active space-y-8">
+                    <h2 class="text-3xl font-black uppercase italic">Profile Config</h2>
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-white/30 uppercase ml-2">Display Name</label>
+                        <input id="cfgName" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-sky-500 transition" placeholder="Enter name...">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-white/30 uppercase ml-2">Profile Image Link</label>
+                        <input id="cfgPFPLink" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-sky-500 transition" placeholder="https://...">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-white/30 uppercase ml-2">Groq Neural Key</label>
+                        <input id="cfgGroq" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-sky-500 transition" type="password" placeholder="gsk_...">
                     </div>
                 </div>
 
-                <button onclick="applyAllChanges()" class="mt-10 w-full bg-sky-500 p-4 rounded-2xl font-black text-xs uppercase tracking-widest">Sync Changes</button>
+                <div id="tab-modes" class="tab-content space-y-6">
+                    <h2 class="text-3xl font-black uppercase italic">System Modes</h2>
+                    <div class="grid grid-cols-1 gap-4 pt-4">
+                        <button onclick="setMode('KID')" class="p-5 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase hover:border-sky-500 transition">Kid Mode</button>
+                        <button onclick="setMode('ADULT')" class="p-5 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase hover:border-sky-500 transition">Adult Mode</button>
+                        <button id="adminBtn" onclick="setMode('ADMIN')" class="p-5 bg-red-500/10 border border-red-500/20 rounded-2xl text-[10px] font-black uppercase opacity-20 cursor-not-allowed">Admin Mode (Locked)</button>
+                    </div>
+                </div>
+
+                <button onclick="applyChanges()" id="syncBtn" class="mt-12 w-full bg-sky-500 p-5 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.3em] hover:brightness-110 active:scale-95 transition shadow-lg shadow-sky-500/20">Sync All Changes</button>
             </div>
         </div>
     </div>
@@ -93,35 +107,41 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        let uData = { displayName: "User", groqKey: "", mode: "ADULT" };
+        let uData = { displayName: "User", groqKey: "", pfp: "https://i.imgur.com/r6oJp4O.png", mode: "ADULT" };
         const admins = ["SICMailCenter1@gmail.com", "Roystonslijkerman@gmail.com"];
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) return window.location.href = "login.html";
-            const snap = await getDoc(doc(db, "users", user.uid));
-            if(snap.exists()) uData = snap.data();
-
-            // Admin Logic
-            if(admins.includes(user.email)) {
-                document.getElementById('adminModeBtn').classList.remove('opacity-20', 'cursor-not-allowed');
-                document.getElementById('adminTag').classList.remove('hidden');
-            }
             
+            // Try to load user data
+            try {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if(snap.exists()) uData = {...uData, ...snap.data()};
+                
+                // Admin check
+                if(admins.includes(user.email)) {
+                    document.getElementById('adminBtn').classList.remove('opacity-20', 'cursor-not-allowed');
+                }
+            } catch (e) { console.error("Firebase Error:", e); }
+
             refreshUI();
         });
 
         window.changeView = (target) => {
             document.getElementById('view-dashboard').classList.add('hidden');
             document.getElementById('view-terminal').classList.add('hidden');
-            document.getElementById('view-' + target).classList.remove('hidden');
-            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+
+            document.getElementById(`view-${target}`).classList.remove('hidden');
+            document.getElementById(`btn-${target === 'dashboard' ? 'dash' : 'term'}`).classList.add('nav-active');
+
             if(target === 'dashboard') {
                 const welcome = document.getElementById('welcomeMsg');
                 welcome.innerText = `Welcome, ${uData.displayName}`;
@@ -131,45 +151,84 @@
             }
         };
 
-        window.showTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        };
-
-        window.setSystemMode = (m) => {
-            if(m === 'ADMIN' && !admins.includes(auth.currentUser.email)) return alert("Permission Denied.");
-            uData.mode = m;
-            alert("Mode set to: " + m);
-        };
-
-        window.applyAllChanges = async () => {
-            const name = document.getElementById('cfgName').value;
-            const groq = document.getElementById('cfgGroq').value;
-            const pass = document.getElementById('cfgPass').value;
+        window.applyChanges = async () => {
+            const syncBtn = document.getElementById('syncBtn');
+            syncBtn.innerText = "Syncing...";
+            
+            const name = document.getElementById('cfgName').value.trim();
+            const groq = document.getElementById('cfgGroq').value.trim();
+            const pfp = document.getElementById('cfgPFPLink').value.trim();
+            
             const updates = { mode: uData.mode };
-
             if(name) updates.displayName = name;
             if(groq) updates.groqKey = groq;
+            if(pfp) updates.pfp = pfp;
 
             try {
-                if(pass) await updatePassword(auth.currentUser, pass);
                 await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
                 uData = {...uData, ...updates};
-                alert("MobbyOS V1.1.0: All Systems Synced.");
                 refreshUI();
+                syncBtn.innerText = "Sync All Changes";
+                alert("Success: All changes saved to SIC Corp Cloud.");
                 closeConfig();
-            } catch (e) { alert(e.message); }
+            } catch (e) { 
+                alert("Sync Failed: " + e.message);
+                syncBtn.innerText = "Sync All Changes";
+            }
+        };
+
+        window.sendMessage = async () => {
+            const input = document.getElementById('termInput');
+            const chat = document.getElementById('chatBox');
+            const text = input.value.trim();
+            if(!text || !uData.groqKey) return;
+
+            input.value = '';
+            chat.innerHTML += `<div class="p-4 bg-white/5 rounded-2xl border border-white/5"><span class="text-white/30 font-black uppercase text-[9px]">User</span><p class="mt-1">${text}</p></div>`;
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${uData.groqKey}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] })
+                });
+                const data = await res.json();
+                const reply = data.choices[0].message.content;
+                chat.innerHTML += `<div class="p-4 bg-sky-500/5 rounded-2xl border border-sky-500/10"><span class="text-sky-400 font-black uppercase text-[9px]">MobbyOS</span><p class="mt-1 text-sky-100">${reply}</p></div>`;
+            } catch {
+                chat.innerHTML += `<div class="text-red-500 font-black">!! NEURAL LINK FAILURE !!</div>`;
+            }
+            chat.scrollTop = chat.scrollHeight;
+        };
+
+        window.setMode = (m) => {
+            if(m === 'ADMIN' && !admins.includes(auth.currentUser.email)) return alert("Permission Denied.");
+            uData.mode = m;
+            alert(`Mode set to ${m}. Click 'Sync Changes' to save permanently.`);
         };
 
         function refreshUI() {
             document.getElementById('sideName').innerText = uData.displayName;
             document.getElementById('userRole').innerText = uData.mode + " MODE";
+            document.getElementById('sidePFP').src = uData.pfp;
+            document.getElementById('dashPFP').src = uData.pfp;
+            
+            const status = document.getElementById('mobbyStatus');
+            if(uData.groqKey) {
+                status.innerText = "Neural Engine Online";
+                status.className = "text-[9px] font-bold text-green-500 uppercase italic";
+            }
+            
             changeView('dashboard');
         }
 
+        window.showTab = (id) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        };
         window.openConfig = () => document.getElementById('configModal').classList.remove('hidden');
         window.closeConfig = () => document.getElementById('configModal').classList.add('hidden');
-        window.checkTerminal = () => uData.groqKey ? changeView('terminal') : alert("No Neural Key Found.");
     </script>
 </body>
 </html>
