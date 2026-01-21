@@ -3,235 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS | SIC Corp</title>
+    <title>MobbyOS V1 | SIC Corp</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --transition: 0.4s ease; }
-        body.mode-kid { background: #0c4a6e; color: #f0f9ff; }
-        body.mode-adult { background: #1e293b; color: #e2e8f0; }
-        body.mode-admin { background: #020617; color: #f8fafc; font-family: 'JetBrains Mono', monospace; }
-        body { transition: background var(--transition); height: 100vh; overflow: hidden; display: flex; margin: 0; }
+        :root { --sky: #38bdf8; --glow: 0 0 20px rgba(56, 189, 248, 0.2); }
+        body { background: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; margin: 0; }
         
         .hidden { display: none !important; }
 
-        /* Welcome Text Animation Fix */
-        .typewriter-container { min-height: 1.2em; display: flex; align-items: center; }
-        .typewriter-text { 
-            display: inline-block;
-            overflow: hidden; 
-            white-space: nowrap; 
-            border-right: 3px solid #38bdf8;
-            width: 0;
-        }
-        .animate-now {
-            animation: typing 1.5s steps(25, end) forwards, blink 0.75s step-end infinite;
-        }
+        /* V1 Typewriter Reset Logic */
+        .typewriter { overflow: hidden; white-space: nowrap; border-right: 3px solid var(--sky); width: 0; }
+        .animate-v1 { animation: typing 1.5s steps(30, end) forwards, blink .75s step-end infinite; }
         @keyframes typing { from { width: 0 } to { width: 100% } }
-        @keyframes blink { from, to { border-color: transparent } 50% { border-color: #38bdf8; } }
+        @keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--sky); } }
 
-        .sidebar { background: #000; border-right: 1px solid rgba(255,255,255,0.05); width: 280px; z-index: 50; }
-        .nav-btn { width: 100%; text-align: left; padding: 14px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; color: rgba(255,255,255,0.4); transition: 0.2s; }
-        .nav-btn.active { color: white; background: rgba(255,255,255,0.08); }
-        .input-magical { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 12px; width: 100%; outline: none; transition: 0.3s; }
-        .input-magical:focus { border-color: #38bdf8; background: rgba(255,255,255,0.07); }
+        /* Magical Glassmorphism */
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .sidebar { transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -100%; height: 100%; width: 85%; background: rgba(0,0,0,0.95); }
+            .sidebar.open { left: 0; }
+        }
+
+        .input-magical { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 14px; border-radius: 16px; width: 100%; outline: none; transition: 0.3s; }
+        .input-magical:focus { border-color: var(--sky); box-shadow: var(--glow); }
+        
+        /* Loading Spinner */
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid var(--sky); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body id="mainBody" class="mode-kid">
+<body class="flex flex-col md:flex-row">
 
-    <aside class="sidebar flex flex-col p-6">
-        <div class="mb-10 flex items-center gap-3">
-            <img id="sidePFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-10 h-10 rounded-full object-cover border border-sky-500/20">
+    <div class="md:hidden p-4 flex justify-between items-center glass border-b border-white/5">
+        <h1 class="font-black tracking-tighter text-lg uppercase">Mobby<span class="text-sky-400">OS V1</span></h1>
+        <button onclick="document.getElementById('sideBar').classList.toggle('open')" class="text-white text-2xl">☰</button>
+    </div>
+
+    <aside id="sideBar" class="sidebar w-[300px] bg-black flex flex-col p-8 border-r border-white/5">
+        <div class="mb-12 flex items-center gap-4">
+            <div class="relative">
+                <img id="sidePFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-12 h-12 rounded-2xl object-cover ring-1 ring-white/10">
+                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-black"></div>
+            </div>
             <div class="overflow-hidden">
-                <h1 class="text-sm font-black text-white truncate" id="sideName">MOBBYOS</h1>
-                <div id="userEmailDisplay" class="text-[7px] font-bold text-sky-400 uppercase opacity-50">Connecting...</div>
+                <p id="sideName" class="text-sm font-black truncate">Initializing...</p>
+                <p id="userEmail" class="text-[7px] text-sky-400 font-black uppercase tracking-widest opacity-60 truncate">SIC CORP SECURE</p>
             </div>
         </div>
 
-        <nav class="space-y-1">
-            <button onclick="showView('dashboard')" class="nav-btn active" id="btn-dashboard">Dashboard</button>
-            <button onclick="showView('terminal')" class="nav-btn" id="btn-terminal">Terminal</button>
-            <button onclick="toggleSettings()" class="nav-btn">Config</button>
+        <nav class="space-y-2 flex-grow">
+            <button onclick="showView('dashboard')" class="w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase hover:bg-white/5 transition tracking-widest" id="nav-dashboard">Dashboard</button>
+            <button onclick="checkKeyBeforeTerminal()" class="w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase hover:bg-white/5 transition tracking-widest" id="nav-terminal">Terminal</button>
+            <button onclick="toggleSettings()" class="w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase hover:bg-white/5 transition tracking-widest">Config</button>
         </nav>
 
-        <div class="mt-auto pt-6 border-t border-white/5">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-[9px] font-black text-white/20 uppercase tracking-widest">Threads</span>
-                <button id="addThreadBtn" class="text-sky-400 text-lg hover:scale-125 transition">+</button>
-            </div>
-            <div id="threadList" class="space-y-1 max-h-[30vh] overflow-y-auto"></div>
+        <div class="mt-auto border-t border-white/5 pt-6">
+            <button onclick="logout()" class="w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase text-red-500 hover:bg-red-500/10 transition">Logout System</button>
         </div>
     </aside>
 
-    <main class="flex-grow flex flex-col p-12 relative overflow-y-auto">
-        <div id="view-dashboard" class="h-full flex flex-col justify-center animate-fade-in">
-            <div class="flex items-center gap-8 mb-8">
-                <img id="dashPFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-32 h-32 rounded-[2rem] object-cover shadow-2xl border border-white/10 bg-slate-800">
-                <div>
-                    <div class="typewriter-container">
-                        <h2 id="welcomeMsg" class="text-6xl font-black text-white tracking-tighter typewriter-text">Welcome</h2>
-                    </div>
-                    <p class="text-sky-400 text-[10px] uppercase mt-2 tracking-[0.5em] font-bold">SIC Corp Identity Confirmed</p>
-                </div>
+    <main class="flex-grow relative p-8 md:p-16 overflow-y-auto bg-gradient-to-br from-slate-950 to-black">
+        
+        <div id="view-dashboard" class="h-full flex flex-col justify-center items-start animate-in fade-in duration-700">
+            <img id="dashPFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-28 h-28 md:w-40 md:h-40 rounded-[2.5rem] mb-8 shadow-2xl border border-white/10 bg-slate-900">
+            <div class="h-20">
+                <h2 id="welcomeMsg" class="text-5xl md:text-7xl font-black mb-4 typewriter">Welcome</h2>
             </div>
-            <div class="bg-white/5 border border-white/10 p-6 rounded-3xl max-w-sm">
-                <p class="text-[10px] text-sky-500 font-black uppercase mb-1">LPU Status</p>
-                <p class="text-xs text-white/40 italic">Mobby engine online. Ready for execution.</p>
+            <div class="flex items-center gap-4 mt-4">
+                <span class="px-3 py-1 bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[9px] font-black rounded-full uppercase tracking-tighter">MobbyOS V1</span>
+                <span class="text-white/20 text-[9px] font-black uppercase tracking-[0.3em]">SIC Corp Protocol Active</span>
             </div>
         </div>
 
         <div id="view-terminal" class="h-full flex flex-col hidden">
-            <div id="chatBox" class="flex-grow overflow-y-auto space-y-4 mb-6 pr-4 font-mono text-sm"></div>
-            <div class="max-w-4xl mx-auto w-full p-4 border border-white/10 rounded-2xl bg-black/40">
-                <textarea id="userInput" placeholder="Command Mobby..." rows="1" class="bg-transparent outline-none text-white resize-none w-full text-sm"></textarea>
-                <div class="flex justify-between mt-2">
-                    <span class="text-[8px] text-white/20 uppercase font-black">Shift+Enter for newline</span>
-                    <button id="sendBtn" class="text-sky-400 font-black text-[10px] uppercase hover:text-white transition">Execute</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-6 hidden">
-            <div class="w-full max-w-sm p-8 bg-[#0a0a0a] border border-white/10 rounded-[2.5rem]">
-                <h2 class="text-xs font-black text-sky-400 mb-6 uppercase tracking-widest">Configuration</h2>
-                <div class="space-y-4">
-                    <input type="text" id="settingName" class="input-magical" placeholder="New Display Name">
-                    <input type="text" id="settingPFP" class="input-magical" placeholder="New PFP URL (Optional)">
-                    <input type="password" id="settingGroqKey" class="input-magical" placeholder="New Groq API Key (Optional)">
-                    
-                    <div class="pt-4 space-y-2">
-                        <button id="saveSettingsBtn" class="w-full bg-sky-500 text-white py-4 rounded-xl font-black uppercase text-[10px]">Sync Changes</button>
-                        <button onclick="toggleSettings()" class="w-full text-white/20 py-2 text-[8px] font-black uppercase">Discard</button>
-                    </div>
+            <div id="chatBox" class="flex-grow overflow-y-auto mb-6 space-y-4 p-6 glass rounded-[2rem] font-mono text-xs leading-relaxed"></div>
+            <div class="flex flex-col gap-3 glass p-4 rounded-[2rem]">
+                <textarea id="userInput" placeholder="Execute command..." rows="1" class="bg-transparent p-2 outline-none text-sm resize-none w-full"></textarea>
+                <div class="flex justify-between items-center px-2">
+                    <span class="text-[8px] text-white/20 font-black uppercase">V1 Engine // LPU Active</span>
+                    <button onclick="handleSend()" class="bg-sky-500 text-white px-6 py-2 rounded-xl font-black text-[10px] uppercase hover:scale-105 transition shadow-lg shadow-sky-500/20">Send</button>
                 </div>
             </div>
         </div>
     </main>
 
+    <div id="keySetup" class="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-md p-10 glass rounded-[3rem] text-center border-sky-500/20 shadow-2xl">
+            <div class="w-16 h-16 bg-sky-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-sky-500/20">
+                <span class="text-sky-400 text-2xl font-black">!</span>
+            </div>
+            <h2 class="text-2xl font-black text-white mb-2 uppercase tracking-tight">V1 Initialization</h2>
+            <p class="text-[11px] text-white/40 mb-8 leading-relaxed">System security requires a <b>Groq API Key</b> to link MobbyOS V1 to the neural network.</p>
+            <input type="password" id="forcedKey" class="input-magical mb-4 text-center" placeholder="Paste gsk_ key here">
+            <button onclick="saveForcedKey()" class="w-full bg-sky-500 p-5 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:brightness-110 transition">Connect Engine</button>
+        </div>
+    </div>
+
+    <div id="settingsTab" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-sm p-10 glass rounded-[3rem]">
+            <h3 class="text-xs font-black text-sky-400 mb-8 uppercase tracking-[0.2em] text-center">Sync Config</h3>
+            <div class="space-y-4">
+                <input type="text" id="setName" class="input-magical" placeholder="Change Display Name">
+                <input type="text" id="setPFP" class="input-magical" placeholder="Profile Picture URL">
+                <button onclick="syncChanges()" class="w-full bg-sky-500 p-5 rounded-2xl font-black text-[11px] uppercase tracking-widest mt-4">Sync to SIC Cloud</button>
+                <button onclick="toggleSettings()" class="w-full text-white/20 text-[9px] font-black uppercase mt-4">Discard</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        let currentChatId = null;
-        let userData = {};
+        let currentUserData = null;
 
-        // --- DASHBOARD ANIMATION FIX ---
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "login.html"; // Ensure you have this file
+                return;
+            }
+            document.getElementById('userEmail').innerText = user.email;
+            const snap = await getDoc(doc(db, "users", user.uid));
+            if (snap.exists()) {
+                currentUserData = snap.data();
+                updateUI();
+            } else {
+                const defaults = { displayName: "User", pfp: "", groqKey: "" };
+                await setDoc(doc(db, "users", user.uid), defaults);
+                currentUserData = defaults;
+                updateUI();
+            }
+        });
+
+        window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
+
         window.showView = (name) => {
             document.getElementById('view-dashboard').classList.add('hidden');
             document.getElementById('view-terminal').classList.add('hidden');
             document.getElementById(`view-${name}`).classList.remove('hidden');
             
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-${name}`)?.classList.add('active');
-
             if(name === 'dashboard') {
-                const wel = document.getElementById('welcomeMsg');
-                wel.classList.remove('animate-now');
-                void wel.offsetWidth; // Force Reflow
-                wel.innerText = `Welcome, ${userData.displayName || 'User'}`;
-                wel.classList.add('animate-now');
+                const el = document.getElementById('welcomeMsg');
+                el.innerText = `Welcome, ${currentUserData?.displayName || 'User'}`;
+                el.classList.remove('animate-v1');
+                void el.offsetWidth; 
+                el.classList.add('animate-v1');
+            }
+            if(window.innerWidth < 768) document.getElementById('sideBar').classList.remove('open');
+        };
+
+        window.checkKeyBeforeTerminal = () => {
+            if (!currentUserData?.groqKey) {
+                document.getElementById('keySetup').classList.remove('hidden');
+            } else {
+                showView('terminal');
             }
         };
 
-        window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
-
-        // --- AUTH & DATA SYNC ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                document.getElementById('userEmailDisplay').innerText = user.email;
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                userData = userDoc.exists() ? userDoc.data() : { displayName: "User", pfp: "" };
-                updateUI(userData);
-                loadThreads(user.uid);
-            }
-        });
-
-        function updateUI(data) {
-            document.getElementById('sideName').innerText = data.displayName || "User";
-            document.getElementById('sidePFP').src = data.pfp || "";
-            document.getElementById('dashPFP').src = data.pfp || "";
-            showView('dashboard');
-        }
-
-        // --- SELECTIVE COMMIT FIX ---
-        document.getElementById('saveSettingsBtn').onclick = async () => {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            const newName = document.getElementById('settingName').value.trim();
-            const newPFP = document.getElementById('settingPFP').value.trim();
-            const newKey = document.getElementById('settingGroqKey').value.trim();
-
+        window.syncChanges = async () => {
+            const name = document.getElementById('setName').value.trim();
+            const pfp = document.getElementById('setPFP').value.trim();
             let updates = {};
-            if (newName) updates.displayName = newName;
-            if (newPFP) updates.pfp = newPFP;
-            if (newKey) updates.groqKey = newKey;
+            if (name) updates.displayName = name;
+            if (pfp) updates.pfp = pfp;
 
             if (Object.keys(updates).length > 0) {
-                await updateDoc(doc(db, "users", user.uid), updates);
-                userData = { ...userData, ...updates };
-                updateUI(userData);
-                alert("MobbyOS Updated.");
+                await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
+                currentUserData = { ...currentUserData, ...updates };
+                updateUI();
             }
             toggleSettings();
         };
 
-        // --- CHAT LOGIC ---
-        const handleSend = async () => {
-            const input = document.getElementById('userInput');
-            const text = input.value.trim();
-            if (!text) return;
-            input.value = '';
-            
-            const chatBox = document.getElementById('chatBox');
-            chatBox.innerHTML += `<div class="p-3 text-white/50 bg-white/5 rounded-lg"><b>YOU:</b> ${text}</div>`;
-
-            if (!currentChatId) {
-                const thread = await addDoc(collection(db, "users", auth.currentUser.uid, "threads"), {
-                    title: text.substring(0, 15),
-                    timestamp: serverTimestamp()
-                });
-                currentChatId = thread.id;
-                loadThreads(auth.currentUser.uid);
+        window.saveForcedKey = async () => {
+            const key = document.getElementById('forcedKey').value.trim();
+            if (key.startsWith('gsk_')) {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { groqKey: key });
+                currentUserData.groqKey = key;
+                document.getElementById('keySetup').classList.add('hidden');
+                showView('terminal');
+            } else {
+                alert("Invalid Key Format. Must start with gsk_");
             }
-
-            // Mock Bot Response (Add Groq API Fetch here if key exists)
-            chatBox.innerHTML += `<div class="p-3 text-sky-400 animate-pulse">MOBBY IS PROCESSING...</div>`;
-            setTimeout(() => {
-                chatBox.lastElementChild.innerHTML = `<b>MOBBY:</b> Awaiting Groq Command. System standing by.`;
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 1000);
         };
 
-        document.getElementById('userInput').addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
-        });
-        document.getElementById('sendBtn').onclick = handleSend;
-
-        async function loadThreads(uid) {
-            const q = query(collection(db, "users", uid, "threads"), orderBy("timestamp", "desc"));
-            const snap = await getDocs(q);
-            const list = document.getElementById('threadList');
-            list.innerHTML = '';
-            snap.forEach(d => {
-                const div = document.createElement('div');
-                div.className = "p-2 text-[9px] text-white/30 cursor-pointer hover:text-white";
-                div.innerHTML = `⚡ ${d.data().title}`;
-                div.onclick = () => { currentChatId = d.id; showView('terminal'); };
-                list.appendChild(div);
-            });
+        function updateUI() {
+            document.getElementById('sideName').innerText = currentUserData.displayName || "User";
+            document.getElementById('sidePFP').src = currentUserData.pfp || "";
+            document.getElementById('dashPFP').src = currentUserData.pfp || "";
+            showView('dashboard');
         }
 
-        document.getElementById('addThreadBtn').onclick = () => {
-            currentChatId = null;
-            document.getElementById('chatBox').innerHTML = '';
-            showView('terminal');
+        window.toggleSettings = () => document.getElementById('settingsTab').classList.toggle('hidden');
+
+        window.handleSend = async () => {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if(!text) return;
+            input.value = '';
+
+            const chat = document.getElementById('chatBox');
+            chat.innerHTML += `<div class="mb-2 text-white/40 uppercase font-black text-[9px] tracking-widest">User</div><div class="mb-6">${text}</div>`;
+
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${currentUserData.groqKey}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] })
+                });
+                const data = await res.json();
+                const botReply = data.choices[0].message.content;
+                chat.innerHTML += `<div class="mb-2 text-sky-400 uppercase font-black text-[9px] tracking-widest">MobbyOS V1</div><div class="mb-6 text-sky-100/90">${botReply}</div>`;
+            } catch (e) {
+                chat.innerHTML += `<div class="text-red-500 font-black text-[10px]">!! SYSTEM LINK FAILURE !!</div>`;
+            }
+            chat.scrollTop = chat.scrollHeight;
         };
     </script>
 </body>
