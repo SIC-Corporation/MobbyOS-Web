@@ -5,184 +5,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MobbyOS V1.1.0 | SIC Corp</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         :root { --sky: #38bdf8; }
-        body { background: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; margin: 0; }
+        body { background: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); }
         
-        /* Fixed Typewriter */
-        .typewriter { overflow: hidden; white-space: nowrap; border-right: 3px solid var(--sky); width: 0; }
-        .animate-v1 { animation: typing 1.5s steps(30, end) forwards, blink .75s step-end infinite; }
+        /* THE ANIMATION FIX */
+        .typewriter { 
+            display: inline-block;
+            overflow: hidden; 
+            white-space: nowrap; 
+            border-right: 3px solid var(--sky); 
+            width: 0; 
+        }
+        .run-anim { 
+            animation: typing 1s steps(20, end) forwards, blink .75s step-end infinite; 
+        }
         @keyframes typing { from { width: 0 } to { width: 100% } }
         @keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--sky); } }
 
-        /* Setup Screen Animation */
-        .setup-pulse { animation: pulse-glow 3s infinite; }
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 0px rgba(56, 189, 248, 0); }
-            50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.3); }
-            100% { box-shadow: 0 0 0px rgba(56, 189, 248, 0); }
-        }
-
-        .input-magical { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 14px; border-radius: 12px; width: 100%; outline: none; }
-        .input-magical:focus { border-color: var(--sky); }
-        
-        .nav-active { background: rgba(56, 189, 248, 0.1) !important; color: var(--sky) !important; border-left: 3px solid var(--sky); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .nav-btn { transition: 0.2s; border-left: 3px solid transparent; }
+        .nav-active { background: rgba(56, 189, 248, 0.1); color: var(--sky); border-left: 3px solid var(--sky); }
     </style>
 </head>
-<body class="flex flex-col md:flex-row h-screen w-screen">
+<body class="flex">
 
-    <aside id="sideBar" class="w-[300px] bg-black flex flex-col p-8 border-r border-white/5 h-full z-50">
-        <div class="mb-12 flex items-center gap-4">
-            <img id="sidePFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-12 h-12 rounded-full object-cover border border-white/10">
+    <aside class="w-64 bg-black border-r border-white/5 flex flex-col p-6 z-50">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center font-black text-sky-400">M</div>
             <div>
-                <p id="sideName" class="text-sm font-black truncate text-white">Loading...</p>
-                <p class="text-[7px] text-sky-400 font-black uppercase tracking-widest">MobbyOS V1.1.0</p>
+                <p id="sideName" class="text-xs font-black uppercase tracking-tighter">System Offline</p>
+                <p class="text-[8px] text-sky-400 font-bold opacity-50 uppercase">V1.1.0 STABLE</p>
             </div>
         </div>
-
-        <nav class="space-y-2 flex-grow">
-            <button id="nav-dash" onclick="changeView('dashboard')" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase hover:bg-white/5 transition text-white/50">Dashboard</button>
-            <button id="nav-term" onclick="changeView('terminal')" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase hover:bg-white/5 transition text-white/50">Terminal</button>
-            <button onclick="toggleSettings()" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase hover:bg-white/5 transition text-white/50">Config</button>
-            <button onclick="toggleHistory()" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase hover:bg-white/5 transition text-white/50">Ver. History</button>
+        <nav class="space-y-1 flex-grow">
+            <button onclick="changeView('dashboard')" id="btn-dash" class="nav-btn w-full text-left p-3 rounded-lg text-[10px] font-black uppercase text-white/40 hover:text-white">Dashboard</button>
+            <button onclick="checkTerminal()" id="btn-term" class="nav-btn w-full text-left p-3 rounded-lg text-[10px] font-black uppercase text-white/40 hover:text-white">Terminal</button>
+            <button onclick="toggleModal('settingsModal')" class="nav-btn w-full text-left p-3 rounded-lg text-[10px] font-black uppercase text-white/40 hover:text-white">Config</button>
+            <button onclick="toggleModal('historyModal')" class="nav-btn w-full text-left p-3 rounded-lg text-[10px] font-black uppercase text-white/40 hover:text-white">History</button>
         </nav>
-
-        <button onclick="logout()" class="text-red-500 text-[10px] font-black uppercase p-4 text-left">Logout</button>
     </aside>
 
-    <main class="flex-grow relative h-full">
-        <div id="view-dashboard" class="h-full w-full flex flex-col justify-center p-12 md:p-24 bg-[#020617]">
-            <img id="dashPFP" src="" onerror="this.src='https://i.imgur.com/r6oJp4O.png'" class="w-32 h-32 rounded-3xl mb-8 border border-white/10 shadow-2xl">
-            <div class="h-20">
-                <h2 id="welcomeMsg" class="text-5xl md:text-7xl font-black text-white">Welcome</h2>
+    <main class="flex-grow relative">
+        <div id="view-dashboard" class="absolute inset-0 flex flex-col justify-center p-20">
+            <h1 class="text-[10px] font-black text-sky-400 tracking-[0.5em] mb-4">SYSTEM READY</h1>
+            <div class="h-24">
+                <span id="welcomeMsg" class="text-6xl font-black text-white typewriter">Welcome</span>
             </div>
-            <p class="text-sky-400 text-[10px] mt-4 uppercase tracking-[0.6em] font-bold">SIC Corp Protocol Active</p>
         </div>
 
-        <div id="view-terminal" class="h-full w-full flex flex-col hidden p-8 bg-[#020617]">
-            <div id="chatBox" class="flex-grow overflow-y-auto mb-6 p-6 glass rounded-[2rem] text-xs font-mono space-y-4"></div>
-            <div class="glass p-4 rounded-2xl flex gap-3">
-                <textarea id="userInput" rows="1" class="flex-grow bg-transparent outline-none text-sm text-white resize-none" placeholder="Ask Mobby..."></textarea>
-                <button onclick="handleSend()" class="text-sky-400 font-black text-xs uppercase">Execute</button>
+        <div id="view-terminal" class="absolute inset-0 flex flex-col p-10 hidden bg-[#020617]">
+            <div id="chatBox" class="flex-grow overflow-y-auto glass rounded-3xl p-6 mb-4 font-mono text-xs space-y-4"></div>
+            <div class="glass p-4 rounded-2xl flex gap-4">
+                <input id="termInput" class="bg-transparent flex-grow outline-none text-sm" placeholder="Execute command...">
+                <button onclick="sendMessage()" class="text-sky-400 font-black text-xs uppercase">Run</button>
             </div>
         </div>
     </main>
 
-    <div id="setupScreen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-md p-12 glass rounded-[3rem] text-center setup-pulse border-sky-500/30">
-            <div class="w-20 h-20 bg-sky-500/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-sky-500/20">
-                <span class="text-sky-400 text-3xl font-black">!</span>
-            </div>
-            <h2 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter">Initialize Engine</h2>
-            <p class="text-[10px] text-white/40 mb-8 uppercase tracking-widest">MobbyOS V1.1.0 requires a Groq API Key</p>
-            <input type="password" id="forcedGroq" class="input-magical text-center mb-4" placeholder="gsk_...">
-            <button onclick="saveInitialKey()" class="w-full bg-sky-500 p-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:brightness-110 transition">Connect Brain</button>
+    <div id="groqAlert" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center hidden">
+        <div class="p-10 glass rounded-[2rem] text-center max-w-xs">
+            <div class="text-3xl mb-4">⚠️</div>
+            <h2 class="font-black uppercase text-sm mb-2">Neural Link Offline</h2>
+            <p class="text-[10px] text-white/40 mb-6">You must initialize your Groq API Key in Config to use the Terminal.</p>
+            <button onclick="toggleModal('groqAlert')" class="w-full bg-sky-500 p-3 rounded-xl font-black text-[10px] uppercase">Acknowledge</button>
         </div>
     </div>
 
-    <div id="historyTab" class="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-md p-10 glass rounded-[3rem]">
-            <h2 class="text-sky-400 font-black uppercase mb-6 italic">Version History</h2>
-            <div class="text-[10px] space-y-4 text-white/60 font-mono">
-                <p><b class="text-white">V1.1.0:</b> Navigation Logic Refactor + Setup Animation</p>
-                <p><b class="text-white">V1.0.5:</b> Categorized Config & Password Updating</p>
-                <p><b class="text-white">V1.0.0:</b> Core Release</p>
+    <div id="settingsModal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center hidden">
+        <div class="p-10 glass rounded-[3rem] w-full max-w-sm">
+            <h2 class="font-black uppercase text-sky-400 text-xs mb-6">System Config</h2>
+            <div class="space-y-4">
+                <input id="newName" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm outline-none" placeholder="New Display Name">
+                <input id="newGroq" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm outline-none" type="password" placeholder="Groq API Key">
+                <button onclick="saveChanges()" class="w-full bg-white text-black p-4 rounded-xl font-black text-[10px] uppercase">Commit Changes</button>
+                <button onclick="toggleModal('settingsModal')" class="w-full text-white/20 font-black text-[9px] uppercase">Cancel</button>
             </div>
-            <button onclick="toggleHistory()" class="w-full mt-8 bg-white/10 p-4 rounded-xl font-black text-[10px] uppercase">Close</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAPgNEVr315jkYcww3MpjAOL93Dfgtl_k8", authDomain: "mobbyoswebapp.firebaseapp.com", projectId: "mobbyoswebapp", storageBucket: "mobbyoswebapp.firebasestorage.app", messagingSenderId: "6814948758", appId: "1:6814948758:web:a87a03eff182e0029091b7" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        let userState = null;
+        let uData = { displayName: "User", groqKey: "" };
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) return window.location.href = "login.html";
             const snap = await getDoc(doc(db, "users", user.uid));
-            userState = snap.exists() ? snap.data() : { displayName: "User", groqKey: "", pfp: "", sysPass: "1234" };
+            if(snap.exists()) uData = snap.data();
             
-            // Check if Setup is needed
-            if(!userState.groqKey) {
-                document.getElementById('setupScreen').classList.remove('hidden');
-            }
-            
-            refreshUI();
+            // FORCE START UI
+            document.getElementById('sideName').innerText = uData.displayName;
+            changeView('dashboard');
         });
 
-        // --- GLOBAL NAVIGATION FIX ---
+        // FIXED NAVIGATION & ANIMATION TRIGGER
         window.changeView = (target) => {
-            // Hide all
             document.getElementById('view-dashboard').classList.add('hidden');
             document.getElementById('view-terminal').classList.add('hidden');
-            document.getElementById('nav-dash').classList.remove('nav-active');
-            document.getElementById('nav-term').classList.remove('nav-active');
+            document.getElementById('btn-dash').classList.remove('nav-active');
+            document.getElementById('btn-term').classList.remove('nav-active');
 
-            // Show target
-            const activeView = document.getElementById(`view-${target}`);
-            activeView.classList.remove('hidden');
-            document.getElementById(`nav-${target === 'dashboard' ? 'dash' : 'term'}`).classList.add('nav-active');
+            document.getElementById(`view-${target}`).classList.remove('hidden');
+            document.getElementById(`btn-${target === 'dashboard' ? 'dash' : 'term'}`).classList.add('nav-active');
 
             if(target === 'dashboard') {
-                const el = document.getElementById('welcomeMsg');
-                el.innerText = `Welcome, ${userState.displayName}`;
-                el.classList.remove('typewriter', 'animate-v1');
-                void el.offsetWidth; // Force reflow
-                el.classList.add('typewriter', 'animate-v1');
+                const welcome = document.getElementById('welcomeMsg');
+                welcome.innerText = `Welcome, ${uData.displayName}`;
+                welcome.classList.remove('run-anim');
+                void welcome.offsetWidth; // TRICK TO RESTART ANIMATION
+                welcome.classList.add('run-anim');
             }
         };
 
-        window.saveInitialKey = async () => {
-            const key = document.getElementById('forcedGroq').value.trim();
-            if(key.startsWith('gsk_')) {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { groqKey: key });
-                userState.groqKey = key;
-                document.getElementById('setupScreen').classList.add('hidden');
-                changeView('terminal');
+        window.checkTerminal = () => {
+            if(!uData.groqKey) {
+                toggleModal('groqAlert');
             } else {
-                alert("Invalid Groq Key Format");
+                changeView('terminal');
             }
         };
 
-        function refreshUI() {
-            document.getElementById('sideName').innerText = userState.displayName;
-            document.getElementById('sidePFP').src = userState.pfp;
-            document.getElementById('dashPFP').src = userState.pfp;
+        window.toggleModal = (id) => document.getElementById(id).classList.toggle('hidden');
+
+        window.saveChanges = async () => {
+            const name = document.getElementById('newName').value.trim();
+            const groq = document.getElementById('newGroq').value.trim();
+            const updates = {};
+            if(name) updates.displayName = name;
+            if(groq) updates.groqKey = groq;
+
+            await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
+            uData = {...uData, ...updates};
+            document.getElementById('sideName').innerText = uData.displayName;
+            toggleModal('settingsModal');
+            alert("System Synced.");
             changeView('dashboard');
-        }
+        };
 
-        window.toggleHistory = () => document.getElementById('historyTab').classList.toggle('hidden');
-        window.toggleSettings = () => alert("Config Menu Opening..."); // Add your specific settings modal here
-        window.logout = () => signOut(auth);
-
-        // Terminal Logic
-        window.handleSend = async () => {
-            const input = document.getElementById('userInput');
-            const text = input.value.trim();
-            if(!text) return;
-            input.value = '';
+        window.sendMessage = async () => {
+            const input = document.getElementById('termInput');
             const chat = document.getElementById('chatBox');
-            chat.innerHTML += `<div class="text-white/30 uppercase font-black text-[9px]">User</div><div class="mb-4">${text}</div>`;
+            if(!input.value) return;
+            
+            const msg = input.value;
+            input.value = '';
+            chat.innerHTML += `<div class="text-white/40 uppercase font-black text-[9px]">User</div><div class="mb-4">${msg}</div>`;
             
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
-                    headers: { "Authorization": `Bearer ${userState.groqKey}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] })
+                    headers: { "Authorization": `Bearer ${uData.groqKey}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: msg}] })
                 });
                 const data = await res.json();
                 chat.innerHTML += `<div class="text-sky-400 uppercase font-black text-[9px]">MobbyOS</div><div class="mb-4 text-sky-100">${data.choices[0].message.content}</div>`;
-            } catch { chat.innerHTML += `<div class="text-red-500">Connection Failed</div>`; }
+            } catch {
+                chat.innerHTML += `<div class="text-red-500 font-bold uppercase">Engine Error</div>`;
+            }
             chat.scrollTop = chat.scrollHeight;
         };
     </script>
