@@ -7,7 +7,7 @@ class SICryption:
     SIC Corp High-Advanced Encryption Module (V2.0)
     Creator: Roy (Owner of SIC Corp)
     """
-    def __init__(self, master_key):
+    def __init__(self, master_key="Roy_SIC_Corp_2026"):
         self.key = hashlib.sha256(master_key.encode()).hexdigest()
         self.header = "SIC|SECURED|V2|"
 
@@ -44,3 +44,35 @@ class SICryption:
             return "".join(decrypted_chars)
         except:
             return "DECRYPTION_FAILED"
+
+# --- ACCESS LEVEL LOGIC ---
+# This is called by engine.py to check roles
+
+def identify_access(email):
+    """
+    Validates user email and returns access tier.
+    Used by MobbyOS to determine UI and Permissions.
+    """
+    admins = ["SICMailCenter1@gmail.com", "Roystonslijkerman@gmail.com"]
+    email = email.lower().strip()
+
+    if email in admins:
+        return {
+            "role": "ADMIN (SIC CORP)",
+            "color": "#38bdf8", # Sky Blue
+            "clearance": 3
+        }
+    
+    elif "@kids.com" in email or "child" in email:
+        return {
+            "role": "KIDS MODE",
+            "color": "#fbbf24", # Amber/Yellow
+            "clearance": 1
+        }
+    
+    else:
+        return {
+            "role": "ADULT NODE",
+            "color": "#a855f7", # Purple
+            "clearance": 2
+        }
