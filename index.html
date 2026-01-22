@@ -192,16 +192,6 @@
                     <input id="set-username" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm font-bold text-white mb-6 focus:border-sky-500 outline-none">
                     <button id="save-profile" class="btn-primary px-8 py-3 rounded-xl text-[10px] uppercase">Update Profile</button>
                 </div>
-                <div id="tab-security" class="settings-content hidden">
-                    <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">Security</h4>
-                    <label class="block text-[9px] uppercase font-black text-white/40 mb-2">New Password</label>
-                    <input id="set-password" type="password" placeholder="••••••••" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm font-bold text-white mb-6 focus:border-sky-500 outline-none">
-                    <button id="save-security" class="btn-primary px-8 py-3 rounded-xl text-[10px] uppercase">Update Password</button>
-                    <div class="mt-12 pt-8 border-t border-white/5">
-                        <h5 class="text-red-500 font-black uppercase text-xs mb-2">Danger Zone</h5>
-                        <button id="delete-account" class="btn-danger w-full p-4 rounded-xl text-[10px] uppercase font-black">Delete Account Permanently</button>
-                    </div>
-                </div>
                 <div id="tab-cloud" class="settings-content hidden">
                     <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">Cloud Config</h4>
                     <div class="bg-sky-500/10 border border-sky-500/20 p-4 rounded-xl mb-6">
@@ -211,31 +201,11 @@
                     <input id="set-apikey" type="password" placeholder="gsk_..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm font-bold text-white mb-6 focus:border-sky-500 outline-none font-mono">
                     <button id="save-cloud" class="btn-primary px-8 py-3 rounded-xl text-[10px] uppercase">Save Key</button>
                 </div>
-                <div id="tab-system" class="settings-content hidden">
-                    <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">System Info</h4>
-                    <div class="space-y-4">
-                        <div class="glass-panel p-4 rounded-xl flex justify-between items-center">
-                            <span class="text-xs font-bold text-white/60">Current Version</span>
-                            <span class="text-xs font-black text-white">MobbyOS V2.0</span>
-                        </div>
-                        <div class="glass-panel p-4 rounded-xl flex justify-between items-center">
-                            <span class="text-xs font-bold text-white/60">Build Date</span>
-                            <span class="text-xs font-black text-white">JAN 2026</span>
-                        </div>
-                        <div class="glass-panel p-4 rounded-xl">
-                            <p class="text-[9px] font-black text-white/40 uppercase mb-2">Version History</p>
-                            <ul class="text-[10px] text-white/60 space-y-1 list-disc pl-4">
-                                <li>V2.0 - Dashboard, Groq Key, Security Tabs</li>
-                                <li>V1.1.5 - Identity Link Fixes</li>
-                                <li>V1.1.4 - Parental Shield Integration</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
+    <script type="text/python" src="botinitials.py"></script>
     <script type="text/python" src="engine.py"></script>
 
     <script>
