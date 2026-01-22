@@ -3,64 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS V2.0 | SIC Corp</title>
+    <title>MobbyOS V1.1.4 | SIC Corp</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
     <style>
         :root { --accent: #38bdf8; }
-        body { 
-            background: #000; 
-            color: white; 
-            font-family: 'Fredoka', sans-serif; 
-            overflow: hidden; 
-            margin: 0; 
-        }
+        body { background: #000; color: white; font-family: 'Fredoka', sans-serif; overflow: hidden; margin: 0; }
         
-        /* Fixed Glassmorphism */
         .glass { 
             background: rgba(255, 255, 255, 0.03); 
             backdrop-filter: blur(40px); 
             border: 1px solid rgba(255, 255, 255, 0.1); 
         }
 
-        /* Fixed Message Bubbles & Layout */
-        .chat-msg {
-            display: flex;
-            align-items: flex-end;
-            gap: 12px;
-            margin-bottom: 20px;
-            width: 100%;
-            animation: slideUp 0.3s ease-out;
-        }
+        /* Message Layout Fixes */
+        .msg-container { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 20px; width: 100%; animation: slideUp 0.3s ease-out; }
         .msg-user { flex-direction: row-reverse; }
-        
-        .bubble {
-            max-width: 70%;
-            padding: 14px 20px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        .bubble-bot { 
-            background: rgba(255,255,255,0.05); 
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px 20px 20px 4px; 
-        }
-        .bubble-user { 
-            background: var(--accent); 
-            color: #000;
-            font-weight: 500;
-            border-radius: 20px 20px 4px 20px; 
-        }
+        .bubble { max-width: 70%; padding: 14px 20px; font-size: 14px; line-height: 1.5; }
+        .bubble-bot { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px 20px 20px 4px; }
+        .bubble-user { background: var(--accent); color: #000; font-weight: 500; border-radius: 20px 20px 4px 20px; }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #welcomeMsg { animation: pulse 4s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
         
         .hidden { display: none !important; }
-        input::placeholder { color: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body onload="brython()">
@@ -70,10 +40,15 @@
             <h2 class="text-4xl font-black italic mb-2 tracking-tighter">SIC <span class="text-sky-500">CORP</span></h2>
             <p class="text-[10px] text-white/30 uppercase tracking-[0.5em] mb-10">Neural Identity Gate</p>
             
+            <div id="g_id_onload" 
+                 data-client_id="6814948758-09puthcj96kia9ln1qeo4rut1ljto6a4.apps.googleusercontent.com" 
+                 data-callback="handleGoogleLogin">
+            </div>
+            <div class="g_id_signin mb-8 flex justify-center" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
+
             <div class="space-y-4">
                 <input id="auth-email" type="text" placeholder="Operator Name" class="w-full bg-white/5 p-5 rounded-2xl outline-none border border-white/5 focus:border-sky-500 transition-all">
-                <input id="auth-pass" type="password" placeholder="Access Key" class="w-full bg-white/5 p-5 rounded-2xl border border-white/5 focus:border-sky-500 transition-all">
-                <button id="btn-auth-submit" class="w-full bg-sky-500 text-black font-bold py-5 rounded-2xl hover:scale-[1.02] transition-all uppercase text-xs tracking-widest">Initialize Mobby</button>
+                <button id="btn-auth-submit" class="w-full bg-sky-500 text-black font-bold py-5 rounded-2xl hover:bg-sky-400 transition-all uppercase text-xs tracking-widest">Initialize Mobby</button>
             </div>
         </div>
     </div>
@@ -81,16 +56,12 @@
     <div class="flex h-screen w-screen bg-black">
         <aside class="w-72 border-r border-white/5 p-8 flex flex-col z-20 bg-black">
             <div class="mb-10 p-5 glass rounded-[2rem] flex items-center gap-4 border-white/10">
-                <div class="relative">
-                    <img id="sidePFP" src="https://ui-avatars.com/api/?name=Roy&background=38bdf8&color=fff" class="w-12 h-12 rounded-2xl object-cover border border-white/10">
-                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-4 border-black rounded-full"></div>
-                </div>
+                <img id="sidePFP" src="https://ui-avatars.com/api/?name=Roy&background=38bdf8&color=fff" class="w-12 h-12 rounded-2xl object-cover border border-white/10">
                 <div class="overflow-hidden text-left">
                     <p id="sideName" class="text-xs font-bold uppercase truncate tracking-tight">Operator</p>
                     <p id="mode-indicator" class="text-[8px] text-sky-500 font-bold uppercase tracking-widest">Adult Mode</p>
                 </div>
             </div>
-
             <nav class="space-y-2">
                 <button id="btn-start" class="w-full text-left p-4 rounded-2xl text-[11px] font-bold uppercase hover:bg-white/5 transition-all">🏠 Home</button>
                 <button id="btn-config" class="w-full text-left p-4 rounded-2xl text-[11px] font-bold uppercase hover:bg-white/5 transition-all">⚙ Settings</button>
@@ -100,21 +71,18 @@
         <main class="flex-grow relative bg-[#020617]">
             <div id="desktop-view" class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center">
-                    <h1 class="text-9xl font-black italic tracking-tighter">MOBBY<span class="text-sky-500">OS</span></h1>
-                    <p class="mt-4 text-[10px] text-white/20 uppercase tracking-[1em]">Secure Interface</p>
+                    <h1 id="welcomeMsg" class="text-9xl font-black italic tracking-tighter">MOBBY<span class="text-sky-500">OS</span></h1>
+                    <p class="mt-4 text-[10px] text-white/20 uppercase tracking-[1em]">Secure Interface Architecture</p>
                 </div>
             </div>
 
             <div id="chat-view" class="absolute inset-0 hidden flex flex-col p-10">
-                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-8 overflow-y-auto flex flex-col mb-6">
-                    </div>
-                
+                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-8 overflow-y-auto flex flex-col mb-6"></div>
                 <div class="flex gap-4 p-2 glass rounded-full border-white/10">
                     <input id="chat-input" placeholder="Enter System Command..." class="flex-grow bg-transparent px-8 py-5 outline-none text-sm font-medium">
                     <button id="send-chat" class="w-16 h-16 bg-sky-500 rounded-full text-black text-xl flex items-center justify-center">➤</button>
                 </div>
             </div>
-            
             <button id="btn-add" class="absolute bottom-12 right-12 w-16 h-16 bg-sky-500 rounded-full text-black text-3xl font-bold shadow-xl shadow-sky-500/20">+</button>
         </main>
     </div>
@@ -124,10 +92,18 @@
     <script type="text/python" src="engine.py"></script>
 
     <script>
-        document.getElementById('chat-input')?.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                document.getElementById('send-chat').click();
-            }
+        // JS Bridge for Google Auth
+        function handleGoogleLogin(response) {
+            const data = JSON.parse(atob(response.credential.split('.')[1]));
+            localStorage.setItem("mobby_user", data.name);
+            localStorage.setItem("mobby_pfp", data.picture);
+            localStorage.setItem("mobby_auth", "true");
+            window.location.reload();
+        }
+        
+        // Enter Key Listener
+        document.getElementById('chat-input')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('send-chat').click();
         });
     </script>
 </body>
