@@ -1,40 +1,44 @@
 from browser import document, window, html, timer
-import SICHelper
-
-handshake = SICHelper.SICHandshake("SIC_CORP_2026")
 
 def type_text(element, text):
     element.html = ""
     def _type(i):
         if i < len(text):
             element.html += text[i]
-            timer.set_timeout(lambda: _type(i + 1), 30)
+            timer.set_timeout(lambda: _type(i + 1), 20)
     _type(0)
 
-def save_user_profile(ev):
-    name = document['set-username'].value
-    encrypted_name = handshake.secure_data(name)
-    window.localStorage.setItem("mobby_user", encrypted_name)
-    document['user-display-name'].text = name
-    document['sideName'].text = name
-    alert("Identity Confirmed, Operator.")
-
 def send_to_mobby(ev):
-    msg = document['chat-input'].value
-    if not msg: return
-    document['chat-box'] <= html.DIV(f"USER: {msg}", className="text-white/30 text-xs mb-2")
+    user_input = document['chat-input'].value.strip()
+    if not user_input: return
+    
+    # Append User Message
+    document['chat-box'] <= html.DIV(f"USER: {user_input}", className="text-white/20 text-[10px] mb-2 pl-4 border-l border-white/5 font-inter")
     document['chat-input'].value = ""
     
-    # RESPONSE LOGIC
-    res_div = html.DIV(className="text-sky-500 font-bold mb-4")
+    # Response Container
+    res_div = html.DIV(className="text-sky-500 font-bold mb-6 text-sm")
     document['chat-box'] <= res_div
     
+    # Check the Neural Bridge (botinitials.py)
     if hasattr(window, 'mobby_reflex'):
-        reply = window.mobby_reflex(msg)
-        type_text(res_div, f"MOBBY: {reply}")
+        reply = window.mobby_reflex(user_input)
+        if reply:
+            type_text(res_div, f"MOBBY: {reply}")
+        else:
+            type_text(res_div, "MOBBY: No local reflex found. Connect Groq Key for deep reasoning.")
     else:
-        type_text(res_div, "MOBBY: UPLINK ERROR. CHECK BOTINITIALS.PY")
+        res_div.text = "MOBBY: UPLINK ERROR - BRIDGE NOT FOUND."
 
-document['save-profile'].bind('click', save_user_profile)
+def update_profile(ev):
+    name = document['set-username'].value
+    if name:
+        document['user-display-name'].text = name
+        document['sideName'].text = name
+        window.localStorage.setItem("mobby_user", name)
+        alert("ID confirmed.")
+
+# Global Bindings
 document['send-chat'].bind('click', send_to_mobby)
-document['btn-add'].bind('click', lambda e: document['chat-view'].classList.remove('hidden'))
+document['save-profile'].bind('click', update_profile)
+document['btn-add'].bind('click', lambda e: toggle_view('chat-view'))
