@@ -4,189 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MobbyOS V2.0 | SIC Corp</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Federo&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
     <style>
         :root { --accent: #38bdf8; }
-        body { background: #000; color: white; font-family: 'Federo', sans-serif; overflow: hidden; margin: 0; }
-        .font-inter { font-family: 'Inter', sans-serif; }
+        body { 
+            background: #000; 
+            color: white; 
+            font-family: 'Fredoka', sans-serif; 
+            overflow: hidden; 
+            margin: 0; 
+        }
         
-        /* Premium Glassmorphism */
+        /* Fixed Glassmorphism */
         .glass { 
             background: rgba(255, 255, 255, 0.03); 
             backdrop-filter: blur(40px); 
             border: 1px solid rgba(255, 255, 255, 0.1); 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Beautiful Animations */
-        @keyframes slideIn {
-            0% { opacity: 0; transform: scale(0.95) translateY(20px); filter: blur(10px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        /* Fixed Message Bubbles & Layout */
+        .chat-msg {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
+            animation: slideUp 0.3s ease-out;
         }
-        .view-fade { animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .msg-user { flex-direction: row-reverse; }
         
-        #welcomeMsg { animation: glow 4s ease-in-out infinite alternate; }
-        @keyframes glow { 
-            from { text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); opacity: 0.8; } 
-            to { text-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 10px #fff; opacity: 1; } 
+        .bubble {
+            max-width: 70%;
+            padding: 14px 20px;
+            font-size: 14px;
+            line-height: 1.5;
         }
-
-        .btn-primary { 
+        .bubble-bot { 
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px 20px 20px 4px; 
+        }
+        .bubble-user { 
             background: var(--accent); 
-            color: #000; 
-            font-weight: 900; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #000;
+            font-weight: 500;
+            border-radius: 20px 20px 4px 20px; 
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.5); }
-        .btn-primary:active { transform: scale(0.98); }
 
-        .tab-btn { transition: all 0.3s ease; border-bottom: 2px solid transparent; opacity: 0.5; }
-        .tab-btn.active { opacity: 1; color: var(--accent); border-bottom: 2px solid var(--accent); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         
         .hidden { display: none !important; }
-
-        /* Modern Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        /* Profile Pulsing for Kid Mode */
-        .kid-glow { box-shadow: 0 0 15px #fbbf24; border-color: #fbbf24 !important; }
+        input::placeholder { color: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body onload="brython()">
 
-    <div id="login-screen" class="fixed inset-0 bg-black z-[20000] flex items-center justify-center p-6 transition-all duration-700">
-        <div class="glass p-12 rounded-[3.5rem] w-full max-w-[440px] text-center border-white/5">
+    <div id="login-screen" class="fixed inset-0 bg-black z-[20000] flex items-center justify-center p-6">
+        <div class="glass p-12 rounded-[3.5rem] w-full max-w-[420px] text-center border-white/5">
             <h2 class="text-4xl font-black italic mb-2 tracking-tighter">SIC <span class="text-sky-500">CORP</span></h2>
-            <p class="text-[11px] text-white/30 uppercase tracking-[0.5em] mb-12">Neural Identity Gate</p>
+            <p class="text-[10px] text-white/30 uppercase tracking-[0.5em] mb-10">Neural Identity Gate</p>
             
-            <div id="g_id_onload" data-client_id="ENTER_YOUR_ID_HERE" data-callback="handleGoogleLogin"></div>
-            <div class="g_id_signin mb-8 flex justify-center" data-type="standard" data-shape="pill" data-theme="filled_black"></div>
-            
-            <div class="relative mb-8">
-                <div class="absolute inset-y-0 left-0 flex items-center w-full"><div class="w-full border-t border-white/10"></div></div>
-                <span class="relative bg-black px-4 text-[9px] text-white/20 uppercase">Or Manual Link</span>
-            </div>
-
             <div class="space-y-4">
-                <input id="auth-email" type="email" placeholder="Operator Email" class="w-full bg-white/5 p-5 rounded-2xl outline-none border border-white/5 focus:border-sky-500 font-inter transition-all">
-                <input id="auth-pass" type="password" placeholder="Access Key" class="w-full bg-white/5 p-5 rounded-2xl outline-none border border-white/5 focus:border-sky-500 font-inter transition-all">
-                <button id="btn-auth-submit" class="btn-primary w-full py-5 rounded-2xl text-[11px] uppercase tracking-widest mt-4">Initialize Mobby</button>
+                <input id="auth-email" type="text" placeholder="Operator Name" class="w-full bg-white/5 p-5 rounded-2xl outline-none border border-white/5 focus:border-sky-500 transition-all">
+                <input id="auth-pass" type="password" placeholder="Access Key" class="w-full bg-white/5 p-5 rounded-2xl border border-white/5 focus:border-sky-500 transition-all">
+                <button id="btn-auth-submit" class="w-full bg-sky-500 text-black font-bold py-5 rounded-2xl hover:scale-[1.02] transition-all uppercase text-xs tracking-widest">Initialize Mobby</button>
             </div>
         </div>
     </div>
 
-    <div class="flex h-screen w-screen bg-[#000]">
-        <aside class="w-72 border-r border-white/5 p-8 flex flex-col z-20 bg-black/50 backdrop-blur-md">
-            <div class="mb-12 p-5 glass rounded-[2rem] flex items-center gap-4 border-white/10" id="profile-card">
+    <div class="flex h-screen w-screen bg-black">
+        <aside class="w-72 border-r border-white/5 p-8 flex flex-col z-20 bg-black">
+            <div class="mb-10 p-5 glass rounded-[2rem] flex items-center gap-4 border-white/10">
                 <div class="relative">
-                    <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="w-12 h-12 rounded-2xl object-cover border-2 border-white/10 transition-all">
-                    <div id="status-dot" class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-4 border-black rounded-full"></div>
+                    <img id="sidePFP" src="https://ui-avatars.com/api/?name=Roy&background=38bdf8&color=fff" class="w-12 h-12 rounded-2xl object-cover border border-white/10">
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-4 border-black rounded-full"></div>
                 </div>
-                <div class="overflow-hidden">
-                    <p id="sideName" class="text-xs font-black uppercase truncate tracking-tight">Guest Operator</p>
-                    <p id="mode-indicator" class="text-[8px] text-sky-500 font-black uppercase tracking-[0.2em]">Adult Mode</p>
+                <div class="overflow-hidden text-left">
+                    <p id="sideName" class="text-xs font-bold uppercase truncate tracking-tight">Operator</p>
+                    <p id="mode-indicator" class="text-[8px] text-sky-500 font-bold uppercase tracking-widest">Adult Mode</p>
                 </div>
             </div>
 
-            <nav class="space-y-3">
-                <button id="btn-start" class="w-full text-left p-4 rounded-2xl text-[11px] font-black uppercase hover:bg-white/5 transition-all flex items-center gap-3">
-                    <span class="text-lg">🏠</span> Home
-                </button>
-                <button id="btn-dashboard" class="w-full text-left p-4 rounded-2xl text-[11px] font-black uppercase hover:bg-white/5 transition-all flex items-center gap-3">
-                    <span class="text-lg">▣</span> Dashboard
-                </button>
-                <button id="btn-config" class="w-full text-left p-4 rounded-2xl text-[11px] font-black uppercase hover:bg-white/5 transition-all flex items-center gap-3">
-                    <span class="text-lg">⚙</span> Settings
-                </button>
+            <nav class="space-y-2">
+                <button id="btn-start" class="w-full text-left p-4 rounded-2xl text-[11px] font-bold uppercase hover:bg-white/5 transition-all">🏠 Home</button>
+                <button id="btn-config" class="w-full text-left p-4 rounded-2xl text-[11px] font-bold uppercase hover:bg-white/5 transition-all">⚙ Settings</button>
             </nav>
-
-            <div class="mt-auto opacity-20 text-[8px] uppercase tracking-widest font-black">
-                MobbyOS v2.0.4 <br> Build: 2026.SIC
-            </div>
         </aside>
 
-        <main class="flex-grow relative bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900 via-black to-black overflow-hidden">
-            
-            <div id="desktop-view" class="absolute inset-0 flex items-center justify-center view-fade">
+        <main class="flex-grow relative bg-[#020617]">
+            <div id="desktop-view" class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center">
-                    <div class="inline-block px-4 py-1 border border-sky-500/30 rounded-full text-[9px] text-sky-500 uppercase tracking-[0.5em] mb-6">NexaFlow Neural Link</div>
-                    <h1 id="welcomeMsg" class="text-9xl font-black italic tracking-tighter leading-none">MOBBY<span class="text-sky-500">OS</span></h1>
-                    <p class="mt-8 text-[11px] text-white/20 uppercase tracking-[1.2em]">Security Intelligence Core</p>
+                    <h1 class="text-9xl font-black italic tracking-tighter">MOBBY<span class="text-sky-500">OS</span></h1>
+                    <p class="mt-4 text-[10px] text-white/20 uppercase tracking-[1em]">Secure Interface</p>
                 </div>
             </div>
 
-            <div id="chat-view" class="absolute inset-0 hidden flex flex-col p-12 view-fade">
-                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-10 overflow-y-auto flex flex-col gap-6 mb-6 scroll-smooth">
+            <div id="chat-view" class="absolute inset-0 hidden flex flex-col p-10">
+                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-8 overflow-y-auto flex flex-col mb-6">
                     </div>
-                <div class="flex gap-4 p-2 glass rounded-[2.5rem] border-white/5">
-                    <input id="chat-input" placeholder="Enter System Command..." class="flex-grow bg-transparent px-8 py-5 outline-none font-inter text-sm">
-                    <button id="send-chat" class="btn-primary w-16 h-16 rounded-full flex items-center justify-center text-xl shadow-lg">➤</button>
+                
+                <div class="flex gap-4 p-2 glass rounded-full border-white/10">
+                    <input id="chat-input" placeholder="Enter System Command..." class="flex-grow bg-transparent px-8 py-5 outline-none text-sm font-medium">
+                    <button id="send-chat" class="w-16 h-16 bg-sky-500 rounded-full text-black text-xl flex items-center justify-center">➤</button>
                 </div>
             </div>
             
-            <button id="btn-add" class="absolute bottom-12 right-12 w-16 h-16 bg-sky-500 rounded-full text-black text-3xl font-black shadow-2xl shadow-sky-500/40 hover:rotate-90 hover:scale-110 transition-all active:scale-95">+</button>
+            <button id="btn-add" class="absolute bottom-12 right-12 w-16 h-16 bg-sky-500 rounded-full text-black text-3xl font-bold shadow-xl shadow-sky-500/20">+</button>
         </main>
-    </div>
-
-    <div id="configModal" class="fixed inset-0 bg-black/95 hidden z-[10000] flex items-center justify-center backdrop-blur-xl p-4">
-        <div class="glass w-full max-w-3xl h-[600px] rounded-[4rem] flex flex-col overflow-hidden border-white/10 animate-in zoom-in duration-300">
-            <div class="flex border-b border-white/5 px-10 items-center">
-                <button class="tab-btn py-8 px-6 text-[11px] font-black uppercase active" data-tab="tab-profile">Profile</button>
-                <button class="tab-btn py-8 px-6 text-[11px] font-black uppercase" data-tab="tab-security">Security & Logic</button>
-                <div class="flex-grow"></div>
-                <button id="closeConfig" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-xl">✕</button>
-            </div>
-            
-            <div class="flex-grow p-12 overflow-y-auto">
-                <div id="tab-profile" class="tab-content space-y-8">
-                    <div>
-                        <h4 class="text-2xl font-black uppercase mb-2">Operator Identity</h4>
-                        <p class="text-[10px] text-white/30 uppercase tracking-widest">Update your neural signature</p>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="group">
-                            <label class="text-[9px] uppercase font-black text-sky-500 ml-4 mb-1 block">Full Name</label>
-                            <input id="set-username" placeholder="Roy" class="w-full bg-white/5 p-5 rounded-2xl border border-white/10 outline-none focus:border-sky-500 transition-all">
-                        </div>
-                        <div class="group">
-                            <label class="text-[9px] uppercase font-black text-sky-500 ml-4 mb-1 block">Avatar URL</label>
-                            <input id="set-pfp" placeholder="https://..." class="w-full bg-white/5 p-5 rounded-2xl border border-white/10 outline-none focus:border-sky-500 transition-all">
-                        </div>
-                    </div>
-                    <button id="save-profile" class="btn-primary px-12 py-4 rounded-2xl text-[10px] uppercase tracking-tighter">Commit Changes</button>
-                </div>
-
-                <div id="tab-security" class="tab-content hidden space-y-8">
-                    <div>
-                        <h4 class="text-2xl font-black uppercase mb-2">System Modes</h4>
-                        <p class="text-[10px] text-white/30 uppercase tracking-widest">Switch logic cores</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-6">
-                        <button id="set-kidmode" class="p-8 rounded-[2.5rem] border-2 border-white/5 hover:border-yellow-500/50 bg-white/5 transition-all text-left group">
-                            <div class="w-12 h-12 bg-yellow-500/20 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">🐣</div>
-                            <p class="font-black text-sm uppercase">Kid Mode</p>
-                            <p class="text-[10px] text-white/30 mt-2 leading-relaxed">Filtered AI, simplified interface, and core protection.</p>
-                        </button>
-                        <button id="set-adultmode" class="p-8 rounded-[2.5rem] border-2 border-sky-500 bg-sky-500/10 text-left group">
-                            <div class="w-12 h-12 bg-sky-500/20 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">⚡</div>
-                            <p class="font-black text-sm uppercase text-sky-500">Adult Mode</p>
-                            <p class="text-[10px] text-white/30 mt-2 leading-relaxed">Full NexaFlow access, raw terminal, and no restrictions.</p>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script type="text/python" src="botinitials.py"></script>
     <script type="text/python" src="buttonsresponder.py"></script>
     <script type="text/python" src="engine.py"></script>
+
+    <script>
+        document.getElementById('chat-input')?.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('send-chat').click();
+            }
+        });
+    </script>
 </body>
 </html>
