@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MobbyOS V2.0 | SIC Corp</title>
 
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
         (function() {
             const originalWarn = console.warn;
@@ -23,34 +24,21 @@
     <style>
         body { background: #000; color: white; font-family: 'Federo', sans-serif; overflow: hidden; margin: 0; }
         .font-inter { font-family: 'Inter', sans-serif; }
-        
-        /* Glassmorphism Pro */
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
         .glass-panel { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); }
-
-        /* Animations */
         #boot-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
         #boot-screen.loaded { opacity: 0; visibility: hidden; }
         .hidden { display: none !important; }
-
-        /* Sidebar & History */
         .history-item { border-left: 2px solid transparent; transition: all 0.3s; opacity: 0.5; }
         .history-item.active { border-left: 2px solid #38bdf8; opacity: 1; background: linear-gradient(90deg, rgba(56, 189, 248, 0.1), transparent); }
-
-        /* Buttons */
         button:active { transform: scale(0.97); }
         .btn-primary { background: #38bdf8; color: #000; font-weight: 900; transition: all 0.2s; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
         .btn-primary:hover { background: #7dd3fc; box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); transform: translateY(-2px); }
-        
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); transition: all 0.2s; }
         .btn-danger:hover { background: #ef4444; color: white; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
-
-        /* Settings Tabs */
         .tab-btn { text-align: left; padding: 12px; border-radius: 12px; font-size: 10px; text-transform: uppercase; color: rgba(255,255,255,0.4); transition: all 0.2s; }
         .tab-btn:hover { color: white; background: rgba(255,255,255,0.05); }
         .tab-btn.active { background: #38bdf8; color: black; font-weight: 900; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
-
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.2); border-radius: 10px; }
     </style>
@@ -93,9 +81,21 @@
                 <input id="auth-pass" type="password" placeholder="Access Key" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-sky-500 text-white font-bold transition-all">
                 <button id="auth-btn" class="btn-primary w-full p-4 rounded-2xl text-[10px] uppercase tracking-widest font-federo mt-2">Connect</button>
             </div>
-            <button id="btn-google" class="mt-4 w-full bg-white text-black p-4 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-3 hover:bg-sky-100 font-federo">
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-4 h-4"> Sign in with Google
-            </button>
+            
+            <div class="flex items-center gap-4 my-6">
+                <div class="h-[1px] bg-white/10 flex-grow"></div>
+                <span class="text-[8px] text-white/20 font-black">OR</span>
+                <div class="h-[1px] bg-white/10 flex-grow"></div>
+            </div>
+
+            <div id="g_id_onload"
+                 data-client_id="6814948758-09puthcj96kia9ln1qeo4rut1ljto6a4.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin w-full flex justify-center" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
         </div>
     </div>
 
@@ -140,16 +140,16 @@
                         <p class="text-3xl font-black mt-2 text-green-400">12ms</p>
                     </div>
                     <div class="glass p-6 rounded-3xl">
-                        <p class="text-[9px] text-white/40 uppercase font-black">Groq Status</p>
-                        <p class="text-xl font-black mt-2 text-sky-500">CONNECTED</p>
+                        <p class="text-[9px] text-white/40 uppercase font-black">Neural Link</p>
+                        <p id="stat-groq" class="text-xl font-black mt-2 text-red-500 italic">OFFLINE</p>
                     </div>
                 </div>
                 <div class="glass p-8 rounded-[3rem] h-64 flex items-end justify-between gap-2 opacity-80">
-                    <div class="w-full bg-sky-500/20 rounded-t-xl h-[40%]"></div>
-                    <div class="w-full bg-sky-500/40 rounded-t-xl h-[70%]"></div>
-                    <div class="w-full bg-sky-500/30 rounded-t-xl h-[50%]"></div>
-                    <div class="w-full bg-sky-500/60 rounded-t-xl h-[90%]"></div>
-                    <div class="w-full bg-sky-500/50 rounded-t-xl h-[60%]"></div>
+                    <div class="w-full bg-sky-500/20 rounded-t-xl h-[40%] animate-pulse"></div>
+                    <div class="w-full bg-sky-500/40 rounded-t-xl h-[70%] animate-pulse"></div>
+                    <div class="w-full bg-sky-500/30 rounded-t-xl h-[50%] animate-pulse"></div>
+                    <div class="w-full bg-sky-500/60 rounded-t-xl h-[90%] animate-pulse"></div>
+                    <div class="w-full bg-sky-500/50 rounded-t-xl h-[60%] animate-pulse"></div>
                 </div>
             </div>
 
@@ -186,26 +186,22 @@
 
             <div class="flex-grow p-10 relative overflow-y-auto font-inter">
                 <button id="closeConfig" class="absolute top-8 right-8 text-white/30 hover:text-white font-black">✕</button>
-                
                 <div id="tab-profile" class="settings-content">
                     <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">Profile Settings</h4>
                     <label class="block text-[9px] uppercase font-black text-white/40 mb-2">Display Name</label>
                     <input id="set-username" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm font-bold text-white mb-6 focus:border-sky-500 outline-none">
                     <button id="save-profile" class="btn-primary px-8 py-3 rounded-xl text-[10px] uppercase">Update Profile</button>
                 </div>
-
                 <div id="tab-security" class="settings-content hidden">
                     <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">Security</h4>
                     <label class="block text-[9px] uppercase font-black text-white/40 mb-2">New Password</label>
                     <input id="set-password" type="password" placeholder="••••••••" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm font-bold text-white mb-6 focus:border-sky-500 outline-none">
                     <button id="save-security" class="btn-primary px-8 py-3 rounded-xl text-[10px] uppercase">Update Password</button>
-                    
                     <div class="mt-12 pt-8 border-t border-white/5">
                         <h5 class="text-red-500 font-black uppercase text-xs mb-2">Danger Zone</h5>
                         <button id="delete-account" class="btn-danger w-full p-4 rounded-xl text-[10px] uppercase font-black">Delete Account Permanently</button>
                     </div>
                 </div>
-
                 <div id="tab-cloud" class="settings-content hidden">
                     <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">Cloud Config</h4>
                     <div class="bg-sky-500/10 border border-sky-500/20 p-4 rounded-xl mb-6">
@@ -215,7 +211,6 @@
                     <input id="set-apikey" type="password" placeholder="gsk_..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm font-bold text-white mb-6 focus:border-sky-500 outline-none font-mono">
                     <button id="save-cloud" class="btn-primary px-8 py-3 rounded-xl text-[10px] uppercase">Save Key</button>
                 </div>
-
                 <div id="tab-system" class="settings-content hidden">
                     <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">System Info</h4>
                     <div class="space-y-4">
@@ -249,7 +244,6 @@
                 document.getElementById('boot-screen').classList.add('loaded');
                 const user = localStorage.getItem("mobby_user");
                 const ageType = localStorage.getItem("mobby_age_type");
-                
                 if (!user) {
                     document.getElementById('auth-screen').classList.remove('hidden');
                 } else if (!ageType) {
