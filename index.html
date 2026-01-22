@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS V1.1.5 | SIC Corp</title>
+    <title>MobbyOS V2.0 | SIC Corp</title>
 
     <script>
-        // Suppress Tailwind warnings to keep console clean for Roy
         (function() {
             const originalWarn = console.warn;
             console.warn = function(...args) {
@@ -19,159 +18,226 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Federo&family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Federo&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
         body { background: #000; color: white; font-family: 'Federo', sans-serif; overflow: hidden; margin: 0; }
         .font-inter { font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
         
-        /* Loading Screen */
-        #boot-screen { 
-            position: fixed; inset: 0; background: #000; z-index: 10000; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease-out, visibility 0.5s;
-        }
-        #boot-screen.loaded { opacity: 0; visibility: hidden; }
-
-        .hidden { display: none !important; }
-
-        /* Sidebar History Active State */
-        .history-item { border-left: 2px solid transparent; transition: all 0.3s; }
-        .history-item.active { border-left: 2px solid #38bdf8; background: rgba(56, 189, 248, 0.05); color: white !important; }
+        /* Glassmorphism Pro */
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        .glass-panel { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); }
 
         /* Animations */
-        .scanline { width: 100%; height: 100px; background: linear-gradient(0deg, transparent, rgba(56, 189, 248, 0.05), transparent); position: absolute; top: -100px; animation: scan 4s linear infinite; pointer-events: none; }
-        @keyframes scan { to { top: 100%; } }
+        #boot-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
+        #boot-screen.loaded { opacity: 0; visibility: hidden; }
+        .hidden { display: none !important; }
 
-        button:active { transform: scale(0.96); }
+        /* Sidebar & History */
+        .history-item { border-left: 2px solid transparent; transition: all 0.3s; opacity: 0.5; }
+        .history-item.active { border-left: 2px solid #38bdf8; opacity: 1; background: linear-gradient(90deg, rgba(56, 189, 248, 0.1), transparent); }
+
+        /* Buttons */
+        button:active { transform: scale(0.97); }
         .btn-primary { background: #38bdf8; color: #000; font-weight: 900; transition: all 0.2s; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
-        .btn-primary:hover { background: #7dd3fc; box-shadow: 0 0 25px rgba(56, 189, 248, 0.5); transform: translateY(-1px); }
+        .btn-primary:hover { background: #7dd3fc; box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); transform: translateY(-2px); }
         
-        /* Typing Cursor */
-        #welcomeMsg::after { content: '|'; animation: blink 1s infinite; margin-left: 5px; color: #38bdf8; }
-        @keyframes blink { 50% { opacity: 0; } }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); transition: all 0.2s; }
+        .btn-danger:hover { background: #ef4444; color: white; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
 
-        /* Custom Scrollbar */
-        #chat-box::-webkit-scrollbar { width: 4px; }
-        #chat-box::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.2); border-radius: 10px; }
+        /* Settings Tabs */
+        .tab-btn { text-align: left; padding: 12px; border-radius: 12px; font-size: 10px; text-transform: uppercase; color: rgba(255,255,255,0.4); transition: all 0.2s; }
+        .tab-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+        .tab-btn.active { background: #38bdf8; color: black; font-weight: 900; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.2); border-radius: 10px; }
     </style>
 </head>
 <body onload="brython()">
 
     <div id="boot-screen">
-        <div class="w-16 h-16 border-4 border-sky-500/10 border-t-sky-500 rounded-full animate-spin"></div>
-        <p class="mt-8 text-[10px] tracking-[0.8em] uppercase text-sky-500/60 font-black italic">MobbyOS Loading...</p>
+        <div class="relative">
+            <div class="w-20 h-20 border-4 border-white/5 rounded-full"></div>
+            <div class="absolute top-0 left-0 w-20 h-20 border-4 border-sky-500/0 border-t-sky-500 rounded-full animate-spin"></div>
+        </div>
+        <p class="mt-8 text-[10px] tracking-[0.8em] uppercase text-sky-500/80 font-black italic">MobbyOS V2.0</p>
     </div>
 
     <div id="setup-screen" class="fixed inset-0 z-[9990] bg-black flex items-center justify-center hidden">
-        <div class="glass p-12 rounded-[3rem] w-[500px] text-center relative overflow-hidden border border-sky-500/20">
-            <div class="scanline"></div>
+        <div class="glass p-12 rounded-[3rem] w-[500px] text-center border border-white/10 relative overflow-hidden">
             <h2 class="text-3xl font-black mb-2 italic uppercase">Identity <span class="text-sky-500">Link</span></h2>
-            <p class="text-[9px] text-white/30 uppercase tracking-widest mb-8">SIC Corp Security Protocol</p>
-            
-            <div id="setup-step-1" class="space-y-4">
-                <div class="text-left pl-2">
-                    <label class="text-[9px] text-sky-500 uppercase font-black">Date of Birth</label>
-                </div>
+            <div id="setup-step-1" class="space-y-4 mt-8">
+                <label class="text-[9px] text-sky-500 uppercase font-black block text-left ml-2">Date of Birth</label>
                 <input id="user-bday" type="date" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white outline-none focus:border-sky-500 font-inter uppercase text-sm">
-                <button id="verify-age" class="btn-primary w-full p-5 rounded-2xl text-[10px] uppercase tracking-widest mt-4">Continue Verification</button>
+                <button id="verify-age" class="btn-primary w-full p-5 rounded-2xl text-[10px] uppercase tracking-widest mt-4">Initialize</button>
             </div>
-            
-            <div id="setup-step-child" class="hidden space-y-4 mt-4">
+            <div id="setup-step-child" class="hidden space-y-4 mt-8">
                 <div class="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
                     <p class="text-xs text-red-400 font-bold uppercase">Parental Shield Active</p>
                     <p class="text-[8px] text-red-200/50 mt-1 font-inter">User is under 14. Guardian authorization required.</p>
                 </div>
-                <input id="parent-email" placeholder="Parent/Guardian Email" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white outline-none focus:border-sky-500 font-inter">
+                <input id="parent-email" placeholder="Guardian Email" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white outline-none focus:border-sky-500 font-inter">
                 <button id="finish-child-setup" class="btn-primary w-full p-5 rounded-2xl text-[10px] uppercase">Lock Neural Link</button>
             </div>
         </div>
     </div>
 
     <div id="auth-screen" class="fixed inset-0 z-[9980] flex items-center justify-center hidden" style="background: radial-gradient(circle at center, #020617 0%, #000 100%);">
-        <div class="glass p-10 rounded-[3.5rem] w-[450px] text-center relative overflow-hidden shadow-2xl shadow-sky-900/20">
-            <div class="scanline"></div>
-            <h2 id="auth-title" class="text-5xl font-black italic mb-2 tracking-tighter">Mobby<span class="text-sky-500">OS</span></h2>
-            <p class="text-[10px] text-white/30 uppercase tracking-[0.4em] mb-10 font-bold italic">Neural Link Required</p>
-
-            <div class="space-y-3 text-left relative z-10 mt-6 font-inter">
-                <input id="auth-user" placeholder="Operator Identity" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl outline-none focus:border-sky-500 transition-all text-white font-bold">
-                
-                <button id="auth-btn" class="btn-primary w-full p-5 rounded-2xl text-[10px] uppercase tracking-widest font-federo mt-2">Initialize Link</button>
-                
-                <div class="flex items-center gap-4 my-4">
-                    <div class="h-[1px] bg-white/5 flex-grow"></div>
-                    <span class="text-[8px] text-white/20 font-black">OR</span>
-                    <div class="h-[1px] bg-white/5 flex-grow"></div>
-                </div>
-
-                <button id="btn-google" class="w-full bg-white text-black p-4 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-3 hover:bg-sky-100 transition-all font-federo">
-                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-4 h-4">
-                    Sign in with Google
-                </button>
+        <div class="glass p-10 rounded-[3rem] w-[450px] text-center shadow-2xl shadow-sky-900/10">
+            <h2 class="text-5xl font-black italic mb-2 tracking-tighter">Mobby<span class="text-sky-500">OS</span></h2>
+            <p class="text-[10px] text-white/30 uppercase tracking-[0.4em] mb-10 font-bold italic">Secure Uplink</p>
+            <div class="space-y-3 text-left font-inter">
+                <input id="auth-user" placeholder="Operator Identity" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-sky-500 text-white font-bold transition-all">
+                <input id="auth-pass" type="password" placeholder="Access Key" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-sky-500 text-white font-bold transition-all">
+                <button id="auth-btn" class="btn-primary w-full p-4 rounded-2xl text-[10px] uppercase tracking-widest font-federo mt-2">Connect</button>
             </div>
-            
-            <div class="mt-8 flex justify-between px-2">
-                <button id="toggle-auth" class="text-[9px] text-sky-500 uppercase font-black hover:underline tracking-tighter">Create Account</button>
-                <button id="btn-forgot" class="text-[9px] text-white/20 uppercase font-black hover:text-white transition-all tracking-tighter">Forgot Password?</button>
-            </div>
+            <button id="btn-google" class="mt-4 w-full bg-white text-black p-4 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-3 hover:bg-sky-100 font-federo">
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-4 h-4"> Sign in with Google
+            </button>
         </div>
     </div>
 
     <div class="flex h-screen w-screen bg-[#000]">
-        <aside class="w-80 bg-black border-r border-white/5 p-8 flex flex-col relative z-10">
-            <div id="role-card" class="mb-12 p-4 glass rounded-[2rem] transition-all group hover:border-sky-500/30">
-                <div class="flex items-center gap-4">
-                    <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="w-14 h-14 rounded-2xl border border-white/10 object-cover group-hover:scale-105 transition-transform">
-                    <div>
-                        <p id="sideName" class="text-sm font-black uppercase tracking-tight text-white">Guest</p>
-                        <p id="userRole" class="text-[8px] font-black uppercase tracking-[0.2em] text-white/30 mt-0.5">Online Node</p>
-                    </div>
+        <aside class="w-72 bg-black border-r border-white/5 p-6 flex flex-col z-20">
+            <div class="mb-10 p-4 glass rounded-3xl flex items-center gap-4">
+                <img id="sidePFP" src="https://i.imgur.com/r6oJp4O.png" class="w-12 h-12 rounded-xl border border-white/10 object-cover">
+                <div>
+                    <p id="sideName" class="text-xs font-black uppercase text-white truncate w-24">Guest</p>
+                    <p id="userRole" class="text-[8px] font-black uppercase text-white/30 mt-0.5">Online</p>
                 </div>
             </div>
-            <div id="history-list" class="flex-grow overflow-y-auto space-y-2 pr-2"></div>
-            <nav class="mt-8 pt-8 border-t border-white/5">
-                <button id="btn-config" class="w-full flex items-center justify-between p-5 text-[10px] font-black uppercase text-white/40 hover:text-white glass rounded-2xl transition-all hover:bg-white/5">OS Settings</button>
+            <div id="history-list" class="flex-grow overflow-y-auto space-y-1 mb-4"></div>
+            <nav class="space-y-2 pt-4 border-t border-white/5">
+                <button id="btn-dashboard" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase text-white/60 hover:text-white hover:bg-white/5 transition-all flex items-center gap-3">
+                    <span class="text-sky-500">▣</span> Dashboard
+                </button>
+                <button id="btn-config" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase text-white/60 hover:text-white hover:bg-white/5 transition-all flex items-center gap-3">
+                    <span class="text-sky-500">⚙</span> Settings
+                </button>
             </nav>
         </aside>
 
-        <main id="os-main" class="flex-grow relative flex flex-col bg-[#020617]">
-            
-            <div id="desktop-view" class="flex-grow flex flex-col items-center justify-center px-20">
-                <h1 id="welcomeMsg" class="text-7xl md:text-8xl font-black italic tracking-tighter text-white text-center leading-[0.9] drop-shadow-2xl select-none"></h1>
+        <main class="flex-grow relative flex flex-col bg-[#020617] overflow-hidden">
+            <div id="desktop-view" class="absolute inset-0 flex items-center justify-center">
+                <h1 id="welcomeMsg" class="text-7xl font-black italic tracking-tighter text-white/90 drop-shadow-2xl text-center"></h1>
             </div>
 
-            <div id="chat-view" class="hidden flex-grow flex flex-col p-8 md:p-12 max-w-5xl mx-auto w-full h-full">
-                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-8 overflow-y-auto space-y-6 mb-6 font-inter text-sm shadow-2xl">
-                    <div class="text-sky-500 font-federo uppercase text-[10px] tracking-widest border-b border-white/5 pb-4 mb-4">System: Neural link established with NexaFlow/Groq.</div>
+            <div id="dashboard-view" class="absolute inset-0 hidden p-12 overflow-y-auto">
+                <h2 class="text-4xl font-black italic uppercase mb-8">System <span class="text-sky-500">Metrics</span></h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[9px] text-white/40 uppercase font-black">Uptime</p>
+                        <p id="stat-uptime" class="text-3xl font-black mt-2">0m</p>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[9px] text-white/40 uppercase font-black">Messages</p>
+                        <p id="stat-msgs" class="text-3xl font-black mt-2 text-sky-500">0</p>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[9px] text-white/40 uppercase font-black">Net Latency</p>
+                        <p class="text-3xl font-black mt-2 text-green-400">12ms</p>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[9px] text-white/40 uppercase font-black">Groq Status</p>
+                        <p class="text-xl font-black mt-2 text-sky-500">CONNECTED</p>
+                    </div>
                 </div>
-                <div class="flex gap-4 items-center">
-                    <input id="chat-input" placeholder="Enter Neural Command..." class="flex-grow bg-white/5 border border-white/10 p-6 rounded-3xl outline-none focus:border-sky-500 transition-all font-inter text-white placeholder-white/20">
-                    <button id="send-chat" class="btn-primary h-16 w-16 rounded-3xl flex items-center justify-center text-xl shadow-lg shadow-sky-500/20">➤</button>
+                <div class="glass p-8 rounded-[3rem] h-64 flex items-end justify-between gap-2 opacity-80">
+                    <div class="w-full bg-sky-500/20 rounded-t-xl h-[40%]"></div>
+                    <div class="w-full bg-sky-500/40 rounded-t-xl h-[70%]"></div>
+                    <div class="w-full bg-sky-500/30 rounded-t-xl h-[50%]"></div>
+                    <div class="w-full bg-sky-500/60 rounded-t-xl h-[90%]"></div>
+                    <div class="w-full bg-sky-500/50 rounded-t-xl h-[60%]"></div>
                 </div>
             </div>
-            
-            <div class="absolute bottom-12 right-12 z-20">
-                <button id="btn-add" class="w-20 h-20 bg-sky-500 rounded-[2.5rem] flex items-center justify-center text-black text-4xl font-bold shadow-2xl hover:scale-110 active:scale-95 transition-all shadow-sky-500/30">+</button>
+
+            <div id="chat-view" class="absolute inset-0 hidden flex flex-col p-8 md:p-12">
+                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-8 overflow-y-auto space-y-4 mb-6 shadow-2xl">
+                    <div class="text-sky-500 font-federo uppercase text-[10px] tracking-widest border-b border-white/5 pb-4">NexaFlow Secure Link Established.</div>
+                </div>
+                <div class="flex gap-4">
+                    <input id="chat-input" placeholder="Enter Command..." class="flex-grow bg-white/5 border border-white/10 p-6 rounded-3xl outline-none focus:border-sky-500 transition-all font-inter text-white">
+                    <button id="send-chat" class="btn-primary h-16 w-16 rounded-3xl flex items-center justify-center text-xl">➤</button>
+                </div>
+            </div>
+
+            <div class="absolute bottom-10 right-10 z-30">
+                <button id="btn-add" class="w-16 h-16 bg-sky-500 rounded-full flex items-center justify-center text-black text-3xl font-bold shadow-2xl hover:scale-110 active:scale-95 transition-all shadow-sky-500/40">+</button>
             </div>
         </main>
     </div>
 
-    <div id="configModal" class="fixed inset-0 bg-black/95 backdrop-blur-3xl flex items-center justify-center hidden z-[10000]">
-        <div class="glass p-16 rounded-[4rem] w-[550px] border-white/10 text-center relative overflow-hidden">
-            <h2 class="text-4xl font-black uppercase italic mb-10 text-sky-500 tracking-tighter">System Config</h2>
-            <div class="space-y-5 font-inter">
+    <div id="configModal" class="fixed inset-0 bg-black/90 backdrop-blur-2xl flex items-center justify-center hidden z-[10000]">
+        <div class="glass w-[800px] h-[500px] rounded-[3rem] flex overflow-hidden border border-white/10 shadow-2xl">
+            <div class="w-64 bg-black/40 border-r border-white/5 p-6 flex flex-col justify-between">
                 <div>
-                    <label class="block text-left text-[9px] uppercase font-black text-white/30 mb-2 ml-2">Operator Name</label>
-                    <input id="set-username" placeholder="Update Operator Name" class="w-full bg-white/5 border border-white/5 p-5 rounded-2xl text-xs font-bold outline-none focus:border-sky-500 transition-all text-white">
+                    <h3 class="text-xl font-black italic uppercase mb-8 pl-2">Settings</h3>
+                    <div class="space-y-2" id="settings-nav">
+                        <button class="tab-btn w-full active" data-tab="tab-profile">Profile</button>
+                        <button class="tab-btn w-full" data-tab="tab-security">Security</button>
+                        <button class="tab-btn w-full" data-tab="tab-cloud">Groq Cloud</button>
+                        <button class="tab-btn w-full" data-tab="tab-system">System Info</button>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 mt-8">
-                    <button id="save-settings" class="bg-sky-500 text-black p-5 rounded-2xl text-[9px] font-black uppercase hover:bg-sky-400 font-federo shadow-lg shadow-sky-500/20">Upload to Groq</button>
-                    <button id="logoutBtn" class="bg-red-500/10 text-red-500 border border-red-500/20 p-5 rounded-2xl text-[9px] font-black uppercase hover:bg-red-500 hover:text-white font-federo transition-all">Kill Session</button>
+                <button id="logoutBtn" class="btn-danger p-4 rounded-xl text-[10px] uppercase font-black w-full">Logout</button>
+            </div>
+
+            <div class="flex-grow p-10 relative overflow-y-auto font-inter">
+                <button id="closeConfig" class="absolute top-8 right-8 text-white/30 hover:text-white font-black">✕</button>
+                
+                <div id="tab-profile" class="settings-content">
+                    <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">Profile Settings</h4>
+                    <label class="block text-[9px] uppercase font-black text-white/40 mb-2">Display Name</label>
+                    <input id="set-username" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm font-bold text-white mb-6 focus:border-sky-500 outline-none">
+                    <button id="save-profile" class="btn-primary px-8 py-3 rounded-xl text-[10px] uppercase">Update Profile</button>
+                </div>
+
+                <div id="tab-security" class="settings-content hidden">
+                    <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">Security</h4>
+                    <label class="block text-[9px] uppercase font-black text-white/40 mb-2">New Password</label>
+                    <input id="set-password" type="password" placeholder="••••••••" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm font-bold text-white mb-6 focus:border-sky-500 outline-none">
+                    <button id="save-security" class="btn-primary px-8 py-3 rounded-xl text-[10px] uppercase">Update Password</button>
+                    
+                    <div class="mt-12 pt-8 border-t border-white/5">
+                        <h5 class="text-red-500 font-black uppercase text-xs mb-2">Danger Zone</h5>
+                        <button id="delete-account" class="btn-danger w-full p-4 rounded-xl text-[10px] uppercase font-black">Delete Account Permanently</button>
+                    </div>
+                </div>
+
+                <div id="tab-cloud" class="settings-content hidden">
+                    <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">Cloud Config</h4>
+                    <div class="bg-sky-500/10 border border-sky-500/20 p-4 rounded-xl mb-6">
+                        <p class="text-[10px] text-sky-300">Enter your personal Groq API key to unlock full reasoning capabilities.</p>
+                    </div>
+                    <label class="block text-[9px] uppercase font-black text-white/40 mb-2">Groq API Key</label>
+                    <input id="set-apikey" type="password" placeholder="gsk_..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm font-bold text-white mb-6 focus:border-sky-500 outline-none font-mono">
+                    <button id="save-cloud" class="btn-primary px-8 py-3 rounded-xl text-[10px] uppercase">Save Key</button>
+                </div>
+
+                <div id="tab-system" class="settings-content hidden">
+                    <h4 class="text-2xl font-black uppercase mb-6 text-sky-500">System Info</h4>
+                    <div class="space-y-4">
+                        <div class="glass-panel p-4 rounded-xl flex justify-between items-center">
+                            <span class="text-xs font-bold text-white/60">Current Version</span>
+                            <span class="text-xs font-black text-white">MobbyOS V2.0</span>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl flex justify-between items-center">
+                            <span class="text-xs font-bold text-white/60">Build Date</span>
+                            <span class="text-xs font-black text-white">JAN 2026</span>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl">
+                            <p class="text-[9px] font-black text-white/40 uppercase mb-2">Version History</p>
+                            <ul class="text-[10px] text-white/60 space-y-1 list-disc pl-4">
+                                <li>V2.0 - Dashboard, Groq Key, Security Tabs</li>
+                                <li>V1.1.5 - Identity Link Fixes</li>
+                                <li>V1.1.4 - Parental Shield Integration</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button id="closeConfig" class="mt-12 text-white/20 text-[9px] uppercase font-black hover:text-white transition-colors">Close Uplink</button>
         </div>
     </div>
 
@@ -179,21 +245,17 @@
 
     <script>
         window.addEventListener('load', function() {
-            // Ensure Brython has a moment to compile before we reveal UI
             setTimeout(() => {
                 document.getElementById('boot-screen').classList.add('loaded');
-                
-                // Logic to check localStorage state
                 const user = localStorage.getItem("mobby_user");
                 const ageType = localStorage.getItem("mobby_age_type");
                 
-                // State Machine for Screens
                 if (!user) {
                     document.getElementById('auth-screen').classList.remove('hidden');
                 } else if (!ageType) {
                     document.getElementById('setup-screen').classList.remove('hidden');
                 }
-            }, 1000); // 1 second boot time
+            }, 800);
         });
     </script>
 </body>
