@@ -1,20 +1,24 @@
 from browser import document, window, timer, alert
-import datetime  # FIXED: Importing from standard lib, NOT browser
+import datetime
 
-# --- STATE VARIABLES ---
-history_data = ["System Boot", "Neural Link Ready"]
-is_register = False
+# --- STATE ---
+history_data = ["System Boot", "V2.0 Loaded"]
+start_time = datetime.datetime.now()
+msg_count = 0
 
-# --- UTILITY FUNCTIONS ---
-def type_writer(text, element_id, speed=40):
-    if element_id not in document: return
-    element = document[element_id]
-    element.text = ""
-    def add_char(i):
-        if i < len(text):
-            element.text += text[i]
-            timer.set_timeout(lambda: add_char(i + 1), speed)
-    add_char(0)
+# --- UTILS ---
+def update_stats():
+    # Update Uptime
+    now = datetime.datetime.now()
+    diff = now - start_time
+    minutes = int(diff.total_seconds() / 60)
+    if "stat-uptime" in document:
+        document["stat-uptime"].text = f"{minutes}m"
+    if "stat-msgs" in document:
+        document["stat-msgs"].text = str(msg_count)
+
+# Start stats timer (every 10s)
+timer.set_interval(update_stats, 10000)
 
 def render_history():
     if "history-list" not in document: return
@@ -22,160 +26,194 @@ def render_history():
     container.html = ""
     for i, item in enumerate(history_data):
         div = document.createElement('div')
-        # Highlight first item
         active_class = "active" if i == 0 else ""
-        div.class_name = f"history-item p-4 glass rounded-xl text-[10px] font-black uppercase text-white/30 cursor-pointer {active_class}"
+        div.class_name = f"history-item p-3 rounded-lg text-[9px] font-black uppercase text-white/40 cursor-pointer truncate {active_class}"
         div.text = f"> {item}"
         container <= div
 
-# --- EVENT HANDLERS ---
-
+# --- AUTH & SETUP ---
 def handle_login(ev):
-    """Handles Identity Link initialization"""
     user_val = document["auth-user"].value
-    if user_val and len(user_val.strip()) > 0:
-        window.localStorage.setItem("mobby_user", user_val)
-        window.location.reload()
-    else:
-        # Visual error feedback
-        document["auth-user"].style.border = "1px solid red"
-        timer.set_timeout(lambda: setattr(document["auth-user"].style, "border", "1px solid rgba(255,255,255,0.1)"), 1000)
-
-def handle_age_verification(ev):
-    """The critical fix for the date button"""
-    bday_val = document["user-bday"].value
+    pass_val = document["auth-pass"].value
     
-    # 1. Validation: Ensure user picked a date
-    if not bday_val:
-        document["user-bday"].style.border = "1px solid red"
+    if not user_val:
+        document["auth-user"].style.border = "1px solid red"
         return
 
+    stored_pass = window.localStorage.getItem("mobby_pass")
+    
+    # Logic: If password exists, check it. If not, this is first setup/registration.
+    if stored_pass and stored_pass != pass_val:
+        alert("ACCESS DENIED: Invalid Password")
+        return
+
+    # Success
+    window.localStorage.setItem("mobby_user", user_val)
+    if not stored_pass and pass_val:
+        window.localStorage.setItem("mobby_pass", pass_val) # Set pass on first login if typed
+        
+    window.location.reload()
+
+def handle_age_verify(ev):
+    bday_val = document["user-bday"].value
+    if not bday_val: return
+    
     try:
-        # 2. Parse Date (YYYY-MM-DD)
-        # In Brython, we use standard datetime module logic
         y, m, d = map(int, bday_val.split('-'))
         bday_date = datetime.date(y, m, d)
         today = datetime.date.today()
-        
-        # 3. Calculate Age
         age = today.year - bday_date.year - ((today.month, today.day) < (bday_date.month, bday_date.day))
         
         window.localStorage.setItem("mobby_bday", bday_val)
         
-        # 4. Route Logic
         if age < 14:
             document["setup-step-1"].classList.add("hidden")
             document["setup-step-child"].classList.remove("hidden")
         else:
             window.localStorage.setItem("mobby_age_type", "adult")
             window.location.reload()
-            
-    except Exception as e:
-        print(f"Date Error: {e}")
-        alert("System Error: Invalid Date Format")
+    except:
+        pass
 
-def finish_child_setup(ev):
-    p_email = document["parent-email"].value
-    if p_email and "@" in p_email:
-        window.localStorage.setItem("mobby_parent", p_email)
-        window.localStorage.setItem("mobby_age_type", "child")
-        window.location.reload()
-    else:
-        document["parent-email"].style.border = "1px solid red"
-
-def switch_to_chat(ev):
-    """Hides welcome screen, shows chat"""
+# --- NAVIGATION ---
+def switch_view(view_id):
+    # Hide all views
     document["desktop-view"].classList.add("hidden")
-    document["chat-view"].classList.remove("hidden")
-    document["btn-add"].classList.add("hidden") # Hide floating button in chat mode
+    document["chat-view"].classList.add("hidden")
+    document["dashboard-view"].classList.add("hidden")
+    document["btn-add"].classList.remove("hidden")
     
-    history_data.insert(0, "Secure Chat Session")
+    # Show target
+    document[view_id].classList.remove("hidden")
+    
+    if view_id == "chat-view":
+        document["btn-add"].classList.add("hidden")
+        history_data.insert(0, "Chat Active")
+    elif view_id == "dashboard-view":
+        history_data.insert(0, "Viewing Metrics")
+        update_stats()
+        
     render_history()
 
-def send_chat_message(ev):
-    user_input = document["chat-input"].value
-    if not user_input: return
-    
-    chat_box = document["chat-box"]
-    
-    # User Message
-    user_div = document.createElement('div')
-    user_div.class_name = "text-right"
-    user_div.html = f"<span class='bg-sky-500/20 text-sky-400 p-3 rounded-xl inline-block'>{user_input}</span>"
-    chat_box <= user_div
-    
-    document["chat-input"].value = ""
-    chat_box.scrollTop = chat_box.scrollHeight
-
-    # Simulated Bot Response
-    def bot_reply():
-        bot_div = document.createElement('div')
-        bot_div.class_name = "text-left"
-        bot_div.html = f"<span class='text-white/60 p-3 block'><strong class='text-sky-500 font-federo'>MOBBY:</strong> Processing '{user_input}' via Groq Neural Net...</span>"
-        chat_box <= bot_div
-        chat_box.scrollTop = chat_box.scrollHeight
-
-    timer.set_timeout(bot_reply, 600)
-
-def groq_upload_simulation(ev):
-    """Simulates saving settings"""
-    new_name = document["set-username"].value
-    if new_name:
-        window.localStorage.setItem("mobby_user", new_name)
-    
+# --- SETTINGS TABS ---
+def switch_tab(ev):
+    # Get the clicked button
     btn = ev.target
-    original_text = btn.text
-    btn.text = "UPLOADING..."
-    btn.class_name += " bg-green-500 text-white"
+    target_id = btn.attrs['data-tab']
     
-    def finish():
-        window.location.reload()
+    # Reset all buttons
+    for b in document.select('.tab-btn'):
+        b.classList.remove("active")
+    
+    # Hide all contents
+    for c in document.select('.settings-content'):
+        c.classList.add("hidden")
         
-    timer.set_timeout(finish, 1000)
+    # Activate clicked
+    btn.classList.add("active")
+    document[target_id].classList.remove("hidden")
+
+def save_profile(ev):
+    val = document["set-username"].value
+    if val:
+        window.localStorage.setItem("mobby_user", val)
+        ev.target.text = "Saved!"
+        timer.set_timeout(lambda: window.location.reload(), 500)
+
+def save_security(ev):
+    val = document["set-password"].value
+    if val:
+        window.localStorage.setItem("mobby_pass", val)
+        ev.target.text = "Password Updated"
+        timer.set_timeout(lambda: setattr(ev.target, 'text', 'UPDATE PASSWORD'), 2000)
+
+def save_cloud(ev):
+    val = document["set-apikey"].value
+    if val:
+        window.localStorage.setItem("mobby_apikey", val)
+        ev.target.text = "Key Securely Stored"
+
+def delete_account(ev):
+    if window.confirm("WARNING: This will wipe all SIC Corp data. Continue?"):
+        window.localStorage.clear()
+        window.location.reload()
+
+# --- CHAT ---
+def send_chat(ev):
+    global msg_count
+    user_inp = document["chat-input"].value
+    if not user_inp: return
+    
+    msg_count += 1
+    chat = document["chat-box"]
+    
+    # User
+    u = document.createElement('div')
+    u.class_name = "text-right"
+    u.html = f"<span class='bg-sky-500 text-black font-bold p-3 rounded-xl inline-block text-xs'>{user_inp}</span>"
+    chat <= u
+    document["chat-input"].value = ""
+    chat.scrollTop = chat.scrollHeight
+    
+    # Bot
+    def reply():
+        b = document.createElement('div')
+        b.class_name = "text-left"
+        b.html = f"<span class='text-sky-500 font-federo text-xs block mb-1'>MOBBY</span><span class='text-white/80 p-3 bg-white/5 rounded-xl inline-block text-xs'>Processed: {user_inp}</span>"
+        chat <= b
+        chat.scrollTop = chat.scrollHeight
+    timer.set_timeout(reply, 600)
 
 # --- BINDINGS ---
-# We use try/except on bindings to ensure one missing ID doesn't crash the whole app
-def bind(id_name, func):
-    if id_name in document:
-        document[id_name].bind("click", func)
+def bind(id, func):
+    if id in document: document[id].bind("click", func)
 
-def setup_app():
-    # Login & Setup
+def init():
+    # Auth
     bind("auth-btn", handle_login)
-    bind("verify-age", handle_age_verification)
-    bind("finish-child-setup", finish_child_setup)
-    bind("btn-google", lambda e: alert("Server Connection Required"))
-    bind("btn-forgot", lambda e: alert("Contact Admin Roy"))
+    bind("verify-age", handle_age_verify)
+    bind("finish-child-setup", lambda e: (window.localStorage.setItem("mobby_age_type", "child"), window.location.reload()))
     
-    # Auth Toggle
-    if "toggle-auth" in document:
-        document["toggle-auth"].bind("click", lambda e: alert("Registration disabled in prototype."))
-
-    # Core OS
-    bind("btn-add", switch_to_chat)
-    bind("send-chat", send_chat_message)
+    # Nav
+    bind("btn-add", lambda e: switch_view("chat-view"))
+    bind("btn-dashboard", lambda e: switch_view("dashboard-view"))
     
-    # Settings
-    bind("save-settings", groq_upload_simulation)
-    bind("logoutBtn", lambda e: (window.localStorage.clear(), window.location.reload()))
+    # Settings Modal
     bind("btn-config", lambda e: document["configModal"].classList.remove("hidden"))
     bind("closeConfig", lambda e: document["configModal"].classList.add("hidden"))
-
-    # Initialization Logic
-    render_history()
+    bind("logoutBtn", lambda e: (window.localStorage.clear(), window.location.reload()))
     
+    # Settings Forms
+    bind("save-profile", save_profile)
+    bind("save-security", save_security)
+    bind("save-cloud", save_cloud)
+    bind("delete-account", delete_account)
+    
+    # Tabs
+    for btn in document.select('.tab-btn'):
+        btn.bind("click", switch_tab)
+        
+    # Chat
+    bind("send-chat", send_chat)
+    
+    # Load User Data
     user = window.localStorage.getItem("mobby_user")
-    age_type = window.localStorage.getItem("mobby_age_type")
+    age = window.localStorage.getItem("mobby_age_type")
     
     if user:
         if "sideName" in document: document["sideName"].text = user
-        if age_type:
-            if "userRole" in document: document["userRole"].text = f"{age_type.upper()} NODE"
-            if age_type == "child" and "set-username" in document:
-                document["set-username"].disabled = True
-                document["set-username"].placeholder = "LOCKED BY PARENTAL SHIELD"
-        
-        timer.set_timeout(lambda: type_writer(f"Welcome, {user}", "welcomeMsg"), 200)
+        if "welcomeMsg" in document: 
+             # Typewriter effect
+            txt = f"Welcome, {user}"
+            target = document["welcomeMsg"]
+            def type(i):
+                if i < len(txt):
+                    target.text += txt[i]
+                    timer.set_timeout(lambda: type(i+1), 50)
+            type(0)
+            
+        if age == "child" and "set-username" in document:
+            document["set-username"].disabled = True
+            document["set-username"].placeholder = "LOCKED (CHILD SAFETY)"
 
-# Run App
-setup_app()
+init()
