@@ -5,40 +5,40 @@ def handle_manual_auth(ev):
     password = document['auth-pass'].value
     
     if email and password:
+        # Standard manual entry logic
         window.localStorage.setItem("mobby_email", email)
         window.localStorage.setItem("mobby_user", email.split('@')[0])
         window.localStorage.setItem("mobby_auth", "true")
         document['login-screen'].classList.add('hidden')
         document['mode-screen'].classList.remove('hidden')
     else:
-        alert("SIC Security: Credentials Required.")
+        alert("SIC System: Credentials needed to proceed.")
 
-def select_mode(mode):
-    window.localStorage.setItem("mobby_mode", mode)
+def set_mode(mode_name):
+    window.localStorage.setItem("mobby_mode", mode_name)
     window.location.reload()
 
-def lock_system(ev):
+def lock_os(ev):
+    # Total system wipe of local session
     window.localStorage.clear()
     window.location.reload()
 
-def toggle_view(view_id):
-    for v in ['desktop-view', 'chat-view']:
-        document[v].classList.add('hidden')
-    document[view_id].classList.remove('hidden')
+def switch_view(view):
+    document['desktop-view'].classList.add('hidden')
+    document['chat-view'].classList.add('hidden')
+    document[view].classList.remove('hidden')
 
 # Bindings
 document['btn-auth-submit'].bind('click', handle_manual_auth)
-document['mode-adult'].bind('click', lambda e: select_mode('Adult'))
-document['mode-kid'].bind('click', lambda e: select_mode('Kid'))
-document['mode-guest'].bind('click', lambda e: select_mode('Guest'))
-document['btn-lock'].bind('click', lock_system)
-document['btn-start'].bind('click', lambda e: toggle_view('desktop-view'))
-document['btn-add'].bind('click', lambda e: toggle_view('chat-view'))
+document['mode-adult'].bind('click', lambda e: set_mode('Adult'))
+document['mode-kid'].bind('click', lambda e: set_mode('Kid'))
+document['mode-guest'].bind('click', lambda e: set_mode('Guest'))
+document['btn-lock'].bind('click', lock_os)
+document['btn-start'].bind('click', lambda e: switch_view('desktop-view'))
+document['btn-add'].bind('click', lambda e: switch_view('chat-view'))
 
-# Startup Logic
-if window.localStorage.getItem("mobby_auth") == "true" and window.localStorage.getItem("mobby_mode"):
+# Check state on load
+if window.localStorage.getItem("mobby_auth") == "true":
     document['login-screen'].classList.add('hidden')
-    document['mode-screen'].classList.add('hidden')
-elif window.localStorage.getItem("mobby_auth") == "true":
-    document['login-screen'].classList.add('hidden')
-    document['mode-screen'].classList.remove('hidden')
+    if not window.localStorage.getItem("mobby_mode"):
+        document['mode-screen'].classList.remove('hidden')
