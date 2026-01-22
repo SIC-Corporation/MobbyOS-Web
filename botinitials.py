@@ -2,30 +2,23 @@ from browser import window
 
 class MobbyReflex:
     def __init__(self):
-        # The Knowledge Base of SIC Corp & NexaFlow
         self.fast_responses = {
-            "ping": "Pong! Latency: 12ms. Connection: Stable.",
-            "status": "All systems nominal. NexaFlow Neural Bridge is active.",
-            "who created you": "I was created by Roy, owner of SIC Corp. NexaFlow handles my neural processing.",
-            "roy": "Biometric match confirmed: Roy (CEO, SIC Corp). High-priority access granted.",
-            "nexa": "NexaFlow is the proprietary neural architecture powering my cognition.",
-            "sic": "SIC Corp: The parent organization and owner of my core code and website.",
-            "help": "I am MobbyOS. You can talk to me, check metrics in the Dashboard, or link your Groq Key in Settings for deep reasoning."
+            "ping": "Pong! Neural latency at 4ms.",
+            "status": "SIC Corp systems are green. MobbyOS V2.0 is operational.",
+            "who created you": "I was created by Roy, CEO of SIC Corp.",
+            "roy": "Biometric identity: Roy. Status: Administrator/Owner.",
+            "nexa": "NexaFlow is the engine behind my neural processing.",
+            "sic": "SIC Corp owns all rights to my architecture.",
+            "help": "Commands: ping, status, roy, sic, help. Or link a Groq Key for deep reasoning."
         }
 
-    def intercept(self, message):
-        """
-        Checks if the message should be handled locally for speed.
-        Returns the response string if found, else returns None.
-        """
+    def get_reply(self, message):
         msg = message.lower().strip()
-        
-        # Check for exact matches or keywords
-        for key in self.fast_responses:
+        for key, response in self.fast_responses.items():
             if key in msg:
-                return self.fast_responses[key]
-        
+                return response
         return None
 
-# Initialize and export to the window so engine.py can see it
-window.mobby_reflex = MobbyReflex()
+# Export only the function to avoid Class attribute errors
+reflex_engine = MobbyReflex()
+window.mobby_reflex = reflex_engine.get_reply
