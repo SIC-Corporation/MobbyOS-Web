@@ -1,44 +1,49 @@
 from browser import document, window, html, timer
 
-def type_text(element, text):
-    element.html = ""
-    def _type(i):
-        if i < len(text):
-            element.html += text[i]
-            timer.set_timeout(lambda: _type(i + 1), 20)
-    _type(0)
+def create_bubble(name, text, pfp, is_user=True):
+    align = "msg-user ml-auto" if is_user else "msg-bot mr-auto"
+    bubble = html.DIV(className=f"flex gap-3 max-w-[80%] p-4 rounded-3xl {align}")
+    
+    img = html.IMG(src=pfp, className="w-8 h-8 rounded-full border border-white/10")
+    content = html.DIV()
+    content <= html.P(name, className="text-[8px] font-black uppercase text-white/30 mb-1")
+    content <= html.P(text, className="text-sm font-inter")
+    
+    if is_user:
+        bubble <= content
+        bubble <= img
+    else:
+        bubble <= img
+        bubble <= content
+        
+    document['chat-box'] <= bubble
+    document['chat-box'].scrollTop = document['chat-box'].scrollHeight
 
 def send_to_mobby(ev):
     user_input = document['chat-input'].value.strip()
     if not user_input: return
     
-    # Append User Message
-    document['chat-box'] <= html.DIV(f"USER: {user_input}", className="text-white/20 text-[10px] mb-2 pl-4 border-l border-white/5 font-inter")
+    name = window.localStorage.getItem("mobby_user") or "Guest"
+    pfp = window.localStorage.getItem("mobby_pfp") or "https://i.imgur.com/r6oJp4O.png"
+    
+    # User Message
+    create_bubble(name, user_input, pfp, True)
     document['chat-input'].value = ""
     
-    # Response Container
-    res_div = html.DIV(className="text-sky-500 font-bold mb-6 text-sm")
-    document['chat-box'] <= res_div
-    
-    # Check the Neural Bridge (botinitials.py)
+    # Bot Response
     if hasattr(window, 'mobby_reflex'):
         reply = window.mobby_reflex(user_input)
         if reply:
-            type_text(res_div, f"MOBBY: {reply}")
-        else:
-            type_text(res_div, "MOBBY: No local reflex found. Connect Groq Key for deep reasoning.")
-    else:
-        res_div.text = "MOBBY: UPLINK ERROR - BRIDGE NOT FOUND."
+            timer.set_timeout(lambda: create_bubble("MOBBY", reply, "https://i.imgur.com/r6oJp4O.png", False), 600)
 
 def update_profile(ev):
     name = document['set-username'].value
-    if name:
-        document['user-display-name'].text = name
-        document['sideName'].text = name
-        window.localStorage.setItem("mobby_user", name)
-        alert("ID confirmed.")
+    pfp = document['set-pfp'].value
+    window.localStorage.setItem("mobby_user", name)
+    window.localStorage.setItem("mobby_pfp", pfp)
+    document['sideName'].text = name
+    document['sidePFP'].src = pfp
+    alert("Profile Updated.")
 
-# Global Bindings
 document['send-chat'].bind('click', send_to_mobby)
 document['save-profile'].bind('click', update_profile)
-document['btn-add'].bind('click', lambda e: toggle_view('chat-view'))
