@@ -7,7 +7,6 @@ start_time = datetime.datetime.now()
 
 # --- GOOGLE AUTH ---
 def handle_google_auth(response):
-    # This stores the Google info and logs you in instantly
     window.localStorage.setItem("mobby_user", "Google Operator")
     window.localStorage.setItem("mobby_age_type", "adult")
     window.location.reload()
@@ -16,11 +15,10 @@ window.handleCredentialResponse = handle_google_auth
 
 # --- CORE LOGIC ---
 def update_metrics():
-    # Uptime
     diff = datetime.datetime.now() - start_time
     if "stat-uptime" in document:
         document["stat-uptime"].text = f"{int(diff.total_seconds() / 60)}m"
-    # Groq Key Check
+    
     key = window.localStorage.getItem("mobby_apikey")
     if "stat-groq" in document:
         if key and len(key) > 10:
@@ -49,20 +47,14 @@ def mobby_process(user_text):
     chat <= bot_div
     chat.scrollTop = chat.scrollHeight
 
-    # 2. LOCAL FAST-PATH (Instant Commands)
-    commands = {
-        "status": "Systems: Optimal. NexaFlow link: Active. SIC Corp servers: Green.",
-        "who are you": "I am MobbyOS V2.0, developed by Roy for SIC Corp.",
-        "roy": "Creator recognized. Access levels: Maximum.",
-        "help": "You can ask me anything, check system status, or manage settings via the sidebar."
-    }
-    
-    clean_text = user_text.lower().strip()
-    if clean_text in commands:
-        def reply_fast():
-            document[bot_id].text = commands[clean_text]
-        timer.set_timeout(reply_fast, 300)
-        return
+    # 2. LOCAL FAST-PATH (Interception from botinitials.py)
+    if hasattr(window, 'mobby_reflex'):
+        fast_reply = window.mobby_reflex.intercept(user_text)
+        if fast_reply:
+            def reply_fast():
+                document[bot_id].text = fast_reply
+            timer.set_timeout(reply_fast, 200) # Blazing fast response
+            return
 
     # 3. GLOBAL AI-PATH (Groq)
     if api_key and len(api_key) > 20:
@@ -82,7 +74,7 @@ def mobby_process(user_text):
                   oncomplete=on_complete)
     else:
         def no_key():
-            document[bot_id].html = "Neural link offline. <span class='text-sky-400 underline cursor-pointer' onclick='document.getElementById(\"btn-config\").click()'>Add Groq Key</span> in Cloud Config to chat."
+            document[bot_id].html = "Neural link offline. <span class='text-sky-400 underline cursor-pointer' onclick='document.getElementById(\"btn-config\").click()'>Add Groq Key</span> to chat."
         timer.set_timeout(no_key, 600)
 
 # --- UI EVENTS ---
@@ -90,7 +82,6 @@ def send_chat(ev):
     inp = document["chat-input"]
     if not inp.value: return
     
-    # Show User Msg
     u = document.createElement('div')
     u.class_name = "text-right"
     u.html = f"<span class='bg-sky-500 text-black font-bold p-3 rounded-xl inline-block text-xs'>{inp.value}</span>"
@@ -110,13 +101,11 @@ def switch_tab(ev):
 
 # --- INITIALIZATION ---
 def init():
-    # Buttons
     document["send-chat"].bind("click", send_chat)
     document["btn-config"].bind("click", lambda e: document["configModal"].classList.remove("hidden"))
     document["closeConfig"].bind("click", lambda e: document["configModal"].classList.add("hidden"))
     document["save-cloud"].bind("click", lambda e: (window.localStorage.setItem("mobby_apikey", document["set-apikey"].value), alert("Key Saved")))
     
-    # View Switching
     def show_view(vid):
         for v in ["desktop-view", "dashboard-view", "chat-view"]: document[v].classList.add("hidden")
         document[vid].classList.remove("hidden")
@@ -124,13 +113,12 @@ def init():
     document["btn-add"].bind("click", lambda e: show_view("chat-view"))
     document["btn-dashboard"].bind("click", lambda e: show_view("dashboard-view"))
     
-    # Tabs
     for t in document.select(".tab-btn"): t.bind("click", switch_tab)
     
-    # Profile Loader
     user = window.localStorage.getItem("mobby_user")
     if user:
         document["sideName"].text = user
-        document["welcomeMsg"].text = f"Welcome, {user}"
+        if "welcomeMsg" in document:
+            document["welcomeMsg"].text = f"Welcome, {user}"
 
 init()
