@@ -1,44 +1,47 @@
-from browser import document, window, alert
+from browser import document, window
 
-def handle_manual_auth(ev):
-    email = document['auth-email'].value
-    password = document['auth-pass'].value
-    
-    if email and password:
-        # Standard manual entry logic
-        window.localStorage.setItem("mobby_email", email)
-        window.localStorage.setItem("mobby_user", email.split('@')[0])
-        window.localStorage.setItem("mobby_auth", "true")
-        document['login-screen'].classList.add('hidden')
-        document['mode-screen'].classList.remove('hidden')
-    else:
-        alert("SIC System: Credentials needed to proceed.")
-
-def set_mode(mode_name):
-    window.localStorage.setItem("mobby_mode", mode_name)
-    window.location.reload()
-
-def lock_os(ev):
-    # Total system wipe of local session
-    window.localStorage.clear()
-    window.location.reload()
+def toggle_settings(ev):
+    document['settings-panel'].classList.toggle('open')
 
 def switch_view(view):
     document['desktop-view'].classList.add('hidden')
     document['chat-view'].classList.add('hidden')
     document[view].classList.remove('hidden')
+    # Toggle the PLUS button visibility
+    if view == 'chat-view':
+        document['btn-add'].classList.add('hidden')
+    else:
+        document['btn-add'].classList.remove('hidden')
+
+def handle_keypress(ev):
+    """
+    Logic:
+    Enter -> Send Message
+    Shift + Enter -> Allow default (New Line)
+    """
+    if ev.keyCode == 13: # Enter key
+        if not ev.shiftKey:
+            ev.preventDefault()
+            # Call the send function from engine.py
+            window.send_message()
+
+def lock_system(ev):
+    window.localStorage.clear()
+    window.location.reload()
 
 # Bindings
-document['btn-auth-submit'].bind('click', handle_manual_auth)
-document['mode-adult'].bind('click', lambda e: set_mode('Adult'))
-document['mode-kid'].bind('click', lambda e: set_mode('Kid'))
-document['mode-guest'].bind('click', lambda e: set_mode('Guest'))
-document['btn-lock'].bind('click', lock_os)
+document['open-settings'].bind('click', toggle_settings)
+document['close-settings'].bind('click', toggle_settings)
+document['profile-trigger'].bind('click', toggle_settings)
+document['btn-lock-final'].bind('click', lock_system)
+document['btn-signout'].bind('click', lock_system)
+
 document['btn-start'].bind('click', lambda e: switch_view('desktop-view'))
 document['btn-add'].bind('click', lambda e: switch_view('chat-view'))
 
-# Check state on load
+# Keyboard binding for the input
+document['chat-input'].bind('keydown', handle_keypress)
+
+# Initialization
 if window.localStorage.getItem("mobby_auth") == "true":
     document['login-screen'].classList.add('hidden')
-    if not window.localStorage.getItem("mobby_mode"):
-        document['mode-screen'].classList.remove('hidden')
