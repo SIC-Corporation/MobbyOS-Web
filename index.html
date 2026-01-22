@@ -3,31 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobbyOS V2.1.0 | SIC Corp</title>
+    <title>MobbyOS V5.3.2 | SIC Corp</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
-    <style>
-        :root { --admin-red: #ef4444; --accent: #38bdf8; }
-        body { background: #000; color: white; font-family: 'Fredoka', sans-serif; overflow: hidden; margin: 0; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        
-        /* Smooth UI Transitions */
-        .msg-container { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 20px; width: 100%; animation: slideUp 0.3s ease; }
-        .msg-user { flex-direction: row-reverse; }
-        .bubble { max-width: 70%; padding: 14px 20px; font-size: 14px; line-height: 1.5; border-radius: 20px; }
-        .bubble-bot { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-bottom-left-radius: 4px; }
-        .bubble-user { background: var(--accent); color: #000; font-weight: 500; border-bottom-right-radius: 4px; }
-        
-        /* Admin Security Visuals */
-        .admin-glow { border: 1px solid var(--admin-red) !important; box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
-        .admin-text { color: var(--admin-red) !important; text-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
-
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .hidden { display: none !important; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body onload="brython()">
 
@@ -35,97 +17,85 @@
         <div class="glass p-12 rounded-[3.5rem] w-full max-w-[440px] text-center border-white/5">
             <h2 class="text-4xl font-black italic mb-2 tracking-tighter">SIC <span class="text-sky-500">CORP</span></h2>
             <p class="text-[10px] text-white/30 uppercase tracking-[0.5em] mb-10">Neural Identity Gate</p>
-            
-            <div id="g_id_onload" 
-                 data-client_id="6814948758-09puthcj96kia9ln1qeo4rut1ljto6a4.apps.googleusercontent.com" 
-                 data-callback="handleGoogleLogin"
-                 data-auto_prompt="false">
-            </div>
+            <div id="g_id_onload" data-client_id="6814948758-09puthcj96kia9ln1qeo4rut1ljto6a4.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-auto_prompt="false"></div>
             <div class="g_id_signin mb-6 flex justify-center" data-type="standard" data-shape="pill"></div>
-
             <div class="space-y-3">
                 <input id="auth-email" type="email" placeholder="SIC Email Address" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10 focus:border-sky-500 transition-all text-sm">
                 <input id="auth-pass" type="password" placeholder="Access Key" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10 focus:border-sky-500 transition-all text-sm">
-                <button id="btn-auth-submit" class="w-full bg-sky-500 text-black font-bold py-4 rounded-2xl hover:brightness-110 transition-all uppercase text-[10px] tracking-widest">Initialize Mobby</button>
+                <button id="btn-auth-submit" class="w-full bg-sky-500 text-black font-bold py-4 rounded-2xl hover:brightness-110 transition-all uppercase text-[10px]">Initialize Mobby</button>
             </div>
         </div>
     </div>
 
-    <div id="mode-screen" class="fixed inset-0 bg-black/95 z-[20001] hidden flex items-center justify-center p-6 backdrop-blur-3xl">
-        <div class="glass p-10 rounded-[4rem] w-full max-w-4xl text-center">
-            <h3 class="text-2xl font-black uppercase mb-10 tracking-[0.3em]">Select Logic Core</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <button id="mode-adult" class="p-8 rounded-[2.5rem] border-2 border-white/5 bg-white/5 hover:border-sky-500 hover:bg-sky-500/10 group transition-all">
-                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">⚡</div>
-                    <p class="font-bold uppercase text-sky-500">Adult Node</p>
-                </button>
-                <button id="mode-kid" class="p-8 rounded-[2.5rem] border-2 border-white/5 bg-white/5 hover:border-yellow-500 hover:bg-yellow-500/10 group transition-all">
-                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🐣</div>
-                    <p class="font-bold uppercase text-yellow-500">Kid Mode</p>
-                </button>
-                <button id="mode-guest" class="p-8 rounded-[2.5rem] border-2 border-white/5 bg-white/5 hover:border-purple-500 hover:bg-purple-500/10 group transition-all">
-                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🎨</div>
-                    <p class="font-bold uppercase text-purple-500">Guest Mode</p>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="flex h-screen w-screen bg-black">
-        <aside class="w-72 border-r border-white/5 p-8 flex flex-col z-20 bg-black">
-            <div class="mb-10 p-5 glass rounded-[2rem] flex items-center gap-4 border-white/10">
-                <img id="sidePFP" src="" class="w-12 h-12 rounded-2xl object-cover bg-slate-900 border border-white/5">
-                <div class="overflow-hidden text-left">
-                    <p id="sideName" class="text-xs font-bold uppercase truncate tracking-tight">...</p>
-                    <p id="mode-indicator" class="text-[8px] font-bold uppercase tracking-widest opacity-60">Booting</p>
-                </div>
-            </div>
+    <div class="flex h-screen w-screen bg-black overflow-hidden">
+        <aside class="w-72 border-r border-white/5 p-6 flex flex-col z-20 bg-black">
+            <h2 class="text-2xl font-black italic mb-10 tracking-tighter px-2">MOBBY<span class="text-sky-500">OS</span></h2>
             <nav class="space-y-2 flex-grow">
                 <button id="btn-start" class="w-full text-left p-4 rounded-2xl text-[11px] font-bold uppercase hover:bg-white/5 transition-all">🏠 Home</button>
-                <button id="btn-config" class="w-full text-left p-4 rounded-2xl text-[11px] font-bold uppercase hover:bg-white/5 transition-all">⚙ Settings</button>
+                <button id="btn-dashboard" class="w-full text-left p-4 rounded-2xl text-[11px] font-bold uppercase hover:bg-white/5 transition-all">📊 Dashboard</button>
             </nav>
-            <button id="btn-lock" class="w-full p-4 rounded-2xl bg-red-500/10 text-red-500 text-[10px] font-bold uppercase border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">🔒 Lock Terminal</button>
+
+            <div id="profile-trigger" class="p-4 glass rounded-[2rem] flex items-center gap-4 border-white/10 cursor-pointer hover:bg-white/5 transition-all">
+                <img id="sidePFP" src="" class="w-10 h-10 rounded-full border border-white/10 bg-slate-900">
+                <div class="overflow-hidden">
+                    <p id="sideName" class="text-[10px] font-bold uppercase truncate">...</p>
+                    <p id="mode-indicator" class="text-[7px] text-sky-500 font-bold uppercase tracking-widest">Active</p>
+                </div>
+            </div>
         </aside>
 
         <main class="flex-grow relative bg-[#010409]">
+            <button id="open-settings" class="absolute top-8 right-8 z-50 p-4 glass rounded-2xl hover:scale-110 transition-all">⚙️</button>
+
             <div id="desktop-view" class="absolute inset-0 flex items-center justify-center">
-                <div class="text-center">
-                    <h1 id="welcomeMsg" class="text-9xl font-black italic tracking-tighter opacity-10">MOBBY<span class="text-sky-500">OS</span></h1>
-                    <p class="mt-4 text-[10px] text-white/10 uppercase tracking-[1em]">SIC Corp Legacy Engine</p>
+                <div class="text-center group">
+                    <h1 class="text-9xl font-black italic tracking-tighter opacity-10 group-hover:opacity-40 transition-all duration-1000">MOBBY</h1>
+                    <p class="text-[10px] text-white/10 uppercase tracking-[1.5em] mt-4">SIC Corp Legacy Engine</p>
                 </div>
             </div>
 
-            <div id="chat-view" class="absolute inset-0 hidden flex flex-col p-10">
-                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-8 overflow-y-auto flex flex-col mb-6"></div>
+            <div id="chat-view" class="absolute inset-0 hidden flex flex-col p-10 bg-black/50 backdrop-blur-xl">
+                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-8 overflow-y-auto mb-6"></div>
                 <div class="flex gap-4 p-2 glass rounded-full border-white/10">
-                    <input id="chat-input" placeholder="Neural command..." class="flex-grow bg-transparent px-8 py-5 outline-none text-sm font-medium">
-                    <button id="send-chat" class="w-16 h-16 bg-sky-500 rounded-full text-black text-xl flex items-center justify-center">➤</button>
+                    <textarea id="chat-input" placeholder="Neural command..." rows="1" class="flex-grow bg-transparent px-8 py-5 outline-none text-sm resize-none"></textarea>
+                    <button id="send-chat" class="w-16 h-16 bg-sky-500 rounded-full text-black flex items-center justify-center">➤</button>
                 </div>
             </div>
-            <button id="btn-add" class="absolute bottom-12 right-12 w-16 h-16 bg-sky-500 rounded-full text-black text-3xl font-bold shadow-2xl shadow-sky-500/20 hover:scale-110 transition-transform">+</button>
+
+            <button id="btn-add" class="absolute bottom-12 right-12 w-16 h-16 bg-sky-500 rounded-full text-black text-3xl font-bold shadow-2xl hover:scale-110 transition-transform">+</button>
         </main>
     </div>
 
+    <div id="settings-panel" class="settings-menu glass rounded-[3.5rem] p-10 flex flex-col">
+        <div class="flex justify-between items-center mb-10">
+            <h3 class="font-black uppercase tracking-[0.2em] text-xs">System Panel</h3>
+            <button id="close-settings" class="text-white/20 hover:text-white">✕</button>
+        </div>
+        <div class="space-y-4 overflow-y-auto pr-2 custom-scroll">
+            <p class="text-[9px] uppercase opacity-40 font-bold ml-2">Account Control</p>
+            <button class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5">👤 Change Name</button>
+            <button class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5">🖼️ Profile Appearance</button>
+            <button class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5">🤖 Groq API Key</button>
+            
+            <p class="text-[9px] uppercase opacity-40 font-bold mt-6 ml-2">Danger Zone</p>
+            <button id="btn-lock-final" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold text-orange-500 hover:bg-orange-500/10">🔒 Lock Terminal</button>
+            <button id="btn-signout" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold text-red-500 hover:bg-red-500/10">🚪 Sign Out</button>
+            <button class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold text-red-900 opacity-40">⚠️ Delete Account</button>
+        </div>
+    </div>
+
     <script type="text/python" src="SICryption.py"></script>
-    <script type="text/python" src="botinitials.py"></script>
     <script type="text/python" src="buttonsresponder.py"></script>
     <script type="text/python" src="engine.py"></script>
 
     <script>
-        // JS Wrapper for Google Auth Logic
         function handleGoogleLogin(response) {
-            try {
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                localStorage.setItem("mobby_user", payload.name);
-                localStorage.setItem("mobby_email", payload.email);
-                localStorage.setItem("mobby_pfp", payload.picture);
-                localStorage.setItem("mobby_auth", "true");
-                
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('mode-screen').classList.remove('hidden');
-            } catch (err) {
-                console.error("SIC Security Error:", err);
-            }
+            const payload = JSON.parse(atob(response.credential.split('.')[1]));
+            localStorage.setItem("mobby_user", payload.name);
+            localStorage.setItem("mobby_email", payload.email);
+            localStorage.setItem("mobby_pfp", payload.picture);
+            localStorage.setItem("mobby_auth", "true");
+            window.location.reload();
         }
     </script>
 </body>
