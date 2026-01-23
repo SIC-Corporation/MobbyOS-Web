@@ -1,32 +1,35 @@
 from browser import document, window, html, timer
+import json
 
-def create_bubble(name, text, pfp, is_user=True):
+# Setup Local Persistence
+def save_chat_history(role, name, text, pfp):
+    history = window.localStorage.getItem("mobby_history")
+    history = json.loads(history) if history else []
+    history.append({"role": role, "name": name, "text": text, "pfp": pfp})
+    window.localStorage.setItem("mobby_history", json.dumps(history))
+
+def load_history():
+    history = window.localStorage.getItem("mobby_history")
+    if history:
+        data = json.loads(history)
+        for msg in data:
+            create_bubble(msg['name'], msg['text'], msg['pfp'], msg['role'] == "user", False)
+
+def create_bubble(name, text, pfp, is_user=True, should_save=True):
     email = window.localStorage.getItem("mobby_email") or ""
-    # ADMIN CHECK (Protected list)
     admins = ["sicmailcenter1@gmail.com", "roystonslijkerman@gmail.com"]
     is_admin = email.lower().strip() in admins
     
-    user_alignment = "msg-user" if is_user else ""
-    bubble_style = "bubble-user" if is_user else "bubble-bot"
-    
-    # Apply Master Admin visuals
-    if is_admin and is_user:
-        name = "ADMIN [ROY]"
-        bubble_style += " admin-glow"
+    alignment = "msg-user" if is_user else ""
+    style = "bubble-user" if is_user else "bubble-bot"
+    if is_admin and is_user: style += " admin-glow"
 
-    container = html.DIV(className=f"msg-container {user_alignment}")
-    
-    # PFP Logic
-    img_border = "border-red-500" if is_admin and is_user else "border-white/10"
-    img = html.IMG(src=pfp, className=f"w-10 h-10 rounded-full border {img_border} shadow-sm")
+    container = html.DIV(className=f"msg-container {alignment}")
+    img = html.IMG(src=pfp, className=f"w-10 h-10 rounded-full border {'border-red-500' if is_admin and is_user else 'border-white/10'}")
     
     msg_group = html.DIV(className="flex flex-col")
-    
-    # Name Tag Logic
-    name_class = "admin-text font-black" if is_admin and is_user else "opacity-40"
-    name_tag = html.SPAN(name, className=f"text-[9px] uppercase mb-1 px-2 {name_class}")
-    
-    text_bubble = html.DIV(text, className=f"bubble {bubble_style}")
+    name_tag = html.SPAN(name, className=f"text-[9px] uppercase mb-1 px-2 {'admin-text' if is_admin and is_user else 'opacity-40'}")
+    text_bubble = html.DIV(text, className=f"bubble {style}")
     
     msg_group <= name_tag
     msg_group <= text_bubble
@@ -35,39 +38,23 @@ def create_bubble(name, text, pfp, is_user=True):
     
     document['chat-box'] <= container
     document['chat-box'].scrollTop = document['chat-box'].scrollHeight
+    
+    if should_save:
+        save_chat_history("user" if is_user else "bot", name, text, pfp)
 
 def send_message(ev=None):
     user_input = document['chat-input'].value.strip()
     if not user_input: return
     
     name = window.localStorage.getItem("mobby_user") or "Roy"
-    pfp = window.localStorage.getItem("mobby_pfp") or f"https://ui-avatars.com/api/?name={name}&background=38bdf8&color=fff"
+    pfp = window.localStorage.getItem("mobby_pfp") or f"https://ui-avatars.com/api/?name={name}"
     
     create_bubble(name, user_input, pfp, True)
     document['chat-input'].value = ""
     
-    # Trigger AI Brain
-    if hasattr(window, 'mobby_reflex'):
-        reply = window.mobby_reflex(user_input)
-        if reply:
-            timer.set_timeout(lambda: create_bubble("MOBBY", reply, "https://i.imgur.com/r6oJp4O.png", False), 600)
+    # Simulate Bot Response (Connect your Groq/LLM logic here)
+    timer.set_timeout(lambda: create_bubble("MOBBY", "System Command Received. Processing...", "https://i.imgur.com/r6oJp4O.png", False), 800)
 
-# Sidebar and Presence Updates
-def refresh_sidebar():
-    if window.localStorage.getItem("mobby_auth") == "true":
-        name = window.localStorage.getItem("mobby_user")
-        email = window.localStorage.getItem("mobby_email") or ""
-        mode = window.localStorage.getItem("mobby_mode") or "Adult"
-        
-        document['sideName'].text = name
-        document['sidePFP'].src = window.localStorage.getItem("mobby_pfp") or f"https://ui-avatars.com/api/?name={name}"
-        
-        indicator = document['mode-indicator']
-        indicator.text = f"{mode} Mode"
-        
-        if email.lower() in ["sicmailcenter1@gmail.com", "roystonslijkerman@gmail.com"]:
-            indicator.text = "MASTER ADMIN"
-            indicator.classList.add("admin-text")
-
-refresh_sidebar()
+window.send_message = send_message
+load_history()
 document['send-chat'].bind('click', send_message)
