@@ -13,16 +13,38 @@
 </head>
 <body onload="brython()">
 
-    <div id="login-screen" class="fixed inset-0 bg-black z-[20000] flex items-center justify-center p-6 transition-opacity duration-700">
-        <div class="glass p-12 rounded-[3.5rem] w-full max-w-[440px] text-center border-white/5">
+    <div id="login-screen" class="fixed inset-0 bg-black z-[30000] flex items-center justify-center p-6 transition-all duration-1000">
+        <div class="glass p-12 rounded-[3.5rem] w-full max-w-[440px] text-center border-white/5 shadow-2xl">
             <h2 class="text-4xl font-black italic mb-2 tracking-tighter">SIC <span class="text-sky-500">CORP</span></h2>
             <p class="text-[10px] text-white/30 uppercase tracking-[0.5em] mb-10">Neural Identity Gate</p>
+            
             <div id="g_id_onload" data-client_id="6814948758-09puthcj96kia9ln1qeo4rut1ljto6a4.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-auto_prompt="false"></div>
             <div class="g_id_signin mb-6 flex justify-center" data-type="standard" data-shape="pill"></div>
+
             <div class="space-y-3">
-                <input id="auth-email" type="email" placeholder="SIC Email Address" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10 focus:border-sky-500 transition-all text-sm">
-                <input id="auth-pass" type="password" placeholder="Access Key" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10 focus:border-sky-500 transition-all text-sm">
-                <button id="btn-auth-submit" class="w-full bg-sky-500 text-black font-bold py-4 rounded-2xl hover:brightness-110 transition-all uppercase text-[10px]">Initialize Mobby</button>
+                <input id="auth-email" type="email" placeholder="SIC Email Address" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10 focus:border-sky-500 transition-all text-sm text-white">
+                <input id="auth-pass" type="password" placeholder="Access Key" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10 focus:border-sky-500 transition-all text-sm text-white">
+                <button id="btn-auth-submit" class="w-full bg-sky-500 text-black font-bold py-4 rounded-2xl hover:brightness-110 active:scale-95 transition-all uppercase text-[10px] tracking-widest">Initialize Mobby</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mode-screen" class="fixed inset-0 bg-black/95 z-[25000] hidden flex items-center justify-center p-6 backdrop-blur-3xl transition-all duration-700">
+        <div class="glass p-12 rounded-[4rem] w-full max-w-4xl text-center border-white/5">
+            <h3 class="text-2xl font-black uppercase mb-10 tracking-[0.3em]">Select Logic Core</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <button id="mode-adult" class="p-8 rounded-[2.5rem] border-2 border-white/5 bg-white/5 hover:border-sky-500 hover:bg-sky-500/10 group transition-all">
+                    <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">⚡</div>
+                    <p class="font-bold uppercase text-sky-500 tracking-widest">Adult Node</p>
+                </button>
+                <button id="mode-kid" class="p-8 rounded-[2.5rem] border-2 border-white/5 bg-white/5 hover:border-yellow-500 hover:bg-yellow-500/10 group transition-all">
+                    <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🐣</div>
+                    <p class="font-bold uppercase text-yellow-500 tracking-widest">Kid Mode</p>
+                </button>
+                <button id="mode-guest" class="p-8 rounded-[2.5rem] border-2 border-white/5 bg-white/5 hover:border-purple-500 hover:bg-purple-500/10 group transition-all">
+                    <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🎨</div>
+                    <p class="font-bold uppercase text-purple-500 tracking-widest">Guest Mode</p>
+                </button>
             </div>
         </div>
     </div>
@@ -30,13 +52,14 @@
     <div class="flex h-screen w-screen bg-black overflow-hidden">
         <aside class="w-72 border-r border-white/5 p-6 flex flex-col z-20 bg-black">
             <h2 class="text-2xl font-black italic mb-10 tracking-tighter px-2">MOBBY<span class="text-sky-500">OS</span></h2>
+            
             <nav class="space-y-2 flex-grow">
                 <button id="btn-start" class="w-full text-left p-4 rounded-2xl text-[11px] font-bold uppercase hover:bg-white/5 transition-all">🏠 Home</button>
                 <button id="btn-dashboard" class="w-full text-left p-4 rounded-2xl text-[11px] font-bold uppercase hover:bg-white/5 transition-all">📊 Dashboard</button>
             </nav>
 
-            <div id="profile-trigger" class="p-4 glass rounded-[2rem] flex items-center gap-4 border-white/10 cursor-pointer hover:bg-white/5 transition-all">
-                <img id="sidePFP" src="" class="w-10 h-10 rounded-full border border-white/10 bg-slate-900">
+            <div id="profile-trigger" class="p-4 glass rounded-[2rem] flex items-center gap-4 border-white/10 cursor-pointer hover:bg-white/10 transition-all">
+                <img id="sidePFP" src="" class="w-10 h-10 rounded-full border border-white/10 bg-slate-900 object-cover">
                 <div class="overflow-hidden">
                     <p id="sideName" class="text-[10px] font-bold uppercase truncate">...</p>
                     <p id="mode-indicator" class="text-[7px] text-sky-500 font-bold uppercase tracking-widest">Active</p>
@@ -45,42 +68,47 @@
         </aside>
 
         <main class="flex-grow relative bg-[#010409]">
-            <button id="open-settings" class="absolute top-8 right-8 z-50 p-4 glass rounded-2xl hover:scale-110 transition-all">⚙️</button>
+            <button id="open-settings" class="absolute top-8 right-8 z-50 p-4 glass rounded-2xl hover:scale-110 active:scale-95 transition-all">⚙️</button>
 
             <div id="desktop-view" class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center group">
-                    <h1 class="text-9xl font-black italic tracking-tighter opacity-10 group-hover:opacity-40 transition-all duration-1000">MOBBY</h1>
+                    <h1 class="text-9xl font-black italic tracking-tighter opacity-10 group-hover:opacity-40 transition-all duration-1000 select-none">MOBBY</h1>
                     <p class="text-[10px] text-white/10 uppercase tracking-[1.5em] mt-4">SIC Corp Legacy Engine</p>
                 </div>
             </div>
 
             <div id="chat-view" class="absolute inset-0 hidden flex flex-col p-10 bg-black/50 backdrop-blur-xl">
-                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-8 overflow-y-auto mb-6"></div>
-                <div class="flex gap-4 p-2 glass rounded-full border-white/10">
-                    <textarea id="chat-input" placeholder="Neural command..." rows="1" class="flex-grow bg-transparent px-8 py-5 outline-none text-sm resize-none"></textarea>
-                    <button id="send-chat" class="w-16 h-16 bg-sky-500 rounded-full text-black flex items-center justify-center">➤</button>
+                <div id="chat-box" class="flex-grow glass rounded-[3rem] p-8 overflow-y-auto mb-6 flex flex-col">
+                    </div>
+                
+                <div class="flex gap-4 p-2 glass rounded-full border-white/10 shadow-2xl">
+                    <textarea id="chat-input" placeholder="Neural command..." rows="1" class="flex-grow bg-transparent px-8 py-5 outline-none text-sm resize-none text-white"></textarea>
+                    <button id="send-chat" class="w-16 h-16 bg-sky-500 rounded-full text-black flex items-center justify-center hover:scale-105 active:scale-90 transition-all">➤</button>
                 </div>
             </div>
 
-            <button id="btn-add" class="absolute bottom-12 right-12 w-16 h-16 bg-sky-500 rounded-full text-black text-3xl font-bold shadow-2xl hover:scale-110 transition-transform">+</button>
+            <button id="btn-add" class="absolute bottom-12 right-12 w-16 h-16 bg-sky-500 rounded-full text-black text-3xl font-bold shadow-2xl hover:scale-110 transition-transform active:scale-90">+</button>
         </main>
     </div>
 
-    <div id="settings-panel" class="settings-menu glass rounded-[3.5rem] p-10 flex flex-col">
+    <div id="settings-panel" class="settings-menu glass rounded-[3.5rem] p-10 flex flex-col shadow-2xl border-white/10">
         <div class="flex justify-between items-center mb-10">
             <h3 class="font-black uppercase tracking-[0.2em] text-xs">System Panel</h3>
-            <button id="close-settings" class="text-white/20 hover:text-white">✕</button>
+            <button id="close-settings" class="text-white/20 hover:text-white transition-colors">✕</button>
         </div>
+        
         <div class="space-y-4 overflow-y-auto pr-2 custom-scroll">
             <p class="text-[9px] uppercase opacity-40 font-bold ml-2">Account Control</p>
-            <button class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5">👤 Change Name</button>
-            <button class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5">🖼️ Profile Appearance</button>
-            <button class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5">🤖 Groq API Key</button>
+            <button id="btn-change-name" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5 transition-all">👤 Change Name</button>
+            <button id="btn-profile-appearance" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5 transition-all">🖼️ Profile Appearance</button>
+            <button id="btn-set-groq" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5 transition-all">🤖 Groq API Key</button>
+            <button id="btn-link-google" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5 transition-all">🌐 Link Google</button>
             
-            <p class="text-[9px] uppercase opacity-40 font-bold mt-6 ml-2">Danger Zone</p>
-            <button id="btn-lock-final" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold text-orange-500 hover:bg-orange-500/10">🔒 Lock Terminal</button>
-            <button id="btn-signout" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold text-red-500 hover:bg-red-500/10">🚪 Sign Out</button>
-            <button class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold text-red-900 opacity-40">⚠️ Delete Account</button>
+            <p class="text-[9px] uppercase opacity-40 font-bold mt-6 ml-2">Security & Data</p>
+            <button id="btn-change-pass" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold hover:bg-white/5 transition-all">🔑 Change Password</button>
+            <button id="btn-lock-final" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold text-orange-500 hover:bg-orange-500/10 transition-all">🔒 Lock Terminal</button>
+            <button id="btn-signout" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold text-red-500 hover:bg-red-500/10 transition-all">🚪 Sign Out</button>
+            <button id="btn-delete-all" class="w-full text-left p-5 glass rounded-2xl text-[10px] uppercase font-bold text-red-900 opacity-40 hover:opacity-100 transition-all">⚠️ Delete Account</button>
         </div>
     </div>
 
@@ -89,13 +117,20 @@
     <script type="text/python" src="engine.py"></script>
 
     <script>
+        // Global Authentication Handler
         function handleGoogleLogin(response) {
-            const payload = JSON.parse(atob(response.credential.split('.')[1]));
-            localStorage.setItem("mobby_user", payload.name);
-            localStorage.setItem("mobby_email", payload.email);
-            localStorage.setItem("mobby_pfp", payload.picture);
-            localStorage.setItem("mobby_auth", "true");
-            window.location.reload();
+            try {
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                localStorage.setItem("mobby_user", payload.name);
+                localStorage.setItem("mobby_email", payload.email);
+                localStorage.setItem("mobby_pfp", payload.picture);
+                localStorage.setItem("mobby_auth", "true");
+                
+                // Refresh to trigger Brython's logic
+                window.location.reload();
+            } catch (e) {
+                console.error("Auth System Error:", e);
+            }
         }
     </script>
 </body>
