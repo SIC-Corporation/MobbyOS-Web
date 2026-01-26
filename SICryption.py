@@ -1,45 +1,56 @@
 from browser import window
 import hashlib
 import base64
+import os
+import time
 
 class SICryption:
     def __init__(self):
-        self.allowed_hash_alg = "sha512"
-        self.active_sessions = {}
+        self.sessions = {}
+        self.secret = "SIC_CORE_SECRET_2026"
 
     # =========================
-    # Encrypt / Decrypt Messages
+    # Cryptography
     # =========================
-    def hash_message(self, msg):
-        return hashlib.sha512(msg.encode("utf-8")).hexdigest()
+    def sha512(self, data):
+        return hashlib.sha512(data.encode()).hexdigest()
 
-    def encode_base64(self, msg):
-        return base64.b64encode(msg.encode("utf-8")).decode("utf-8")
+    def encrypt(self, data):
+        payload = f"{data}|{self.secret}"
+        return base64.b64encode(payload.encode()).decode()
 
-    def decode_base64(self, msg):
-        return base64.b64decode(msg.encode("utf-8")).decode("utf-8")
+    def decrypt(self, token):
+        try:
+            raw = base64.b64decode(token).decode()
+            data, secret = raw.rsplit("|", 1)
+            if secret != self.secret:
+                return None
+            return data
+        except:
+            return None
 
     # =========================
-    # Session Validation
+    # Sessions
     # =========================
-    def create_session(self, user_id):
-        token = self.hash_message(user_id + "SECURE" + str(window.Date().now()))
-        self.active_sessions[user_id] = token
+    def create_session(self, user):
+        token = self.sha512(user + str(time.time()))
+        self.sessions[user] = token
         return token
 
-    def validate_session(self, user_id, token):
-        return self.active_sessions.get(user_id) == token
+    def validate_session(self, user, token):
+        return self.sessions.get(user) == token
 
     # =========================
-    # WatcherDog Integration
+    # WatcherDog PY
     # =========================
-    def watcherDog(self, msg):
+    def watchdog(self, msg):
         mode = window.localStorage.getItem("mobby_mode") or "adult"
-        blocked_words = ["hack", "kill", "password", "root", "<script>"]
+        banned = ["<script", "eval(", "password", "root"]
+
         if mode == "kid":
-            for word in blocked_words:
-                if word in msg.lower():
-                    return "WatcherDog Alert: Unsafe content blocked for Kid Mode."
+            for b in banned:
+                if b in msg.lower():
+                    return None
         return msg
 
 sicryption = SICryption()
