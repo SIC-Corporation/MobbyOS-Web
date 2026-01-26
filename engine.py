@@ -1,55 +1,58 @@
-from browser import document, window, html, timer
-import json
+from browser import window, document, alert
 
-def save_chat_history(role, name, text, pfp):
-    history = window.localStorage.getItem("mobby_history")
-    history = json.loads(history) if history else []
-    history.append({"role": role, "name": name, "text": text, "pfp": pfp})
-    window.localStorage.setItem("mobby_history", json.dumps(history))
+# =========================
+# Browser Safety Check
+# =========================
+def check_browser_safety():
+    user_agent = window.navigator.userAgent.lower()
+    allowed = ["chrome", "firefox", "brave", "safari", "edg"]  # Safari and Edge included
+    for name in allowed:
+        if name in user_agent:
+            return True
+    return False
 
-def load_history():
-    history = window.localStorage.getItem("mobby_history")
-    if history:
-        data = json.loads(history)
-        for msg in data:
-            create_bubble(msg['name'], msg['text'], msg['pfp'], msg['role']=="user", False)
+# =========================
+# SICAccountSystem Init
+# =========================
+def init_sic_account_system():
+    # Check if user is already authenticated
+    if window.localStorage.getItem("mobby_auth") == "true":
+        document["sic-setup-screen"].classList.add("hidden")
+        document["main-ui"].classList.remove("hidden")
+    else:
+        document["sic-setup-screen"].classList.remove("hidden")
+        document["main-ui"].classList.add("hidden")
 
-def create_bubble(name, text, pfp, is_user=True, should_save=True):
-    prefs = window.localStorage
-    email = prefs.getItem("mobby_email") or ""
-    admins = ["sicmailcenter1@gmail.com","roystonslijkerman@gmail.com"]
-    is_admin = email.lower().strip() in admins
-    
-    alignment = "msg-user" if is_user else ""
-    style = "bubble-user" if is_user else "bubble-bot"
-    if is_admin and is_user: style += " admin-glow"
+# =========================
+# UI Handlers
+# =========================
+def switch_view(view):
+    document["desktop-view"].classList.add("hidden")
+    document["chat-view"].classList.add("hidden")
+    document[view].classList.remove("hidden")
+    if view == "chat-view":
+        document["btn-add"].classList.add("hidden")
+    else:
+        document["btn-add"].classList.remove("hidden")
 
-    container = html.DIV(className=f"msg-container {alignment}")
-    img = html.IMG(src=pfp, className=f"w-10 h-10 rounded-full border {'border-red-500' if is_admin and is_user else 'border-white/10'}")
-    
-    msg_group = html.DIV(className="flex flex-col")
-    name_tag = html.SPAN(name,className=f"text-[9px] uppercase mb-1 px-2 {'admin-text' if is_admin and is_user else 'opacity-40'}")
-    text_bubble = html.DIV(text,className=f"bubble {style}")
+def handle_keypress(ev):
+    if ev.keyCode == 13:
+        if not ev.shiftKey:
+            ev.preventDefault()
+            window.send_message()
 
-    msg_group <= name_tag
-    msg_group <= text_bubble
-    container <= img
-    container <= msg_group
-    document['chat-box'] <= container
-    document['chat-box'].scrollTop = document['chat-box'].scrollHeight
-    
-    if should_save:
-        save_chat_history("user" if is_user else "bot", name, text, pfp)
+# =========================
+# Browser Safety Enforcement
+# =========================
+if not check_browser_safety():
+    alert("⚠️ Warning: Unrecognized browser detected. Some features may not work properly.")
+    document["main-ui"].classList.add("hidden")
+else:
+    init_sic_account_system()
 
-def send_message(ev=None):
-    user_input = document['chat-input'].value.strip()
-    if not user_input: return
-    name = window.localStorage.getItem("mobby_user") or "Roy"
-    pfp = window.localStorage.getItem("mobby_pfp") or f"https://ui-avatars.com/api/?name={name}"
-    create_bubble(name,user_input,pfp,True)
-    document['chat-input'].value=""
-    # Bot response placeholder
-    timer.set_timeout(lambda: create_bubble("MOBBY","System Command Received. Processing...", "https://i.imgur.com/r6oJp4O.png",False), 800)
-
-window.send_message = send_message
-load_history()
+# =========================
+# Bindings
+# =========================
+document["btn-start"].bind("click", lambda e: switch_view("desktop-view"))
+document["btn-add"].bind("click", lambda e: switch_view("chat-view"))
+document["chat-input"].bind("keydown", handle_keypress)
