@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WatcherDog Alert System</title>
+    <script src="WatcherDog.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body onload="brython(); WatcherDog.initHTML();">
+
+<div id="wd-alert" class="fixed inset-0 bg-red-900/80 hidden z-[50000] flex flex-col items-center justify-center text-center p-6">
+    <h1 class="text-4xl font-black text-white mb-4">🚨 WatcherDog Alert!</h1>
+    <p id="wd-message" class="text-white/90 text-sm mb-6">Potential threat detected.</p>
+    <button onclick="WatcherDog.dismiss()" class="bg-white text-red-800 font-bold py-3 px-6 rounded-xl hover:brightness-110">Dismiss</button>
+</div>
+
+</body>
+</html>
