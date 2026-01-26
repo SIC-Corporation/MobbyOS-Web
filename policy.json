@@ -1,0 +1,23 @@
+{
+  "project": "MobbyOS-Web",
+  "owner": "SIC Corporation",
+  "allowedBrowsers": [
+    "Chrome",
+    "Brave",
+    "Firefox",
+    "Edge",
+    "Safari"
+  ],
+  "forkProtection": true,
+  "securityLevel": "MAX",
+  "modes": {
+    "kid": {
+      "blockKeywords": ["hack", "kill", "password", "root", "exploit"],
+      "watcherDog": true
+    },
+    "adult": {
+      "blockKeywords": [],
+      "watcherDog": true
+    }
+  }
+}
