@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MobbyOS V3.0.1 | SIC Corp</title>
 
-<!-- Tailwind CSS (dev CDN, fine for now) -->
+<!-- Tailwind CSS (dev CDN for now) -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Fonts & Styles -->
@@ -29,77 +29,6 @@
 <script type="text/python" src="SICryption.py"></script>
 <script type="text/python" src="buttonsresponder.py"></script>
 <script type="text/python" src="engine.py"></script>
-
-<!-- Firebase Init & Auth JS -->
-<script>
-document.addEventListener("DOMContentLoaded", ()=>{
-
-  // --- Firebase Init ---
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcXBC24LdNbKnnS4TDPDRrPuee0amae-A",
-    authDomain: "sicaccountsystem.firebaseapp.com",
-    projectId: "sicaccountsystem",
-    storageBucket: "sicaccountsystem.firebasestorage.app",
-    messagingSenderId: "135479971246",
-    appId: "1:135479971246:web:1bac73707f846965340c3f",
-    measurementId: "G-RSV63GQ2EY"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-
-  // --- Show user UI after login ---
-  function showUserUI(user){
-    document.getElementById("sic-setup-screen").classList.add("hidden");
-    document.getElementById("main-ui").classList.remove("hidden");
-
-    localStorage.setItem("mobby_user", user.displayName || "Guest");
-    localStorage.setItem("mobby_email", user.email || "guest@guest.com");
-    localStorage.setItem("mobby_pfp", user.photoURL || "https://ui-avatars.com/api/?name=Guest");
-
-    document.getElementById("sideName").innerText = localStorage.getItem("mobby_user");
-    document.getElementById("sidePFP").src = localStorage.getItem("mobby_pfp");
-  }
-
-  // --- Dummy functions to prevent errors ---
-  function initSICAccountSystem(){ console.log("SIC Account System Initialized"); }
-  function checkFork(){ console.log("checkFork called"); }
-
-  // --- Auth Buttons ---
-  const googleBtn = document.getElementById("btn-firebase-login");
-  const msBtn = document.getElementById("btn-microsoft-login");
-  const emailBtn = document.getElementById("btn-email-login");
-  const guestBtn = document.getElementById("btn-guest-login");
-
-  googleBtn.onclick = ()=>{ 
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
-  }
-
-  msBtn.onclick = ()=> {
-    const provider = new firebase.auth.OAuthProvider("microsoft.com");
-    provider.setCustomParameters({prompt:"select_account"});
-    auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
-  }
-
-  emailBtn.onclick = ()=> {
-    const email = prompt("Enter your email:");
-    const password = prompt("Enter your password:");
-    auth.signInWithEmailAndPassword(email, password).then(res=>showUserUI(res.user)).catch(err=>alert(err.message));
-  }
-
-  guestBtn.onclick = ()=> {
-    showUserUI({displayName:"Guest", email:"guest@guest.com", photoURL:"https://ui-avatars.com/api/?name=Guest"});
-  }
-
-  // auto-login if auth state exists
-  auth.onAuthStateChanged(user => { if(user) showUserUI(user); });
-
-  // --- Initial Load for Brython scripts ---
-  brython();
-  initSICAccountSystem();
-  checkFork();
-});
-</script>
 
 </head>
 <body data-sic-secure="true">
@@ -157,6 +86,75 @@ document.addEventListener("DOMContentLoaded", ()=>{
         <button id="btn-add" class="absolute bottom-12 right-12 w-16 h-16 bg-sky-500 rounded-full text-black text-3xl font-bold shadow-2xl hover:scale-110 transition-transform active:scale-90 duration-300">+</button>
     </main>
 </div>
+
+<script>
+window.addEventListener("load", () => {
+
+  // Firebase init
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcXBC24LdNbKnnS4TDPDRrPuee0amae-A",
+    authDomain: "sicaccountsystem.firebaseapp.com",
+    projectId: "sicaccountsystem",
+    storageBucket: "sicaccountsystem.firebasestorage.app",
+    messagingSenderId: "135479971246",
+    appId: "1:135479971246:web:1bac73707f846965340c3f",
+    measurementId: "G-RSV63GQ2EY"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  function showUserUI(user){
+    document.getElementById("sic-setup-screen").classList.add("hidden");
+    document.getElementById("main-ui").classList.remove("hidden");
+
+    localStorage.setItem("mobby_user", user.displayName||"Guest");
+    localStorage.setItem("mobby_email", user.email||"guest@guest.com");
+    localStorage.setItem("mobby_pfp", user.photoURL||"https://ui-avatars.com/api/?name=Guest");
+    localStorage.setItem("mobby_auth","true");
+
+    document.getElementById("sideName").innerText = localStorage.getItem("mobby_user");
+    document.getElementById("sidePFP").src = localStorage.getItem("mobby_pfp");
+  }
+
+  // Buttons
+  const googleBtn = document.getElementById("btn-firebase-login");
+  const msBtn = document.getElementById("btn-microsoft-login");
+  const emailBtn = document.getElementById("btn-email-login");
+  const guestBtn = document.getElementById("btn-guest-login");
+
+  googleBtn?.addEventListener("click",()=>{ 
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
+  });
+
+  msBtn?.addEventListener("click",()=> {
+    const provider = new firebase.auth.OAuthProvider("microsoft.com");
+    provider.setCustomParameters({prompt:"select_account"});
+    auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
+  });
+
+  emailBtn?.addEventListener("click",()=> {
+    const email=prompt("Enter email:");
+    const pass=prompt("Enter password:");
+    if(!email||!pass) return;
+    auth.signInWithEmailAndPassword(email,pass).then(res=>showUserUI(res.user)).catch(err=>alert(err.message));
+  });
+
+  guestBtn?.addEventListener("click",()=> {
+    showUserUI({displayName:"Guest",email:"guest@guest.com",photoURL:"https://ui-avatars.com/api/?name=Guest"});
+  });
+
+  // Auto-login
+  auth.onAuthStateChanged(user=>{ if(user) showUserUI(user); });
+  if(localStorage.getItem("mobby_auth")==="true"){
+    document.getElementById("sic-setup-screen").classList.add("hidden");
+    document.getElementById("main-ui").classList.remove("hidden");
+  }
+
+  // Brython after Firebase ready
+  brython();
+});
+</script>
 
 </body>
 </html>
