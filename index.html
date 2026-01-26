@@ -17,6 +17,8 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+<script src="auth.js"></script>
 </head>
 <body onload="brython(); initSICAccountSystem(); checkFork();" data-sic-secure="true">
 
@@ -74,11 +76,14 @@
     </main>
 </div>
 
+<!-- Brython + Python Engines -->
 <script type="text/python" src="SICryption.py"></script>
 <script type="text/python" src="buttonsresponder.py"></script>
 <script type="text/python" src="engine.py"></script>
-<script src="sicaccount.js"></script>
-<script src="SICryption.js"></script>
+
+<!-- Auth Scripts -->
+<script src="config.js"></script>
+<script src="auth.js"></script>
 
 </body>
 </html>
