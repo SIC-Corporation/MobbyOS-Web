@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MobbyOS V3.0.1 | SIC Corp</title>
 
-<!-- Tailwind CSS -->
+<!-- Tailwind CSS (dev CDN for now) -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Fonts & Styles -->
@@ -88,67 +88,72 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", ()=>{
+(function(){
+  function initFirebase() {
+    if(!window.firebase) {
+      console.error("Firebase not loaded yet, retrying...");
+      return setTimeout(initFirebase, 50);
+    }
 
-  // --- Firebase Init ---
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcXBC24LdNbKnnS4TDPDRrPuee0amae-A",
-    authDomain: "sicaccountsystem.firebaseapp.com",
-    projectId: "sicaccountsystem",
-    storageBucket: "sicaccountsystem.firebasestorage.app",
-    messagingSenderId: "135479971246",
-    appId: "1:135479971246:web:1bac73707f846965340c3f",
-    measurementId: "G-RSV63GQ2EY"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcXBC24LdNbKnnS4TDPDRrPuee0amae-A",
+      authDomain: "sicaccountsystem.firebaseapp.com",
+      projectId: "sicaccountsystem",
+      storageBucket: "sicaccountsystem.firebasestorage.app",
+      messagingSenderId: "135479971246",
+      appId: "1:135479971246:web:1bac73707f846965340c3f",
+      measurementId: "G-RSV63GQ2EY"
+    };
 
-  function showUserUI(user){
-    document.getElementById("sic-setup-screen").classList.add("hidden");
-    document.getElementById("main-ui").classList.remove("hidden");
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-    localStorage.setItem("mobby_user", user.displayName||"Guest");
-    localStorage.setItem("mobby_email", user.email||"guest@guest.com");
-    localStorage.setItem("mobby_pfp", user.photoURL||"https://ui-avatars.com/api/?name=Guest");
-    localStorage.setItem("mobby_auth","true");
+    function showUserUI(user){
+      document.getElementById("sic-setup-screen").classList.add("hidden");
+      document.getElementById("main-ui").classList.remove("hidden");
 
-    document.getElementById("sideName").innerText = localStorage.getItem("mobby_user");
-    document.getElementById("sidePFP").src = localStorage.getItem("mobby_pfp");
+      localStorage.setItem("mobby_user", user.displayName||"Guest");
+      localStorage.setItem("mobby_email", user.email||"guest@guest.com");
+      localStorage.setItem("mobby_pfp", user.photoURL||"https://ui-avatars.com/api/?name=Guest");
+      localStorage.setItem("mobby_auth","true");
+
+      document.getElementById("sideName").innerText = localStorage.getItem("mobby_user");
+      document.getElementById("sidePFP").src = localStorage.getItem("mobby_pfp");
+    }
+
+    // Buttons
+    document.getElementById("btn-firebase-login")?.addEventListener("click",()=>{ 
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
+    });
+    document.getElementById("btn-microsoft-login")?.addEventListener("click",()=> {
+      const provider = new firebase.auth.OAuthProvider("microsoft.com");
+      provider.setCustomParameters({prompt:"select_account"});
+      auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
+    });
+    document.getElementById("btn-email-login")?.addEventListener("click",()=> {
+      const email = prompt("Enter email:");
+      const pass = prompt("Enter password:");
+      if(!email||!pass) return;
+      auth.signInWithEmailAndPassword(email, pass).then(res=>showUserUI(res.user)).catch(err=>alert(err.message));
+    });
+    document.getElementById("btn-guest-login")?.addEventListener("click",()=> {
+      showUserUI({displayName:"Guest", email:"guest@guest.com", photoURL:"https://ui-avatars.com/api/?name=Guest"});
+    });
+
+    // Auto-login
+    auth.onAuthStateChanged(user=>{ if(user) showUserUI(user); });
+    if(localStorage.getItem("mobby_auth")==="true"){
+      document.getElementById("sic-setup-screen").classList.add("hidden");
+      document.getElementById("main-ui").classList.remove("hidden");
+    }
+
+    // Brython
+    brython();
   }
 
-  // --- Auth Buttons ---
-  document.getElementById("btn-firebase-login")?.addEventListener("click", ()=>{ 
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
-  });
-
-  document.getElementById("btn-microsoft-login")?.addEventListener("click", ()=> {
-    const provider = new firebase.auth.OAuthProvider("microsoft.com");
-    provider.setCustomParameters({prompt:"select_account"});
-    auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
-  });
-
-  document.getElementById("btn-email-login")?.addEventListener("click", ()=> {
-    const email = prompt("Enter email:");
-    const pass = prompt("Enter password:");
-    if(!email||!pass) return;
-    auth.signInWithEmailAndPassword(email, pass).then(res=>showUserUI(res.user)).catch(err=>alert(err.message));
-  });
-
-  document.getElementById("btn-guest-login")?.addEventListener("click", ()=> {
-    showUserUI({displayName:"Guest", email:"guest@guest.com", photoURL:"https://ui-avatars.com/api/?name=Guest"});
-  });
-
-  // --- Auto-login ---
-  auth.onAuthStateChanged(user => { if(user) showUserUI(user); });
-  if(localStorage.getItem("mobby_auth")==="true"){
-    document.getElementById("sic-setup-screen").classList.add("hidden");
-    document.getElementById("main-ui").classList.remove("hidden");
-  }
-
-  // --- Brython ---
-  brython();
-});
+  initFirebase();
+})();
 </script>
 
 </body>
