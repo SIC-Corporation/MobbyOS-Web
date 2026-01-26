@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MobbyOS V3.0.1 | SIC Corp</title>
 
-<!-- Tailwind CSS (dev CDN, ok for now) -->
+<!-- Tailwind CSS (dev CDN, fine for now) -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Fonts & Styles -->
@@ -30,8 +30,10 @@
 <script type="text/python" src="buttonsresponder.py"></script>
 <script type="text/python" src="engine.py"></script>
 
-<!-- Auth & UI JS -->
+<!-- Firebase Init & Auth JS -->
 <script>
+document.addEventListener("DOMContentLoaded", ()=>{
+
   // --- Firebase Init ---
   const firebaseConfig = {
     apiKey: "AIzaSyCcXBC24LdNbKnnS4TDPDRrPuee0amae-A",
@@ -45,7 +47,7 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
-  // --- Helper: show logged-in UI ---
+  // --- Show user UI after login ---
   function showUserUI(user){
     document.getElementById("sic-setup-screen").classList.add("hidden");
     document.getElementById("main-ui").classList.remove("hidden");
@@ -62,42 +64,45 @@
   function initSICAccountSystem(){ console.log("SIC Account System Initialized"); }
   function checkFork(){ console.log("checkFork called"); }
 
-  // --- DOM ready ---
-  document.addEventListener("DOMContentLoaded",()=>{
+  // --- Auth Buttons ---
+  const googleBtn = document.getElementById("btn-firebase-login");
+  const msBtn = document.getElementById("btn-microsoft-login");
+  const emailBtn = document.getElementById("btn-email-login");
+  const guestBtn = document.getElementById("btn-guest-login");
 
-    // buttons
-    const googleBtn = document.getElementById("btn-firebase-login");
-    const msBtn = document.getElementById("btn-microsoft-login");
-    const emailBtn = document.getElementById("btn-email-login");
-    const guestBtn = document.getElementById("btn-guest-login");
+  googleBtn.onclick = ()=>{ 
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
+  }
 
-    googleBtn.onclick = ()=>{ 
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
-    }
+  msBtn.onclick = ()=> {
+    const provider = new firebase.auth.OAuthProvider("microsoft.com");
+    provider.setCustomParameters({prompt:"select_account"});
+    auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
+  }
 
-    msBtn.onclick = ()=>{
-      const provider = new firebase.auth.OAuthProvider("microsoft.com");
-      provider.setCustomParameters({prompt:"select_account"});
-      auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
-    }
+  emailBtn.onclick = ()=> {
+    const email = prompt("Enter your email:");
+    const password = prompt("Enter your password:");
+    auth.signInWithEmailAndPassword(email, password).then(res=>showUserUI(res.user)).catch(err=>alert(err.message));
+  }
 
-    emailBtn.onclick = ()=>{
-      const email=prompt("Enter email:");
-      const password=prompt("Enter password:");
-      auth.signInWithEmailAndPassword(email,password).then(res=>showUserUI(res.user)).catch(err=>alert(err.message));
-    }
+  guestBtn.onclick = ()=> {
+    showUserUI({displayName:"Guest", email:"guest@guest.com", photoURL:"https://ui-avatars.com/api/?name=Guest"});
+  }
 
-    guestBtn.onclick = ()=>{
-      showUserUI({displayName:"Guest",email:"guest@guest.com",photoURL:"https://ui-avatars.com/api/?name=Guest"});
-    }
+  // auto-login if auth state exists
+  auth.onAuthStateChanged(user => { if(user) showUserUI(user); });
 
-    // auto-login if auth state already exists
-    auth.onAuthStateChanged(user=>{ if(user) showUserUI(user) });
-  });
+  // --- Initial Load for Brython scripts ---
+  brython();
+  initSICAccountSystem();
+  checkFork();
+});
 </script>
+
 </head>
-<body onload="brython(); initSICAccountSystem(); checkFork();" data-sic-secure="true">
+<body data-sic-secure="true">
 
 <!-- SIC Account Setup -->
 <div id="sic-setup-screen" class="fixed inset-0 bg-black z-[40000] flex items-center justify-center p-6 transition-all duration-700 ease-in-out">
