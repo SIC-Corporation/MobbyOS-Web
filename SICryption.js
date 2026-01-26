@@ -1,39 +1,59 @@
 // ==========================
-// SICryption Browser Guard
+// SICryption.js – Client Guard
 // ==========================
-const allowedBrowsers = ["chrome", "firefox", "brave", "safari", "edg"];
-let userAgent = navigator.userAgent.toLowerCase();
-let safe = allowedBrowsers.some(name => userAgent.includes(name));
 
-if (!safe) {
-    alert("🚨 Unrecognized or unsafe browser detected! MobbyOS blocked the session.");
-    document.body.innerHTML = "<h1 class='text-center text-red-500 mt-20'>ACCESS DENIED</h1>";
-    throw new Error("Unsafe browser. Access blocked.");
+(() => {
+  const ALLOWED_BROWSERS = ["chrome", "firefox", "brave", "safari", "edg"];
+  const ALLOWED_HOST = "sic-corporation.github.io";
+
+  const ua = navigator.userAgent.toLowerCase();
+  const safeBrowser = ALLOWED_BROWSERS.some(b => ua.includes(b));
+
+  if (!safeBrowser) {
+    alert("🚫 Unsupported browser blocked by SICryption.");
+    document.body.innerHTML = "<h1 style='color:red;text-align:center;margin-top:20%'>ACCESS DENIED</h1>";
+    throw new Error("Browser blocked");
+  }
+
+  if (location.hostname !== ALLOWED_HOST && location.hostname !== "localhost") {
+    document.body.innerHTML = "🚨 Unauthorized fork detected.";
+    throw new Error("Fork blocked");
+  }
+
+  console.log("🔐 SICryption JS active");
+})();
+
+// ==========================
+// JS Threat Scan
+// ==========================
+function jsThreatScan(message) {
+  const patterns = [
+    /<script/i,
+    /eval\s*\(/i,
+    /document\.cookie/i,
+    /fetch\s*\(/i,
+    /window\.location/i
+  ];
+  return !patterns.some(p => p.test(message));
 }
 
 // ==========================
-// JS Threat Protection
+// WatcherDog JS
 // ==========================
-function runJSProtections(message) {
-    // Basic regex checks
-    const threatPatterns = [/script/i, /<.*>/, /eval/i, /fetch\(.*\)/i, /window.location/i];
-    for (let pattern of threatPatterns) {
-        if (pattern.test(message)) return false;
-    }
-    return true;
+function watcherDogJS(message) {
+  const mode = localStorage.getItem("mobby_mode") || "adult";
+
+  if (!jsThreatScan(message)) {
+    alert("⚠️ WatcherDog blocked suspicious input.");
+    return false;
+  }
+
+  if (mode === "kid" && /hack|kill|password|root/i.test(message)) {
+    alert("🧸 Kid Mode Safety: message blocked.");
+    return false;
+  }
+
+  return true;
 }
 
-// ==========================
-// WatcherDog Integration
-// ==========================
-function watcherDogCheck(message) {
-    // Example: prevent sensitive info leaks for kids mode
-    const mode = localStorage.getItem("mobby_mode") || "adult";
-    if (mode === "kid" && /password|hack|kill|root/i.test(message)) {
-        alert("⚠️ WatcherDog blocked unsafe message for Kid Mode!");
-        return false;
-    }
-    return runJSProtections(message);
-}
-
-window.watcherDogCheck = watcherDogCheck;
+window.watcherDogJS = watcherDogJS;
