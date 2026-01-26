@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MobbyOS V3.0.1 | SIC Corp</title>
 
-<!-- Tailwind CSS (dev CDN for now) -->
+<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Fonts & Styles -->
@@ -88,9 +88,9 @@
 </div>
 
 <script>
-window.addEventListener("load", () => {
+document.addEventListener("DOMContentLoaded", ()=>{
 
-  // Firebase init
+  // --- Firebase Init ---
   const firebaseConfig = {
     apiKey: "AIzaSyCcXBC24LdNbKnnS4TDPDRrPuee0amae-A",
     authDomain: "sicaccountsystem.firebaseapp.com",
@@ -116,42 +116,37 @@ window.addEventListener("load", () => {
     document.getElementById("sidePFP").src = localStorage.getItem("mobby_pfp");
   }
 
-  // Buttons
-  const googleBtn = document.getElementById("btn-firebase-login");
-  const msBtn = document.getElementById("btn-microsoft-login");
-  const emailBtn = document.getElementById("btn-email-login");
-  const guestBtn = document.getElementById("btn-guest-login");
-
-  googleBtn?.addEventListener("click",()=>{ 
+  // --- Auth Buttons ---
+  document.getElementById("btn-firebase-login")?.addEventListener("click", ()=>{ 
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
   });
 
-  msBtn?.addEventListener("click",()=> {
+  document.getElementById("btn-microsoft-login")?.addEventListener("click", ()=> {
     const provider = new firebase.auth.OAuthProvider("microsoft.com");
     provider.setCustomParameters({prompt:"select_account"});
     auth.signInWithPopup(provider).then(res=>showUserUI(res.user)).catch(console.error);
   });
 
-  emailBtn?.addEventListener("click",()=> {
-    const email=prompt("Enter email:");
-    const pass=prompt("Enter password:");
+  document.getElementById("btn-email-login")?.addEventListener("click", ()=> {
+    const email = prompt("Enter email:");
+    const pass = prompt("Enter password:");
     if(!email||!pass) return;
-    auth.signInWithEmailAndPassword(email,pass).then(res=>showUserUI(res.user)).catch(err=>alert(err.message));
+    auth.signInWithEmailAndPassword(email, pass).then(res=>showUserUI(res.user)).catch(err=>alert(err.message));
   });
 
-  guestBtn?.addEventListener("click",()=> {
-    showUserUI({displayName:"Guest",email:"guest@guest.com",photoURL:"https://ui-avatars.com/api/?name=Guest"});
+  document.getElementById("btn-guest-login")?.addEventListener("click", ()=> {
+    showUserUI({displayName:"Guest", email:"guest@guest.com", photoURL:"https://ui-avatars.com/api/?name=Guest"});
   });
 
-  // Auto-login
-  auth.onAuthStateChanged(user=>{ if(user) showUserUI(user); });
+  // --- Auto-login ---
+  auth.onAuthStateChanged(user => { if(user) showUserUI(user); });
   if(localStorage.getItem("mobby_auth")==="true"){
     document.getElementById("sic-setup-screen").classList.add("hidden");
     document.getElementById("main-ui").classList.remove("hidden");
   }
 
-  // Brython after Firebase ready
+  // --- Brython ---
   brython();
 });
 </script>
