@@ -18,12 +18,16 @@ def toggle_settings(ev):
 
 def switch_view(view):
     for v in ['desktop-view', 'chat-view']:
-        document[v].classList.add('hidden')
-    document[view].classList.remove('hidden')
-    if view == 'chat-view':
-        document['btn-add'].classList.add('hidden')
-    else:
-        document['btn-add'].classList.remove('hidden')
+        try: document[v].classList.add('hidden')
+        except KeyError: pass
+    try: document[view].classList.remove('hidden')
+    except KeyError: pass
+    try:
+        if view == 'chat-view':
+            document['btn-add'].classList.add('hidden')
+        else:
+            document['btn-add'].classList.remove('hidden')
+    except KeyError: pass
 
 def handle_keypress(ev):
     if ev.keyCode == 13 and not ev.shiftKey:
@@ -31,26 +35,32 @@ def handle_keypress(ev):
         send_chat_message()
 
 def send_chat_message():
-    msg = document['chat-input'].value.strip()
-    if not msg: return
+    try:
+        msg = document['chat-input'].value.strip()
+        if not msg: return
+    except KeyError:
+        return
 
-    blocked = not window.watcherdog.analyze(msg)
+    blocked = not getattr(window.watcherdog, "analyze", lambda x: True)(msg)
+    chat_box = document.get('chat-box')
     if blocked:
-        document['chat-box'].innerHTML += "<p class='text-red-500'>⚠️ WatcherDog blocked your message.</p>"
+        if chat_box: chat_box.innerHTML += "<p class='text-red-500'>⚠️ WatcherDog blocked your message.</p>"
     else:
         secure_msg = sic.secure_data(msg)
-        reply = window.mobby_reflex(secure_msg)
+        reply = getattr(window, "mobby_reflex", lambda x: "No reply")(secure_msg)
         reply = sic.open_data(reply)
-        document['chat-box'].innerHTML += f"<p class='text-white'>You: {msg}</p>"
-        document['chat-box'].innerHTML += f"<p class='text-sky-500'>Mobby: {reply}</p>"
+        if chat_box:
+            chat_box.innerHTML += f"<p class='text-white'>You: {msg}</p>"
+            chat_box.innerHTML += f"<p class='text-sky-500'>Mobby: {reply}</p>"
 
-    document['chat-input'].value = ""
-    document['chat-box'].scrollTop = document['chat-box'].scrollHeight
+    try: document['chat-input'].value = ""
+    except KeyError: pass
+    if chat_box: chat_box.scrollTop = chat_box.scrollHeight
 
 # SIC System actions
 def change_name(ev):
     new_name = window.prompt("Enter new SIC Identity Name:")
-    if new_name and window.watcherdog.analyze(new_name):
+    if new_name and getattr(window.watcherdog, "analyze", lambda x: True)(new_name):
         secure_name = sic.secure_data(new_name)
         window.localStorage.setItem("mobby_user", secure_name)
         window.location.reload()
@@ -59,7 +69,7 @@ def change_name(ev):
 
 def update_groq(ev):
     key = window.prompt("Enter Groq API Key:")
-    if key and window.watcherdog.analyze(key):
+    if key and getattr(window.watcherdog, "analyze", lambda x: True)(key):
         secure_key = sic.secure_data(key)
         window.localStorage.setItem("mobby_groq_key", secure_key)
         alert("✅ API Key Encrypted and Saved.")
@@ -76,19 +86,26 @@ def delete_account(ev):
         window.location.reload()
 
 # BIND BUTTONS SAFELY
-safe_bind('open-settings', 'click', toggle_settings)
-safe_bind('close-settings', 'click', toggle_settings)
-safe_bind('profile-trigger', 'click', toggle_settings)
-safe_bind('btn-change-name', 'click', change_name)
-safe_bind('btn-set-groq', 'click', update_groq)
-safe_bind('btn-lock-final', 'click', lock_os)
-safe_bind('btn-signout', 'click', lock_os)
-safe_bind('btn-delete-all', 'click', delete_account)
-safe_bind('btn-start', 'click', lambda e: switch_view('desktop-view'))
-safe_bind('btn-add', 'click', lambda e: switch_view('chat-view'))
-safe_bind('chat-input', 'keydown', handle_keypress)
+for el, event, func in [
+    ('open-settings','click',toggle_settings),
+    ('close-settings','click',toggle_settings),
+    ('profile-trigger','click',toggle_settings),
+    ('btn-change-name','click',change_name),
+    ('btn-set-groq','click',update_groq),
+    ('btn-lock-final','click',lock_os),
+    ('btn-signout','click',lock_os),
+    ('btn-delete-all','click',delete_account),
+    ('btn-start','click',lambda e: switch_view('desktop-view')),
+    ('btn-add','click',lambda e: switch_view('chat-view')),
+    ('chat-input','keydown',handle_keypress)
+]:
+    safe_bind(el, event, func)
 
-# Initial Load
-if window.localStorage.getItem("mobby_auth") == "true":
-    document['sic-setup-screen'].classList.add('hidden')
-    document['main-ui'].classList.remove('hidden')
+# --- Initial Load safely ---
+mobby_auth = window.localStorage.getItem("mobby_auth")
+if mobby_auth and mobby_auth.lower() == "true":
+    try:
+        document['sic-setup-screen'].classList.add('hidden')
+        document['main-ui'].classList.remove('hidden')
+    except KeyError:
+        pass
