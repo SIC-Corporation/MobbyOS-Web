@@ -8,6 +8,11 @@
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 
+<!-- Fonts & Styles -->
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="config.css">
+
 <!-- Brython -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
@@ -17,15 +22,14 @@
 <script src="https://www.gstatic.com/firebasejs/9.31.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.31.0/firebase-database-compat.js"></script>
 
-<!-- Fonts & Styles -->
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-
 <!-- Custom Scripts -->
 <script src="SICryption.js"></script>
 <script src="auth.js"></script>
+<script type="text/python" src="SICryption.py"></script>
+<script type="text/python" src="buttonsresponder.py"></script>
+<script type="text/python" src="engine.py"></script>
 </head>
-<body onload="brython(); checkFork();" data-sic-secure="true">
+<body onload="brython(); initSICAccountSystem(); checkFork();" data-sic-secure="true">
 
 <!-- SIC Account Setup -->
 <div id="sic-setup-screen" class="fixed inset-0 bg-black z-[40000] flex items-center justify-center p-6 transition-all duration-700 ease-in-out">
@@ -80,11 +84,6 @@
         <button id="btn-add" class="absolute bottom-12 right-12 w-16 h-16 bg-sky-500 rounded-full text-black text-3xl font-bold shadow-2xl hover:scale-110 transition-transform active:scale-90 duration-300">+</button>
     </main>
 </div>
-
-<!-- Brython Python Engines -->
-<script type="text/python" src="SICryption.py"></script>
-<script type="text/python" src="buttonsresponder.py"></script>
-<script type="text/python" src="engine.py"></script>
 
 </body>
 </html>
