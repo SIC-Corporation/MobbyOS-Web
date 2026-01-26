@@ -2,13 +2,14 @@ from browser import window
 
 class MobbyReflex:
     def __init__(self):
+        # Core responses
         self.fast_responses = {
-            "ping": "Pong! Neural latency at 4ms.",
-            "status": "SIC Corp systems are green.",
+            "ping": "Pong! Neural latency at 3ms.",
+            "status": "SIC Corp systems fully operational.",
             "who created you": "I was created by Roy, CEO of SIC Corp.",
-            "roy": "Biometric identity: Roy. Status: Administrator/Owner.",
+            "roy": "Biometric identity: Roy. Admin/Owner status confirmed.",
             "nexa": "NexaFlow is the neural engine I use.",
-            "sic": "SIC Corp: The parent company of this OS."
+            "sic": "SIC Corp: Parent company of this OS."
         }
 
     def get_reply(self, message):
@@ -18,15 +19,21 @@ class MobbyReflex:
         # Kid Mode Filter
         if mode == "kid":
             if any(word in msg for word in ["hack", "kill", "password", "root"]):
-                return "That's a bit too advanced for Kid Mode! Let's talk about science or math instead."
-            if "hello" in msg:
-                return "Hi there! I'm Mobby. Want to learn something cool today?"
+                return "Whoa! Too advanced for Kid Mode. How about some science or math instead?"
+            if "hello" in msg or "hi" in msg:
+                return "Hi there! I'm Mobby. Wanna learn something cool today?"
 
-        # Standard Logic
+        # SICAccountSystem synced messages (FireFox sync)
+        sic_user = window.localStorage.getItem("sic_user") or "Guest"
+        if "my name" in msg:
+            return f"Your SICAccountSystem identity is {sic_user}."
+
+        # Standard fast responses
         for key, response in self.fast_responses.items():
             if key in msg:
                 return response
-        return None
+        return "I'm thinking... can't find a proper response right now."
 
+# Initialize engine
 reflex_engine = MobbyReflex()
 window.mobby_reflex = reflex_engine.get_reply
