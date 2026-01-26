@@ -1,3 +1,13 @@
+// FIREBASE SETUP
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
 function showUserUI(user) {
@@ -12,39 +22,30 @@ function showUserUI(user) {
   document.getElementById("sidePFP").src = localStorage.getItem("mobby_pfp");
 }
 
-// Google Login
+// GOOGLE LOGIN
 document.getElementById("btn-firebase-login").onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(res => showUserUI(res.user))
-    .catch(console.error);
+  auth.signInWithPopup(provider).then(res => showUserUI(res.user)).catch(console.error);
 };
 
-// Microsoft Login
+// MICROSOFT LOGIN
 document.getElementById("btn-microsoft-login").onclick = () => {
   const provider = new firebase.auth.OAuthProvider("microsoft.com");
   provider.setCustomParameters({ prompt: "select_account" });
-
-  auth.signInWithPopup(provider)
-    .then(res => showUserUI(res.user))
-    .catch(console.error);
+  auth.signInWithPopup(provider).then(res => showUserUI(res.user)).catch(console.error);
 };
 
-// Email Login
+// EMAIL LOGIN
 document.getElementById("btn-email-login").onclick = () => {
   const email = prompt("Enter your email:");
   const password = prompt("Enter your password:");
-  auth.signInWithEmailAndPassword(email, password)
-    .then(res => showUserUI(res.user))
-    .catch(err => alert(err.message));
+  auth.signInWithEmailAndPassword(email, password).then(res => showUserUI(res.user)).catch(err => alert(err.message));
 };
 
-// Guest Login
+// GUEST LOGIN
 document.getElementById("btn-guest-login").onclick = () => {
   showUserUI({ displayName: "Guest", email: "guest@guest.com", photoURL: "https://ui-avatars.com/api/?name=Guest" });
 };
 
-// Auth State Changed
-auth.onAuthStateChanged(user => {
-  if (user) showUserUI(user);
-});
+// AUTH STATE
+auth.onAuthStateChanged(user => { if (user) showUserUI(user); });
