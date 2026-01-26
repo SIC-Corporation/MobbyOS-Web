@@ -1,12 +1,15 @@
 // FIREBASE SETUP
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCcXBC24LdNbKnnS4TDPDRrPuee0amae-A",
+  authDomain: "sicaccountsystem.firebaseapp.com",
+  projectId: "sicaccountsystem",
+  storageBucket: "sicaccountsystem.firebasestorage.app",
+  messagingSenderId: "135479971246",
+  appId: "1:135479971246:web:1bac73707f846965340c3f",
+  measurementId: "G-RSV63GQ2EY"
 };
+
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
